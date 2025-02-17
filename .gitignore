@@ -1,0 +1,33 @@
+# Python
+*.pyc
+__pycache__/
+db.sqlite3
+venvgp/
+venv/
+
+# Node
+node_modules/
+/build
+.env
+
+# System files
+.DS_Store
+
+# Media and user uploads
+media/
+/media
+/static
+
+# IDE/Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Distribution / packaging
+*.egg-info/
+dist/
+build/
+
+# Django logs
+*.log
