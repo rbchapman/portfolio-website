@@ -48,6 +48,7 @@ export interface Photo {
   description: string
   photographer: Photographer
   photo_shoot: PhotoShoot
+  shoot_slug: number
   is_portrait: boolean
   photo_shoot_order: number
   carousel_order: number | null

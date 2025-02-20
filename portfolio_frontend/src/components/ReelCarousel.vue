@@ -1,87 +1,130 @@
 <template>
   <div class="overflow-hidden w-full relative">
     <div
-      @mouseover="pauseAnimation"
-      @mouseout="unPauseAnimation"
       class="scroll-track"
       :style="{ animationPlayState: isPaused ? 'paused' : 'running' }"
       ref="scrollTrack"
     >
       <!-- First set of photos -->
       <div class="flex">
-        <PhotoCard
-          v-for="photo in props.photos"
+        <div
+          v-for="photo in photoShootStore.carouselPhotos"
           :key="photo.id"
-          :photo="photo"
-          class="flex-shrink-0"
-          @click="() => handlePhotoSelect(photo)"
-        />
+          class="max-w-4xl max-h-2xl shadow-lg overflow-hidden relative cursor-crosshair"
+          @mouseenter="handleMouseEnter(photo)"
+          @mouseleave="handleMouseLeave()"
+          @click="openModal(photo)"
+        >
+          <img
+            :src="photo.image"
+            :alt="photo.title"
+            loading="eager"
+            :class="[
+              !photo?.is_portrait
+                ? 'h-auto w-auto max-h-[60vh]'
+                : 'w-auto h-auto max-h-[60vh] max-w-3xl'
+            ]"
+          />
+          <HoverInfo 
+            v-if="showHoverInfo?.id === photo.id" 
+            :photo="photo" 
+          />
+        </div>
       </div>
       <!-- Clone set for smooth looping -->
       <div class="flex">
-        <PhotoCard
-          v-for="photo in props.photos"
+        <div
+          v-for="photo in photoShootStore.carouselPhotos"
           :key="photo.id"
-          :photo="photo"
-          class="flex-shrink-0"
-          @click="() => handlePhotoSelect(photo)"
-        />
+          class="max-w-4xl max-h-2xl shadow-lg overflow-hidden relative cursor-crosshair"
+          @mouseenter="handleMouseEnter(photo)"
+          @mouseleave="handleMouseLeave()"
+          @click="openModal(photo)"
+        >
+          <img
+            :src="photo.image"
+            :alt="photo.title"
+            loading="eager"
+            :class="[
+              !photo?.is_portrait
+                ? 'h-auto w-auto max-h-[60vh]'
+                : 'w-auto h-auto max-h-[60vh] max-w-3xl'
+            ]"
+          />
+          <HoverInfo 
+            v-if="showHoverInfo?.id === photo.id" 
+            :photo="photo" 
+          />
+        </div>
       </div>
     </div>
+    <PhotoModal
+      v-if="selectedPhoto"
+      v-model="selectedPhoto"
+      :photos="photoShootStore.carouselPhotos"
+      @close="closeModal"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-  import { ref } from 'vue'
-  import PhotoCard from '@/components/PhotoCard.vue'
-  import type { Photo } from '../types'
+import { ref, computed } from 'vue'
+import PhotoModal from '../components/PhotoModal.vue'
+import HoverInfo from './HoverInfo.vue'
+import type { Photo } from '../types'
+import { usePhotoShootStore } from '@/stores/photoShootStore'
 
-  const props = defineProps<{
-    photos: Photo[]
-  }>()
+const photoShootStore = usePhotoShootStore()
+const selectedPhoto = ref<Photo | null>(null)
+const isModalOpen = ref<boolean>(false)
+const scrollTrack = ref<HTMLElement | null>(null)
+const showHoverInfo = ref<Photo | null>(null)
 
-  const emit = defineEmits<{
-    photoSelect: [photo: Photo]
-  }>()
+const isPaused = computed(() => {
+  return showHoverInfo.value !== null || isModalOpen.value
+})
 
-  const isPaused = ref<boolean>(false)
-  const scrollTrack = ref<HTMLElement | null>(null)
+const closeModal = () => {
+  selectedPhoto.value = null
+  isModalOpen.value = false
+}
 
-  const handlePhotoSelect = (photo: Photo) => {
-    emit('photoSelect', photo)
-  }
+const openModal = (photo: Photo) => {
+  isModalOpen.value = true
+  selectedPhoto.value = photo
+}
 
-  const pauseAnimation = () => {
-    isPaused.value = true
-  }
+const handleMouseEnter = (photo: Photo) => {
+  showHoverInfo.value = photo
+}
 
-  const unPauseAnimation = () => {
-    isPaused.value = false
-  }
+const handleMouseLeave = () => {
+  showHoverInfo.value = null
+}
 </script>
 
 <style scoped>
-  @keyframes scroll {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(-50%);
-    }
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
   }
+  100% {
+    transform: translateX(-50%);
+  }
+}
 
-  .scroll-track {
-    display: flex;
-    width: max-content;
-    animation: scroll 100s linear infinite;
-  }
+.scroll-track {
+  display: flex;
+  width: max-content;
+  animation: scroll 100s linear infinite;
+}
 
-  .scroll-track::-webkit-scrollbar {
-    display: none; 
-  }
+.scroll-track::-webkit-scrollbar {
+  display: none;
+}
 
-  .scroll-track {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
+.scroll-track {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
 </style>

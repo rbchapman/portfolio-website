@@ -7,11 +7,13 @@ class PhotographerSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'instagram', 'website']
 
 class SimplePhotoSerializer(serializers.ModelSerializer):
+    photographer = PhotographerSerializer(read_only=True)
+
     class Meta:
         model = Photo
         fields = [
             'id', 'image', 'title', 'description', 
-            'is_portrait', 'photo_shoot_order',
+            'is_portrait', 'photographer', 'photo_shoot_order',
             'carousel_order', 'show'
         ]
 
@@ -30,6 +32,7 @@ class PhotoShootSerializer(serializers.ModelSerializer):
     photos_count = serializers.SerializerMethodField()
     campaign = CampaignSerializer(read_only=True)
     campaign_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
+    
 
     class Meta:
         model = PhotoShoot
@@ -46,13 +49,13 @@ class PhotoSerializer(serializers.ModelSerializer):
     photographer = PhotographerSerializer(read_only=True)
     photographer_id = serializers.IntegerField(write_only=True)
     photo_shoot_id = serializers.IntegerField(write_only=True)
-
+    shoot_slug = serializers.IntegerField(source='photo_shoot.order')
     class Meta:
         model = Photo
         fields = [
             'id', 'image', 'title', 'description',
             'photographer', 'photographer_id',
-            'photo_shoot_id',
+            'photo_shoot_id', 'shoot_slug',
             'is_portrait', 'photo_shoot_order',
             'carousel_order', 'show',
             'created_at', 'updated_at'

@@ -5,7 +5,7 @@
       class="flex-1 flex flex-col transition-opacity duration-700 ease-in-out"
       :class="isLoading ? 'opacity-0' : 'opacity-100'"
     >
-      <NavMenu class="z-50" />
+      <NavMenu class="z-40" />
       <PageTitle title="Riley Benjamin Chapman" />
       <main class="flex-1 justify-center">
         <RouterView />

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="fixed inset-0 z-40"
+    class="fixed inset-0 z-50"
     tabindex="0"
     @keyup.escape="closeModal"
     @keyup.left="previousPhoto"
@@ -9,28 +9,39 @@
   >
     <!-- Overlay -->
     <div
-      class="absolute inset-0 bg-black bg-opacity-95 z-40"
+      class="absolute inset-0 bg-black bg-opacity-95 z-50"
       @click.self="closeModal"
     ></div>
 
+    <div class="fixed flex flex-col top-4 right-6 uppercase z-[51]">
+      <div v-if="route.path === '/'">
+        <router-link
+          :to="`/portfolio/${currentPhoto.shoot_slug}`"
+          class="flex items-center text-white/70 hover:text-white transition-colors"
+        >
+          <span class="text-sm hover:underline underline-offset-4">
+            View Full Shoot
+          </span>
+          <span class="text-lg ml-1">→</span>
+        </router-link>
+      </div>
+      <button
+        @click="closeModal"
+        :class="[
+          'uppercase hover:underline underline-offset-4 z-[51] text-white/70 hover:text-white transition-colors',
+          route.path === '/'
+            ? 'fixed bottom-4 text-xs left-6'
+            : 'fixed text-sm top-4 right-6'
+        ]"
+        aria-label="Close modal"
+      >
+        close
+      </button>
+    </div>
     <!-- Modal content -->
     <div class="relative h-screen flex items-center justify-center p-24">
       <!-- Navigation buttons -->
-      <button
-        class="absolute left-4 top-1/2 -translate-y-1/2 p-4 text-white/70 hover:text-white transition-colors z-50 text-4xl font-light"
-        aria-label="Previous photo"
-        @click="previousPhoto"
-      >
-        ‹
-      </button>
-
-      <button
-        class="absolute right-4 top-1/2 -translate-y-1/2 p-4 text-white/70 hover:text-white transition-colors z-50 text-4xl font-light"
-        aria-label="Next photo"
-        @click="nextPhoto"
-      >
-        ›
-      </button>
+      <ChevronNav class="z-[51]" @previous="previousPhoto" @next="nextPhoto" />
 
       <div class="flex items-end z-50">
         <div class="relative">
@@ -40,12 +51,6 @@
             :alt="currentPhoto.title"
             :class="currentPhoto?.is_portrait ? 'h-[85vh] w-auto' : 'max-w-3xl'"
           />
-          <button
-            class="absolute bottom-4 left-4 flex items-center gap-2 text-white/90 hover:text-white px-4 py-2 bg-black/30 backdrop-blur-sm rounded"
-          >
-            <span class="uppercase text-sm">View Full Shoot</span>
-            <span class="text-lg">→</span>
-          </button>
         </div>
 
         <!-- Photographer side bar -->
@@ -72,47 +77,49 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, nextTick } from 'vue'
-  import type { Photo } from '../types'
+import { ref, nextTick } from 'vue'
+import { useRoute } from 'vue-router'
+import ChevronNav from './ChevronNav.vue'
+import type { Photo } from '../types'
 
-  // Define props
-  const props = defineProps<{
-    modelValue: Photo
-    photos: Photo[]
-  }>()
+const route = useRoute()
 
-  const emit = defineEmits<{
-    'update:modelValue': [value: Photo]
-    close: []
-  }>()
+const props = defineProps<{
+  modelValue: Photo
+  photos: Photo[]
+}>()
 
-  const modalRef = ref<HTMLElement | null>(null)
-  const currentPhoto = ref(props.modelValue)
+const emit = defineEmits<{
+  'update:modelValue': [value: Photo]
+  close: []
+}>()
 
-  nextTick(() => {
-    modalRef.value?.focus()
-  })
+const modalRef = ref<HTMLElement | null>(null)
+const currentPhoto = ref(props.modelValue)
 
-  const closeModal = () => {
-    emit('close')
-  }
+nextTick(() => {
+  modalRef.value?.focus()
+})
 
-  const nextPhoto = () => {
-    const currentIndex = props.photos.findIndex(
-      (p) => p.id === currentPhoto.value.id
-    )
-    const nextIndex = (currentIndex + 1) % props.photos.length
-    currentPhoto.value = props.photos[nextIndex]
-    emit('update:modelValue', currentPhoto.value)
-  }
+const closeModal = () => {
+  emit('close')
+}
 
-  const previousPhoto = () => {
-    const currentIndex = props.photos.findIndex(
-      (p) => p.id === currentPhoto.value.id
-    )
-    const prevIndex =
-      (currentIndex - 1 + props.photos.length) % props.photos.length
-    currentPhoto.value = props.photos[prevIndex]
-    emit('update:modelValue', currentPhoto.value)
-  }
+const nextPhoto = () => {
+  const currentIndex = props.photos.findIndex(
+    (p) => p.id === currentPhoto.value.id
+  )
+  const nextIndex = (currentIndex + 1) % props.photos.length
+  currentPhoto.value = props.photos[nextIndex]
+  emit('update:modelValue', currentPhoto.value)
+}
+
+const previousPhoto = () => {
+  const currentIndex = props.photos.findIndex(
+    (p) => p.id === currentPhoto.value.id
+  )
+  const prevIndex = (currentIndex - 1 + props.photos.length) % props.photos.length
+  currentPhoto.value = props.photos[prevIndex]
+  emit('update:modelValue', currentPhoto.value)
+}
 </script>
