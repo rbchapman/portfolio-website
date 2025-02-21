@@ -24,10 +24,5 @@ media/
 *.swp
 *.swo
 
-# Distribution / packaging
-*.egg-info/
-dist/
-build/
-
 # Django logs
 *.log

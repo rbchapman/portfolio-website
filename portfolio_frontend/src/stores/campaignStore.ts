@@ -13,7 +13,6 @@ export const useCampaignStore = defineStore('campaign', () => {
         try {
             const response: AxiosResponse<Campaign[]> = await api.get('http://localhost:8000/api/campaigns/')
             campaigns.value = response.data
-            console.log('store camp ', campaigns.value)
         } catch(error) {
             console.error('Error loading campaigns:', error)
             hasError.value = true
