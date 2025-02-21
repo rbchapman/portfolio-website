@@ -2,7 +2,7 @@
 # Exit immediately if a command exits with a non-zero status
 set -e
 
-echo "Starting build process..."
+echo "Starting backend build process..."
 
 # Upgrade pip
 echo "Upgrading pip..."
@@ -20,16 +20,4 @@ python manage.py collectstatic --noinput
 echo "Running database migrations..."
 python manage.py migrate
 
-# Move to frontend directory
-echo "Changing to frontend directory..."
-cd portfolio_frontend
-
-# Install frontend dependencies
-echo "Installing frontend dependencies..."
-npm install
-
-# Build frontend
-echo "Building frontend..."
-npm run build
-
-echo "Build process completed successfully!"
+echo "Backend build process completed successfully!"
