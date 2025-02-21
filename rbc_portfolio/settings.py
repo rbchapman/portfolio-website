@@ -39,7 +39,13 @@ if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
 
-ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '').split(',')
+if not DEBUG:
+    ALLOWED_HOSTS = [
+        'rbc-portfolio.onrender.com',
+        'rileybc.net'
+    ]
+else:
+    ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '').split(',')
 
 CORS_ALLOWED_ORIGINS = os.getenv('DJANGO_CORS_ALLOWED_ORIGINS', '').split(',')
 if not CORS_ALLOWED_ORIGINS[0]:
@@ -97,9 +103,21 @@ WSGI_APPLICATION = 'rbc_portfolio.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': dj_database_url.config(default='sqlite:///db.sqlite3')
-}
+if DEBUG:
+    # Use SQLite for local development
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+else:
+    # Use PostgreSQL on Render or when DEBUG is False
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.getenv('DJANGO_DATABASE_URL')
+        )
+    }
 
 
 # Password validation
