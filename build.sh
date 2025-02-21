@@ -20,4 +20,14 @@ python manage.py collectstatic --noinput
 echo "Running database migrations..."
 python manage.py migrate
 
+# Create superuser if environment variables are set
+if [ -n "$DJANGO_SUPERUSER_USERNAME" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ] && [ -n "$DJANGO_SUPERUSER_EMAIL" ]; then
+    echo "Creating superuser..."
+    python manage.py createsuperuser \
+        --noinput \
+        --username "$DJANGO_SUPERUSER_USERNAME" \
+        --email "$DJANGO_SUPERUSER_EMAIL" \
+        --password "$DJANGO_SUPERUSER_PASSWORD"
+fi
+
 echo "Backend build process completed successfully!"
