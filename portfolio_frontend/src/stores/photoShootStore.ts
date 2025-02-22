@@ -13,10 +13,10 @@ export const usePhotoShootStore = defineStore('photoshoot', () => {
       try {
         hasError.value = false
 
-        const response: AxiosResponse<PhotoShoot[]> = await api.get('http://localhost:8000/api/photo-shoots/')
+        const response: AxiosResponse<PhotoShoot[]> = await api.get('/photo-shoots/')
           photoShoots.value = response.data
 
-        const carouselResponse: AxiosResponse<Photo[]> = await api.get('http://localhost:8000/api/photos/?carousel=true')
+        const carouselResponse: AxiosResponse<Photo[]> = await api.get('/photos/?carousel=true')
           carouselPhotos.value = carouselResponse.data
 
         // Preload all images

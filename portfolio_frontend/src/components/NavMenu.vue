@@ -68,10 +68,6 @@
       label: 'Campaigns',
       path: '/campaigns/1'
     },
-    {
-      label: 'dev',
-      path: '/dev'
-    }
   ]
 
   const toggleMenu = () => {
