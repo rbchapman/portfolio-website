@@ -39,14 +39,18 @@ if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
 
-ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '').split(',')
-if not ALLOWED_HOSTS[0]:
+if DEBUG:
     ALLOWED_HOSTS = ['localhost', '127.0.0.1']
-
-CORS_ALLOWED_ORIGINS = os.getenv('DJANGO_CORS_ALLOWED_ORIGINS', '').split(',')
-if not CORS_ALLOWED_ORIGINS[0]:
-    CORS_ALLOWED_ORIGINS = ['http://localhost:5173', 'http://127.0.0.1:5173']
-CORS_ALLOW_CREDENTIALS = True
+    CORS_ALLOWED_ORIGINS = [
+        'http://localhost:3001',
+        'http://127.0.0.1:3001',
+        'http://localhost:5173',
+        'http://127.0.0.1:5173'
+    ]
+else:
+    # Production settings from environment variables
+    ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '').split(',')
+    CORS_ALLOWED_ORIGINS = os.getenv('DJANGO_CORS_ALLOWED_ORIGINS', '').split(',')
 
 # Application definition
 
