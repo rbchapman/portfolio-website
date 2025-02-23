@@ -155,7 +155,6 @@
   }
 
   const openModal = (photo: Photo) => {
-    console.log('pho', photo)
     selectedPhoto.value = photo
   }
 
