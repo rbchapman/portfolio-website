@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.staticfiles',
     
     # Third-party apps
     'rest_framework',
@@ -69,7 +70,6 @@ INSTALLED_APPS = [
     'adminsortable2',
     'cloudinary',
     'cloudinary_storage',
-    'django.contrib.staticfiles',
     
     # Local apps
     'portfolio_app',
@@ -163,7 +163,6 @@ STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Cloudinary Configuration
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
@@ -172,3 +171,24 @@ DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'level': 'DEBUG',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+        'cloudinary': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
+}
