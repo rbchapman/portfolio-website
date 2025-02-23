@@ -4,6 +4,8 @@ import api from '@/utils/axios'
 import type { PhotoShoot, Photo } from '../types'
 import type { AxiosResponse } from 'axios'
 
+const CLOUDINARY_BASE_URL = import.meta.env.VITE_CLOUDINARY_BASE_URL
+
 export const usePhotoShootStore = defineStore('photoshoot', () => {
     const isLoading = ref<boolean>(true)
     const photoShoots = ref<PhotoShoot[]>([])
@@ -14,10 +16,19 @@ export const usePhotoShootStore = defineStore('photoshoot', () => {
         hasError.value = false
 
         const response: AxiosResponse<PhotoShoot[]> = await api.get('/photo-shoots/')
-          photoShoots.value = response.data
+        photoShoots.value = response.data.map(shoot => ({
+          ...shoot,
+          photos: shoot.photos.map(photo => ({
+            ...photo,
+            image: `${CLOUDINARY_BASE_URL}/${photo.image}`
+          }))
+        }))
 
         const carouselResponse: AxiosResponse<Photo[]> = await api.get('/photos/?carousel=true')
-          carouselPhotos.value = carouselResponse.data
+        carouselPhotos.value = carouselResponse.data.map(photo => ({
+          ...photo,
+          image: `${CLOUDINARY_BASE_URL}/${photo.image}`
+        }))
 
         // Preload all images
         const imagePromises = photoShoots.value
