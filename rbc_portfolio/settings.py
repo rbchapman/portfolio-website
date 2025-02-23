@@ -160,7 +160,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Media Files Configuration
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/media' if not DEBUG else os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Cloudinary Configuration
 CLOUDINARY_STORAGE = {
