@@ -15,30 +15,28 @@ from pathlib import Path
 from dotenv import load_dotenv
 import dj_database_url
 
+# CORE CONFIGURATION
+# ------------------------------------------------------------------------------
 # Load environment variables
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
+# SECURITY CONFIGURATION
+# ------------------------------------------------------------------------------
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG', 'False').lower() == 'true'
 
+# Production security settings
 if not DEBUG:
-    # Production security settings
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
 
+# Host Configuration
 if DEBUG:
     ALLOWED_HOSTS = ['localhost', '127.0.0.1']
     CORS_ALLOWED_ORIGINS = [
@@ -48,25 +46,33 @@ if DEBUG:
         'http://127.0.0.1:5173'
     ]
 else:
-    # Production settings from environment variables
     ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '').split(',')
     CORS_ALLOWED_ORIGINS = os.getenv('DJANGO_CORS_ALLOWED_ORIGINS', '').split(',')
 
-# Application definition
-
+# APPLICATION CONFIGURATION
+# ------------------------------------------------------------------------------
 INSTALLED_APPS = [
+    # Django built-in apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'portfolio_app',
+    
+    # Third-party apps
     'rest_framework',
     'corsheaders',
     'adminsortable2',
+    'cloudinary',
+    'cloudinary_storage',
+    
+    # Local apps
+    'portfolio_app',
 ]
 
+# MIDDLEWARE CONFIGURATION
+# ------------------------------------------------------------------------------
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -79,8 +85,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# URL CONFIGURATION
+# ------------------------------------------------------------------------------
 ROOT_URLCONF = 'rbc_portfolio.urls'
 
+# TEMPLATE CONFIGURATION
+# ------------------------------------------------------------------------------
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -97,12 +107,12 @@ TEMPLATES = [
     },
 ]
 
+# WSGI CONFIGURATION
+# ------------------------------------------------------------------------------
 WSGI_APPLICATION = 'rbc_portfolio.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
+# DATABASE CONFIGURATION
+# ------------------------------------------------------------------------------
 if DEBUG:
     # Use SQLite for local development
     DATABASES = {
@@ -119,10 +129,8 @@ else:
         )
     }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
-
+# PASSWORD VALIDATION
+# ------------------------------------------------------------------------------
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -138,29 +146,29 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.1/topics/i18n/
-
+# INTERNATIONALIZATION
+# ------------------------------------------------------------------------------
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
+# STATIC AND MEDIA FILES CONFIGURATION
+# ------------------------------------------------------------------------------
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# Media Files Configuration
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/media' if not DEBUG else os.path.join(BASE_DIR, 'media')
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
+# Cloudinary Configuration
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET')
+}
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
+# Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

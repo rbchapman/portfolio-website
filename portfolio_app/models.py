@@ -1,4 +1,5 @@
 from django.db import models
+from cloudinary.models import CloudinaryField
 class Photographer(models.Model):
     name = models.CharField(max_length=200)
     instagram = models.CharField(max_length=30, null=True, blank=True)
@@ -65,7 +66,7 @@ class PhotoShoot(models.Model):
     def __str__(self):
         return f"{self.title} - {self.date}"
 class Photo(models.Model):
-    image = models.ImageField(upload_to='photos/')
+    image = CloudinaryField('image')
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     photographer = models.ForeignKey(
