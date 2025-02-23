@@ -62,7 +62,6 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
     
     # Third-party apps
     'rest_framework',
@@ -70,6 +69,7 @@ INSTALLED_APPS = [
     'adminsortable2',
     'cloudinary',
     'cloudinary_storage',
+    'django.contrib.staticfiles',
     
     # Local apps
     'portfolio_app',
@@ -168,15 +168,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Cloudinary Configuration
 CLOUDINARY_URL = os.getenv('CLOUDINARY_URL')
-# CLOUDINARY_STORAGE = {
-#     'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
-#     'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
-#     'API_SECRET': os.getenv('CLOUDINARY_API_SECRET')
-# }
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
-print("Cloudinary URL:", CLOUDINARY_URL)
-print("Cloudinary Config:", cloudinary.config().cloud_name)
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
