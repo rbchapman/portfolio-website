@@ -25,14 +25,8 @@ def get_optimized_images(image):
     
     # Build URLs with transformations
     return {
-        # Thumbnail with improved quality
-        'thumbnail': f"{cloudinary_base}/upload/c_fill,g_auto,w_400,h_400,q_85,f_auto,e_improve,fl_progressive/{cloudinary_id}",
-        
-        # Medium size for general display
-        'medium': f"{cloudinary_base}/upload/c_fill,g_auto,w_800,q_90,f_auto,e_improve,fl_progressive/{cloudinary_id}",
-        
-        # Large for detailed viewing
-        'large': f"{cloudinary_base}/upload/c_fill,g_auto,w_1200,q_90,f_auto,e_improve,fl_progressive/{cloudinary_id}",
+        # Large for slightly lower resolution
+        'large': f"{cloudinary_base}/upload/c_limit,w_1200,q_auto:good,f_auto/{cloudinary_id}",
         
         # Full resolution (original)
         'full': base_url

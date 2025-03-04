@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
+import { RouterView, useRouter } from 'vue-router'
 import LoadScreen from './components/LoadScreen.vue'
 import NavMenu from './components/NavMenu.vue'
 import PageTitle from './components/PageTitle.vue'
@@ -35,6 +35,7 @@ import { onMounted } from 'vue'
 
 const uiStore = useUiStore()
 const photoShootStore = usePhotoShootStore()
+const router = useRouter()
 
 
 function getTransitionKey(route: RouteLocationNormalized) {
@@ -50,12 +51,24 @@ function getTransitionKey(route: RouteLocationNormalized) {
 onMounted(async () => {
   if (uiStore.hasCompletedInitialLoad) return
 
-  await photoShootStore.fetchCarouselPhotos() // Ensure carousel loads first
+  await photoShootStore.fetchInitialData(router.currentRoute.value.fullPath)
 
+  // Minimum 1 second delay before hiding loading screen
   setTimeout(() => {
     uiStore.completeInitialLoad()
-    photoShootStore.fetchAllPhotoShoots() // Continue loading in background
   }, 1000)
+})
+
+// Set up route change detection (outside onMounted to avoid multiple registrations)
+router.beforeEach((to, from, next) => {
+  // If navigating to a specific photoshoot
+  if (to.name === 'portfolio' && to.params.id) {
+    const shootId = to.params.id
+    if (shootId && !isNaN(Number(shootId))) {
+      photoShootStore.prioritizePhotoShoot(Number(shootId))
+    }
+  }
+  next()
 })
 </script>
 

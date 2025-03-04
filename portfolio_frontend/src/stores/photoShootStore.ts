@@ -6,14 +6,43 @@ import type { AxiosResponse } from 'axios'
 
 const CLOUDINARY_BASE_URL = import.meta.env.VITE_CLOUDINARY_BASE_URL
 
+// PhotoShootStore with priority-based loading
 export const usePhotoShootStore = defineStore('photoshoot', () => {
   const isCarouselLoading = ref<boolean>(false)
   const isPhotoShootsLoading = ref<boolean>(false)
-  const isLoading = computed(() => isCarouselLoading.value) // UI loads only until carousel is ready
+  const isLoading = computed(() => isCarouselLoading.value || isPhotoShootsLoading.value)
   const photoShoots = ref<PhotoShoot[]>([])
   const carouselPhotos = ref<Photo[]>([])
   const hasError = ref<boolean>(false)
 
+  // Preload a single image and return a promise
+  function preloadImage(url: string): Promise<void> {
+    return new Promise((resolve) => {
+      const img = new Image()
+      img.src = url
+      
+      // If image is already loaded/cached
+      if (img.complete) {
+        resolve()
+      } else {
+        img.onload = () => resolve()
+        img.onerror = () => {
+          console.warn(`Failed to preload: ${url}`)
+          resolve() // Resolve anyway to not block loading
+        }
+      }
+    })
+  }
+  
+  // Preload a batch of images without waiting (background)
+  function preloadImagesInBackground(urls: string[]): void {
+    urls.forEach(url => {
+      const img = new Image()
+      img.src = url
+    })
+  }
+
+  // Fetch carousel photos (priority 1)
   async function fetchCarouselPhotos() {
     isCarouselLoading.value = true
     try {
@@ -22,28 +51,20 @@ export const usePhotoShootStore = defineStore('photoshoot', () => {
         ...photo,
         image: `${CLOUDINARY_BASE_URL}/${photo.image}`
       }))
-
-      await preloadCarouselImages(carouselPhotos.value) // Ensure carousel is fully loaded before UI unlocks
+      
+      // Wait for carousel images to load (high priority)
+      const carouselUrls = carouselPhotos.value.map(photo => photo.image)
+      await Promise.all(carouselUrls.map(url => preloadImage(url)))
+      
     } catch (error) {
       console.error('Error loading carousel photos:', error)
       hasError.value = true
     } finally {
       isCarouselLoading.value = false
-      fetchAllPhotoShoots() // Start fetching in the background after carousel loads
     }
   }
 
-  function preloadCarouselImages(photos: Photo[]) {
-    return Promise.all(photos.map(photo => {
-      return new Promise(resolve => {
-        const img = new Image()
-        img.src = photo.optimized_images.full
-        img.onload = resolve 
-        img.onerror = resolve
-      })
-    }))
-  }
-
+  // Fetch all photo shoots
   async function fetchAllPhotoShoots() {
     isPhotoShootsLoading.value = true
     try {
@@ -55,6 +76,21 @@ export const usePhotoShootStore = defineStore('photoshoot', () => {
           image: `${CLOUDINARY_BASE_URL}/${photo.image}`
         }))
       }))
+      
+      // Wait for first image of each photoshoot to load (medium priority)
+      const indexImages = photoShoots.value
+        .map(shoot => shoot.photos?.[0]?.image)
+        .filter(Boolean) as string[]
+      
+      await Promise.all(indexImages.map(url => preloadImage(url)))
+      
+      // Preload remaining images in background (low priority)
+      const remainingImages = photoShoots.value.flatMap(shoot => 
+        shoot.photos.slice(1).map(photo => photo.image)
+      )
+      
+      preloadImagesInBackground(remainingImages)
+      
     } catch (error) {
       console.error('Error loading photo shoots:', error)
       hasError.value = true
@@ -63,8 +99,39 @@ export const usePhotoShootStore = defineStore('photoshoot', () => {
     }
   }
 
-  function fetchInitialData() {
-    fetchCarouselPhotos()
+  // Load specific photoshoot images with priority
+  async function prioritizePhotoShoot(shootId: number) {
+    const shoot = photoShoots.value.find(s => s.id === shootId || s.order === shootId)
+    if (shoot?.photos?.length) {
+      const imageUrls = shoot.photos.map(photo => photo.image)
+      await Promise.all(imageUrls.slice(0, 3).map(url => preloadImage(url)))
+      preloadImagesInBackground(imageUrls.slice(3))
+    }
+  }
+
+  // Centralized initial data loader
+  async function fetchInitialData(currentRoute = '') {
+    try {
+      // Fetch and preload high-priority content
+      await Promise.all([
+        fetchCarouselPhotos(),
+        fetchAllPhotoShoots()
+      ])
+      
+      // If on a specific photoshoot page, prioritize those images
+      if (currentRoute.includes('portfolio/')) {
+        const shootId = currentRoute.split('/').pop()
+        if (shootId && !isNaN(Number(shootId))) {
+          await prioritizePhotoShoot(Number(shootId))
+        }
+      }
+      
+      console.log('Priority images loaded, remaining images loading in background')
+      
+    } catch (error) {
+      console.error('Error in initial data load:', error)
+      hasError.value = true
+    }
   }
 
   return {
@@ -74,8 +141,9 @@ export const usePhotoShootStore = defineStore('photoshoot', () => {
     isPhotoShootsLoading,
     isLoading,
     hasError,
-    fetchInitialData,
     fetchCarouselPhotos,
-    fetchAllPhotoShoots
+    fetchAllPhotoShoots,
+    prioritizePhotoShoot,
+    fetchInitialData
   }
 })
