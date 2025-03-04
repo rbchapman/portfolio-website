@@ -1,6 +1,6 @@
 <template>
   <div
-    class="w-full border-t border-t-white/70 border-t-[0.5px] h-[45px] text-sm uppercase tracking-wider"
+    class="w-full h-[45px] text-sm uppercase tracking-wider"
   >
     <div class="flex text-white/70 justify-between items-center px-8 h-full">
       <!-- Toggle Action Template -->
