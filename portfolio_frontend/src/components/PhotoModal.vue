@@ -1,6 +1,6 @@
 <template>
   <div
-    class="fixed inset-0 z-50"
+    class="fixed modal-container inset-0 z-50"
     tabindex="0"
     @keyup.escape="closeModal"
     @keyup.left="previousPhoto"
@@ -9,7 +9,7 @@
   >
     <!-- Overlay -->
     <div
-      class="absolute inset-0 bg-black bg-opacity-95 z-50"
+      class="absolute -m-5 inset-0 bg-black bg-opacity-96 z-50"
       @click.self="closeModal"
     ></div>
 
@@ -42,17 +42,18 @@
     <div class="relative h-screen flex items-center justify-center p-24">
       <!-- Navigation buttons -->
       <ChevronNav class="z-[51]" @previous="previousPhoto" @next="nextPhoto" />
-
-      <div class="flex items-end z-50">
+      <div
+        v-show="currentPhoto"
+        :key="currentPhoto.id"
+        class="flex modal-transition items-end z-50"
+      >
         <div class="relative">
           <img
-            v-if="currentPhoto"
             :src="currentPhoto.image"
             :alt="currentPhoto.title"
             :class="currentPhoto?.is_portrait ? 'h-[85vh] w-auto' : 'max-w-3xl'"
           />
         </div>
-
         <!-- Photographer side bar -->
         <div
           class="flex ml-6 flex-col border-l h-36 border-white/70 justify-end"
@@ -77,49 +78,69 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick } from 'vue'
-import { useRoute } from 'vue-router'
-import ChevronNav from './ChevronNav.vue'
-import type { Photo } from '../types'
+  import { ref, nextTick } from 'vue'
+  import { useRoute } from 'vue-router'
+  import ChevronNav from './ChevronNav.vue'
+  import type { Photo } from '../types'
 
-const route = useRoute()
+  const route = useRoute()
 
-const props = defineProps<{
-  modelValue: Photo
-  photos: Photo[]
-}>()
+  const props = defineProps<{
+    modelValue: Photo
+    photos: Photo[]
+  }>()
 
-const emit = defineEmits<{
-  'update:modelValue': [value: Photo]
-  close: []
-}>()
+  const emit = defineEmits<{
+    'update:modelValue': [value: Photo]
+    close: []
+  }>()
 
-const modalRef = ref<HTMLElement | null>(null)
-const currentPhoto = ref(props.modelValue)
+  const modalRef = ref<HTMLElement | null>(null)
+  const currentPhoto = ref(props.modelValue)
 
-nextTick(() => {
-  modalRef.value?.focus()
-})
+  nextTick(() => {
+    modalRef.value?.focus()
+  })
 
-const closeModal = () => {
-  emit('close')
-}
+  const closeModal = () => {
+    emit('close')
+  }
 
-const nextPhoto = () => {
-  const currentIndex = props.photos.findIndex(
-    (p) => p.id === currentPhoto.value.id
-  )
-  const nextIndex = (currentIndex + 1) % props.photos.length
-  currentPhoto.value = props.photos[nextIndex]
-  emit('update:modelValue', currentPhoto.value)
-}
+  const nextPhoto = () => {
+    const currentIndex = props.photos.findIndex(
+      (p) => p.id === currentPhoto.value.id
+    )
+    const nextIndex = (currentIndex + 1) % props.photos.length
+    currentPhoto.value = props.photos[nextIndex]
+    emit('update:modelValue', currentPhoto.value)
+  }
 
-const previousPhoto = () => {
-  const currentIndex = props.photos.findIndex(
-    (p) => p.id === currentPhoto.value.id
-  )
-  const prevIndex = (currentIndex - 1 + props.photos.length) % props.photos.length
-  currentPhoto.value = props.photos[prevIndex]
-  emit('update:modelValue', currentPhoto.value)
-}
+  const previousPhoto = () => {
+    const currentIndex = props.photos.findIndex(
+      (p) => p.id === currentPhoto.value.id
+    )
+    const prevIndex =
+      (currentIndex - 1 + props.photos.length) % props.photos.length
+    currentPhoto.value = props.photos[prevIndex]
+    emit('update:modelValue', currentPhoto.value)
+  }
 </script>
+<style>
+  .modal-transition {
+    animation: simpleSlide 1.2s ease-out forwards;
+  }
+
+  @keyframes simpleSlide {
+    0% {
+      opacity: 0;
+      transform: translateX(-25px);
+    }
+    50% {
+      opacity: 0.7;
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+</style>

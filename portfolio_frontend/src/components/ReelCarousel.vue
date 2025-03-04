@@ -1,5 +1,5 @@
 <template>
-  <div class="overflow-hidden w-full relative">
+  <div class="overflow-hidden carousel-container w-full relative">
     <div
       class="scroll-track"
       :style="{ animationPlayState: isPaused ? 'paused' : 'running' }"
@@ -16,7 +16,8 @@
           @click="openModal(photo)"
         >
           <img
-            :src="photo.image"
+            v-show="photoShootStore.carouselPhotos"
+            :src="photo.optimized_images.full"
             :alt="photo.title"
             loading="eager"
             :class="[
@@ -25,10 +26,7 @@
                 : 'w-auto h-auto max-h-[60vh] max-w-3xl'
             ]"
           />
-          <HoverInfo 
-            v-if="showHoverInfo?.id === photo.id" 
-            :photo="photo" 
-          />
+          <HoverInfo v-if="showHoverInfo?.id === photo.id" :photo="photo" />
         </div>
       </div>
       <!-- Clone set for smooth looping -->
@@ -42,7 +40,7 @@
           @click="openModal(photo)"
         >
           <img
-            :src="photo.image"
+            :src="photo.optimized_images.full"
             :alt="photo.title"
             loading="eager"
             :class="[
@@ -51,80 +49,82 @@
                 : 'w-auto h-auto max-h-[60vh] max-w-3xl'
             ]"
           />
-          <HoverInfo 
-            v-if="showHoverInfo?.id === photo.id" 
-            :photo="photo" 
-          />
+          <HoverInfo v-if="showHoverInfo?.id === photo.id" :photo="photo" />
         </div>
       </div>
     </div>
-    <PhotoModal
-      v-if="selectedPhoto"
-      v-model="selectedPhoto"
-      :photos="photoShootStore.carouselPhotos"
-      @close="closeModal"
-    />
+      <PhotoModal
+        v-if="selectedPhoto"
+        v-model="selectedPhoto"
+        :photos="photoShootStore.carouselPhotos"
+        @close="closeModal"
+      />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import PhotoModal from '../components/PhotoModal.vue'
-import HoverInfo from './HoverInfo.vue'
-import type { Photo } from '../types'
-import { usePhotoShootStore } from '@/stores/photoShootStore'
+  import { ref, computed, onMounted } from 'vue'
+  import PhotoModal from '../components/PhotoModal.vue'
+  import HoverInfo from './HoverInfo.vue'
+  import type { Photo } from '../types'
+  import { usePhotoShootStore } from '@/stores/photoShootStore'
 
-const photoShootStore = usePhotoShootStore()
-const selectedPhoto = ref<Photo | null>(null)
-const isModalOpen = ref<boolean>(false)
-const scrollTrack = ref<HTMLElement | null>(null)
-const showHoverInfo = ref<Photo | null>(null)
+  const photoShootStore = usePhotoShootStore()
+  const selectedPhoto = ref<Photo | null>(null)
+  const isModalOpen = ref<boolean>(false)
+  const scrollTrack = ref<HTMLElement | null>(null)
+  const showHoverInfo = ref<Photo | null>(null)
 
-const isPaused = computed(() => {
-  return showHoverInfo.value !== null || isModalOpen.value
-})
+  const isPaused = computed(() => {
+    return showHoverInfo.value !== null || isModalOpen.value
+  })
 
-const closeModal = () => {
-  selectedPhoto.value = null
-  isModalOpen.value = false
-}
+  const closeModal = () => {
+    selectedPhoto.value = null
+    isModalOpen.value = false
+  }
 
-const openModal = (photo: Photo) => {
-  isModalOpen.value = true
-  selectedPhoto.value = photo
-}
+  const openModal = (photo: Photo) => {
+    isModalOpen.value = true
+    selectedPhoto.value = photo
+  }
 
-const handleMouseEnter = (photo: Photo) => {
-  showHoverInfo.value = photo
-}
+  const handleMouseEnter = (photo: Photo) => {
+    showHoverInfo.value = photo
+  }
 
-const handleMouseLeave = () => {
-  showHoverInfo.value = null
-}
+  const handleMouseLeave = () => {
+    showHoverInfo.value = null
+  }
+  onMounted(() => {
+    if (photoShootStore.carouselPhotos.length === 0) {
+      photoShootStore.fetchCarouselPhotos()
+    }
+  })
 </script>
 
 <style scoped>
-@keyframes scroll {
-  0% {
-    transform: translateX(0);
+  @keyframes scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
   }
-  100% {
-    transform: translateX(-50%);
+
+  .scroll-track {
+    display: flex;
+    width: max-content;
+    animation: scroll 100s linear infinite;
   }
-}
 
-.scroll-track {
-  display: flex;
-  width: max-content;
-  animation: scroll 100s linear infinite;
-}
+  .scroll-track::-webkit-scrollbar {
+    display: none;
+  }
 
-.scroll-track::-webkit-scrollbar {
-  display: none;
-}
-
-.scroll-track {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
+  .scroll-track {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
 </style>

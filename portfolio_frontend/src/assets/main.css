@@ -1,7 +1,9 @@
+/* Tailwind Directives */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Base Styles */
 @layer base {
   body {
     background-color: #111111;
@@ -9,27 +11,36 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+  
   a {
     cursor: crosshair;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.7);
+    transition: color 0.4s;
   }
-}
-
-@layer components {
+  
   #app {
     min-height: 100vh;
     font-weight: normal;
   }
+}
 
-  a {
-    text-decoration: none;
-    color: rgba(255, 255, 255, 0.7);
-    transition: 0.4s;
-    cursor: crosshair;
+/* Components */
+@layer components {
+  /* Add component styles here */
+}
+
+.content-transition {
+  animation: simpleRise 0.95s ease-out forwards;
+}
+
+@keyframes simpleRise {
+  0% { 
+    opacity: 0; 
+    transform: translateY(20px);
   }
-
-  @media (hover: hover) {
-    /* a:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-    } */
+  100% { 
+    opacity: 1; 
+    transform: translateY(0);
   }
 }
