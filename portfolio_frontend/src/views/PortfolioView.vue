@@ -1,11 +1,11 @@
 <template>
-  <div class="portfolio-view">
+  <div>
     <ActionBar :action="photoShootsNav" />
-    <!-- index of photo shoot instances -->
+    <ChevronNav @previous="previousItem" @next="nextItem" />
     <div
       v-if="!selectedShoot"
       :key="'index-' + $route.fullPath"
-      class="flex content-transition px-8 pt-2 pb-8"
+      class="flex content-transition px-16 pt-2 pb-8"
     >
       <!-- Left side - large photo -->
       <div class="flex-1 pr-8 border-r border-r-white/70 border-r-[0.5px]">
@@ -13,9 +13,9 @@
           v-show="photoShoots.length && photoShoots[0]?.photos?.length"
           :to="`/portfolio/${photoShoots[0].order}`"
           class="relative block h-full"
-          @mouseenter="handleMouseEnter(photoShoots[0].photos[0])"
-          @mouseleave="handleMouseLeave()"
-          @click="handleMouseLeave()"
+          @mouseenter="handleMouseInteraction(photoShoots[0].photos[0])"
+          @mouseleave="handleMouseInteraction(null)"
+          @click="handleMouseInteraction(null)"
         >
           <img
             v-show="photoShoots.length && photoShoots[0].photos?.length"
@@ -44,9 +44,9 @@
               v-if="shoot.photos?.length"
               :to="`/portfolio/${shoot.order}`"
               class="relative block h-full"
-              @mouseenter="handleMouseEnter(shoot.photos[0])"
-              @mouseleave="handleMouseLeave()"
-              @click="handleMouseLeave()"
+              @mouseenter="handleMouseInteraction(shoot.photos[0])"
+              @mouseleave="handleMouseInteraction(null)"
+              @click="handleMouseInteraction(null)"
             >
               <img
                 loading="eager"
@@ -69,7 +69,7 @@
     <div
       v-else
       :key="'shoot-' + selectedShoot.id + '-' + $route.fullPath"
-      class="content-transition flex px-8 pt-2 pb-8"
+      class="content-transition flex px-16 pt-2 pb-8"
     >
       <!-- Left side - large photo -->
       <div
@@ -78,8 +78,8 @@
           selectedShoot?.photos?.[0]?.optimized_images?.large
         ]"
         class="flex-1 pr-8 border-r border-r-white/70 border-r-[0.5px] cursor-pointer relative"
-        @mouseenter="handleMouseEnter(selectedShoot.photos[0])"
-        @mouseleave="handleMouseLeave()"
+        @mouseenter="handleMouseInteraction(selectedShoot.photos[0])"
+        @mouseleave="handleMouseInteraction(null)"
         @click="openModal(selectedShoot.photos[0])"
       >
         <img
@@ -87,7 +87,7 @@
           loading="eager"
           :src="selectedShoot.photos[0].optimized_images.full"
           :alt="selectedShoot.photos[0].title || ''"
-          class="w-full cursor-crosshair h-full object-cover transition-opacity duration-300"
+          class="w-full h-full object-cover transition-opacity duration-300"
         />
         <HoverInfo
           v-if="showHoverInfo?.id === selectedShoot.photos[0].id"
@@ -103,15 +103,15 @@
             v-memo="[photo.id, photo.optimized_images?.large]"
             :key="photo.id"
             class="aspect-[4/5] max-h-[350px] overflow-hidden cursor-pointer relative"
-            @mouseenter="handleMouseEnter(photo)"
-            @mouseleave="handleMouseLeave()"
+            @mouseenter="handleMouseInteraction(photo)"
+            @mouseleave="handleMouseInteraction(null)"
             @click="openModal(photo)"
           >
             <img
               loading="eager"
               :src="photo.optimized_images.large"
               :alt="photo.title || ''"
-              class="w-full h-full cursor-crosshair object-cover transition-opacity duration-300"
+              class="w-full h-full object-cover transition-opacity duration-300"
             />
             <HoverInfo v-if="showHoverInfo?.id === photo.id" :photo="photo" />
           </div>
@@ -120,25 +120,27 @@
     </div>
 
     <!-- Photo Modal -->
-      <PhotoModal
-        v-if="selectedPhoto"
-        v-model="selectedPhoto"
-        :photos="selectedShoot?.photos || []"
-        @close="closeModal"
-      />
+    <PhotoModal
+      v-if="selectedPhoto"
+      v-model="selectedPhoto"
+      :photos="selectedShoot?.photos || []"
+      @close="closeModal"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
+  import { computed, ref } from 'vue'
+  import { useRoute, useRouter } from 'vue-router'
   import ActionBar from '../components/ActionBar.vue'
   import PhotoModal from '../components/PhotoModal.vue'
   import HoverInfo from '../components/HoverInfo.vue'
-  import { computed, ref } from 'vue'
-  import { useRoute } from 'vue-router'
+  import ChevronNav from '../components/ChevronNav.vue'
   import type { NavigationAction, Photo } from '../types'
   import { usePhotoShootStore } from '@/stores/photoShootStore'
 
   const route = useRoute()
+  const router = useRouter()
   const photoShootStore = usePhotoShootStore()
   const photoShoots = computed(() => photoShootStore.photoShoots)
   const selectedPhoto = ref<Photo | null>(null)
@@ -159,12 +161,53 @@
     )
   })
 
-  const handleMouseEnter = (photo: Photo) => {
-    showHoverInfo.value = photo
+  // Navigation functions
+  const previousItem = () => {
+    if (!route.params.order) {
+      // On index page, can't go previous
+      return
+    }
+
+    const currentIndex = photoShoots.value.findIndex(
+      (shoot) => shoot.order === Number(route.params.order)
+    )
+
+    if (currentIndex === 0) {
+      // First shoot, go to index
+      router.push('/portfolio')
+    } else if (currentIndex > 0) {
+      // Go to previous shoot
+      const prevIndex = currentIndex - 1
+      router.push(`/portfolio/${photoShoots.value[prevIndex].order}`)
+    }
   }
 
-  const handleMouseLeave = () => {
-    showHoverInfo.value = null
+  const nextItem = () => {
+    if (!route.params.order) {
+      // On index page, go to first shoot if it exists
+      if (photoShoots.value.length > 0) {
+        router.push(`/portfolio/${photoShoots.value[0].order}`)
+      }
+      return
+    }
+
+    const currentIndex = photoShoots.value.findIndex(
+      (shoot) => shoot.order === Number(route.params.order)
+    )
+
+    if (currentIndex < photoShoots.value.length - 1) {
+      // Go to next shoot
+      const nextIndex = currentIndex + 1
+      router.push(`/portfolio/${photoShoots.value[nextIndex].order}`)
+    } else {
+      // Last shoot, wrap to index
+      router.push('/portfolio')
+    }
+  }
+
+  // Mouse interaction and modal functions
+  const handleMouseInteraction = (photo: Photo | null) => {
+    showHoverInfo.value = photo
   }
 
   const openModal = (photo: Photo) => {

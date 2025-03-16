@@ -6,7 +6,7 @@
       <!-- Toggle Action Template -->
       <template v-if="props.action.type === 'toggle'">
         <h1
-          class="cursor-crosshair bg-transparent transition-all duration-500 hover:text-white underline decoration-[0.25px] uppercase underline-offset-4"
+          class="cursor-pointer bg-transparent transition-all duration-500 hover:text-white underline decoration-[0.25px] uppercase underline-offset-4"
           :class="{
             'text-white opacity-100': isOpen,
             'opacity-70': !isOpen

@@ -10,7 +10,7 @@
         <div
           v-for="photo in photoShootStore.carouselPhotos"
           :key="photo.id"
-          class="max-w-4xl max-h-2xl shadow-lg overflow-hidden relative cursor-crosshair"
+          class="max-w-4xl max-h-2xl shadow-lg overflow-hidden relative cursor-pointer"
           @mouseenter="handleMouseEnter(photo)"
           @mouseleave="handleMouseLeave()"
           @click="openModal(photo)"
@@ -34,7 +34,7 @@
         <div
           v-for="photo in photoShootStore.carouselPhotos"
           :key="photo.id"
-          class="max-w-4xl max-h-2xl shadow-lg overflow-hidden relative cursor-crosshair"
+          class="max-w-4xl max-h-2xl shadow-lg overflow-hidden relative cursor-pointer"
           @mouseenter="handleMouseEnter(photo)"
           @mouseleave="handleMouseLeave()"
           @click="openModal(photo)"

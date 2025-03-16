@@ -13,7 +13,6 @@
   }
   
   a {
-    cursor: crosshair;
     text-decoration: none;
     color: rgba(255, 255, 255, 0.7);
     transition: color 0.4s;
