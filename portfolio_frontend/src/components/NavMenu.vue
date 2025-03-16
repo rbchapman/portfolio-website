@@ -2,7 +2,7 @@
   <div class="fixed top-4 right-4 z-50">
     <button
       v-if="!isOpen"
-      class="relative text-white/70 text-sm cursor-crosshair bg-transparent border-none p-0 z-50 hover:text-white transition-colors duration-300"
+      class="relative text-white/70 text-sm bg-transparent border-none p-0 z-50 hover:text-white transition-colors duration-300"
       @click="toggleMenu"
       aria-label="Menu"
     >
@@ -10,7 +10,7 @@
     </button>
     <button
       v-else
-      class="relative opacity-70 hover:text-white text-2xl bg-transparent border-none cursor-crosshair p-0 z-50 hover:text-white transition-colors duration-300"
+      class="relative opacity-70 text-2xl bg-transparent border-none p-0 z-50 hover:text-white transition-colors duration-300"
       @click="toggleMenu"
       aria-label="Close Menu"
     >
