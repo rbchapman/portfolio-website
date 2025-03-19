@@ -52,6 +52,14 @@ class SimplePhotoSerializer(serializers.ModelSerializer):
     def get_optimized_images(self, obj):
         return get_optimized_images(obj.image)
 
+class SimplePhotoShootSerializer(serializers.ModelSerializer):
+    photographer = PhotographerSerializer(read_only=True)
+    
+    class Meta:
+        model = PhotoShoot
+        fields = [
+            'id', 'title', 'date', 'photographer', 'description', 'location'
+        ]
 class CampaignSerializer(serializers.ModelSerializer):
     class Meta:
         model = Campaign
@@ -82,6 +90,7 @@ class PhotoShootSerializer(serializers.ModelSerializer):
 
 class PhotoSerializer(serializers.ModelSerializer):
     photographer = PhotographerSerializer(read_only=True)
+    photo_shoot = SimplePhotoShootSerializer()
     photographer_id = serializers.IntegerField(write_only=True)
     photo_shoot_id = serializers.IntegerField(write_only=True)
     shoot_slug = serializers.IntegerField(source='photo_shoot.order')
@@ -93,7 +102,7 @@ class PhotoSerializer(serializers.ModelSerializer):
             'id', 'image', 'title', 'description',
             'photographer', 'photographer_id',
             'photo_shoot_id', 'shoot_slug',
-            'is_portrait', 'photo_shoot_order',
+            'is_portrait', 'photo_shoot_order', 'photo_shoot',
             'carousel_order', 'show',
             'created_at', 'updated_at', 'optimized_images'
         ]

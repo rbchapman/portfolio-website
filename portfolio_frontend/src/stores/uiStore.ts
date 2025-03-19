@@ -1,18 +1,58 @@
-// uiStore.ts - simplified
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import type { Photo } from '../types'
 
 export const useUiStore = defineStore('ui', () => {
-  // This is the ONLY state we need to track
+  // Initial load state
   const hasCompletedInitialLoad = ref(false)
   
-  // Simple function to mark initial load as complete
+  // Hover and modal states
+  const hoveredPhoto = ref<Photo | null>(null)
+  const selectedPhoto = ref<Photo | null>(null)
+  const isModalOpen = ref(false)
+  
+  // Initial load function
   function completeInitialLoad() {
     hasCompletedInitialLoad.value = true
   }
   
+  // Hover functions
+  function handleMouseEnter(photo: Photo) {
+    hoveredPhoto.value = photo
+  }
+  
+  function handleMouseLeave() {
+    hoveredPhoto.value = null
+  }
+  
+  // Modal functions
+  function openModal(photo: Photo) {
+    selectedPhoto.value = photo
+    isModalOpen.value = true
+  }
+  
+  function closeModal() {
+    selectedPhoto.value = null
+    isModalOpen.value = false
+  }
+
+  const isPaused = computed(() => {
+    return hoveredPhoto.value !== null || isModalOpen.value
+  })
+  
   return {
+    // State
     hasCompletedInitialLoad,
-    completeInitialLoad
+    hoveredPhoto,
+    selectedPhoto,
+    isModalOpen,
+    isPaused,
+    
+    // Functions
+    completeInitialLoad,
+    handleMouseEnter,
+    handleMouseLeave,
+    openModal,
+    closeModal
   }
 })
