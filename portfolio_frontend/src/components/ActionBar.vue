@@ -6,9 +6,9 @@
       <!-- Toggle Action Template -->
       <template v-if="props.action.type === 'toggle'">
         <h1
-          class="cursor-pointer bg-transparent transition-all duration-500 hover:text-white underline decoration-[0.25px] uppercase underline-offset-4"
+          class="cursor-pointer bg-transparent transition-all duration-500 hover:text-white uppercase "
           :class="{
-            'text-white opacity-100': isOpen,
+            'text-white opacity-100 underline-offset-4 underline decoration-[0.25px]': isOpen,
             'opacity-70': !isOpen
           }"
           @click="isOpen = !isOpen"
@@ -39,7 +39,7 @@
 
       <!-- Navigation Action Template -->
       <template v-else>
-        <h1 class="underline decoration-[0.25px] uppercase underline-offset-4">
+        <h1>
           {{ props.action.title }}
         </h1>
 
@@ -48,10 +48,10 @@
             v-for="route in routes"
             :key="route.path"
             :to="route.path"
-            class="px-2 text-sm opacity-70"
+            class="px-2 text-sm hover:text-white opacity-70"
             :class="[
               {
-                'underline underline-offset-4 decoration-[0.25px]':
+                'underline text-white opacity-100 underline-offset-4 decoration-[0.25px]':
                   isUnderlined(route.label)
               }
             ]"

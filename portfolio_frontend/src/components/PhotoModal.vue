@@ -2,7 +2,7 @@
   <div
     class="fixed modal-container inset-0 z-50"
     tabindex="0"
-    @keyup.escape="closeModal"
+    @keyup.escape="uiStore.closeModal"
     @keyup.left="previousPhoto"
     @keyup.right="nextPhoto"
     ref="modalRef"
@@ -10,33 +10,19 @@
     <!-- Overlay -->
     <div
       class="absolute -m-5 inset-0 bg-black bg-opacity-96 z-50"
-      @click.self="closeModal"
+      @click.self="uiStore.closeModal"
     ></div>
 
     <div class="fixed flex flex-col top-4 right-6 uppercase z-[51]">
-      <div v-if="route.path === '/'">
-        <router-link
-          :to="`/portfolio/${currentPhoto.shoot_slug}`"
-          class="flex items-center text-white/70 hover:text-white transition-colors"
+      <div>
+        <button
+          @click="uiStore.closeModal"
+          class="uppercase hover:underline fixed text-sm top-4 right-6 underline-offset-4 z-[51] text-white/70 hover:text-white transition-colors"
+          aria-label="Close modal"
         >
-          <span class="text-sm hover:underline underline-offset-4">
-            View Full Shoot
-          </span>
-          <span class="text-lg ml-1">→</span>
-        </router-link>
+          close
+        </button>
       </div>
-      <button
-        @click="closeModal"
-        :class="[
-          'uppercase hover:underline underline-offset-4 z-[51] text-white/70 hover:text-white transition-colors',
-          route.path === '/'
-            ? 'fixed bottom-4 text-xs left-6'
-            : 'fixed text-sm top-4 right-6'
-        ]"
-        aria-label="Close modal"
-      >
-        close
-      </button>
     </div>
     <!-- Modal content -->
     <div class="relative h-screen flex items-center justify-center p-24">
@@ -54,23 +40,70 @@
             :class="currentPhoto?.is_portrait ? 'h-[85vh] w-auto' : 'max-w-3xl'"
           />
         </div>
-        <!-- Photographer side bar -->
-        <div
-          class="flex ml-6 flex-col border-l h-36 border-white/70 justify-end"
-        >
-          <a
-            class="text-white/90 -mb-1 ml-2 cursor-crosshair leading-none uppercase font-medium hover:text-white text-m cursor-crosshair hover:underline transition-colors duration-200"
-            :href="`https://www.instagram.com/${currentPhoto.photographer.instagram}/`"
-            target="_blank"
+        <div class="flex items-start">
+          <!-- Photo Metadata Container -->
+          <dl
+            class="flex ml-6 flex-col border-l border-white/70 pl-2 h-44 justify-start"
           >
-            {{ currentPhoto.photographer.name }}
-          </a>
-          <a
-            class="text-white/70 ml-2 pt-2 leading-none cursor-default text-xs"
-            tabindex="0"
-          >
-            Photographer
-          </a>
+            <div class="-mt-1">
+              <dt class="inline text-white/70 uppercase text-xs">
+                Photographer:
+              </dt>
+              <dd class="inline ml-1">
+                <a
+                  class="text-white/90 uppercase font-medium text-xs hover:text-white cursor-pointer hover:underline transition-colors duration-200"
+                  :href="`https://www.instagram.com/${currentPhoto.photographer.instagram}/`"
+                  target="_blank"
+                >
+                  {{ currentPhoto.photographer.name }}
+                </a>
+              </dd>
+            </div>
+
+            <div>
+              <dt class="inline text-white/70 uppercase text-xs">Location:</dt>
+              <dd
+                class="inline ml-1 text-white/90 font-medium text-xs uppercase"
+              >
+              {{ currentPhoto.photo_shoot.location }}
+
+              </dd>
+            </div>
+
+            <div>
+              <dt class="inline text-white/70 uppercase text-xs">Date:</dt>
+              <dd
+                class="inline ml-1 text-white/90 font-medium text-xs uppercase"
+              >
+              {{ currentPhoto.photo_shoot.date }}
+
+              </dd>
+            </div>
+
+            <div>
+              <dt class="inline text-white/70 uppercase text-xs">Photo:</dt>
+              <dd
+                class="inline ml-1 text-white/90 font-medium text-xs uppercase"
+              >
+              {{ currentPhoto.photo_shoot_order }}/8
+                
+              </dd>
+            </div>
+            <div class="mt-auto">
+              <router-link
+                :to="`/portfolio/${currentPhoto.shoot_slug}`"
+                class="flex items-center text-white/70 -mb-2 hover:text-white transition-colors"
+                @click="uiStore.closeModal"
+              >
+                <span
+                  class="text-xs hover:underline uppercase underline-offset-4"
+                >
+                  Full Shoot
+                </span>
+                <span class="text-lg ml-1">→</span>
+              </router-link>
+            </div>
+          </dl>
         </div>
       </div>
     </div>
@@ -79,11 +112,11 @@
 
 <script setup lang="ts">
   import { ref, nextTick } from 'vue'
-  import { useRoute } from 'vue-router'
   import ChevronNav from './ChevronNav.vue'
   import type { Photo } from '../types'
+  import { useUiStore } from '@/stores/uiStore'
 
-  const route = useRoute()
+  const uiStore = useUiStore()
 
   const props = defineProps<{
     modelValue: Photo
@@ -101,10 +134,6 @@
   nextTick(() => {
     modalRef.value?.focus()
   })
-
-  const closeModal = () => {
-    emit('close')
-  }
 
   const nextPhoto = () => {
     const currentIndex = props.photos.findIndex(

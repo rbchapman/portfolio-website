@@ -38,7 +38,7 @@
         v-for="(item, index) in menuItems"
         :key="index"
         :to="item.path"
-        class="uppercase no-underline text-white/50 text-s duration-300 hover:text-white hover:underline focus:outline-none focus-visible:ring-1 focus-visible:ring-white/20 rounded"
+        class="uppercase no-underline text-white/50 underline-offset-4 text-s duration-300 hover:text-white hover:underline focus:outline-none focus-visible:ring-1 focus-visible:ring-white/20 rounded"
         @click="handleNavigation"
       >
         {{ item.label }}

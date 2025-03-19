@@ -13,9 +13,9 @@
           v-show="photoShoots.length && photoShoots[0]?.photos?.length"
           :to="`/portfolio/${photoShoots[0].order}`"
           class="relative block h-full"
-          @mouseenter="handleMouseInteraction(photoShoots[0].photos[0])"
-          @mouseleave="handleMouseInteraction(null)"
-          @click="handleMouseInteraction(null)"
+          @mouseenter="uiStore.handleMouseEnter(photoShoots[0].photos[0])"
+          @mouseleave="uiStore.handleMouseLeave()"
+          @click="uiStore.handleMouseLeave()"
         >
           <img
             v-show="photoShoots.length && photoShoots[0].photos?.length"
@@ -25,7 +25,7 @@
             class="w-full content-transition h-full object-cover transition-opacity duration-300"
           />
           <HoverInfo
-            v-if="showHoverInfo?.id === photoShoots[0].photos[0].id"
+            v-if="uiStore.hoveredPhoto?.id === photoShoots[0].photos[0].id"
             :photo="photoShoots[0].photos[0]"
           />
         </RouterLink>
@@ -44,9 +44,9 @@
               v-if="shoot.photos?.length"
               :to="`/portfolio/${shoot.order}`"
               class="relative block h-full"
-              @mouseenter="handleMouseInteraction(shoot.photos[0])"
-              @mouseleave="handleMouseInteraction(null)"
-              @click="handleMouseInteraction(null)"
+              @mouseenter="uiStore.handleMouseEnter(shoot.photos[0])"
+              @mouseleave="uiStore.handleMouseLeave()"
+              @click="uiStore.handleMouseLeave()"
             >
               <img
                 loading="eager"
@@ -56,7 +56,7 @@
                 class="w-full h-full object-cover transition-opacity duration-300"
               />
               <HoverInfo
-                v-if="showHoverInfo?.id === shoot.photos[0].id"
+                v-if="uiStore.hoveredPhoto?.id === shoot.photos[0].id"
                 :photo="shoot.photos[0]"
               />
             </RouterLink>
@@ -78,9 +78,9 @@
           selectedShoot?.photos?.[0]?.optimized_images?.large
         ]"
         class="flex-1 pr-8 border-r border-r-white/70 border-r-[0.5px] cursor-pointer relative"
-        @mouseenter="handleMouseInteraction(selectedShoot.photos[0])"
-        @mouseleave="handleMouseInteraction(null)"
-        @click="openModal(selectedShoot.photos[0])"
+        @mouseenter="uiStore.handleMouseEnter(selectedShoot.photos[0])"
+        @mouseleave="uiStore.handleMouseLeave()"
+        @click="uiStore.openModal(selectedShoot.photos[0])"
       >
         <img
           v-if="selectedShoot.photos?.length"
@@ -90,7 +90,7 @@
           class="w-full h-full object-cover transition-opacity duration-300"
         />
         <HoverInfo
-          v-if="showHoverInfo?.id === selectedShoot.photos[0].id"
+          v-if="uiStore.hoveredPhoto?.id === selectedShoot.photos[0].id"
           :photo="selectedShoot.photos[0]"
         />
       </div>
@@ -103,9 +103,9 @@
             v-memo="[photo.id, photo.optimized_images?.large]"
             :key="photo.id"
             class="aspect-[4/5] max-h-[350px] overflow-hidden cursor-pointer relative"
-            @mouseenter="handleMouseInteraction(photo)"
-            @mouseleave="handleMouseInteraction(null)"
-            @click="openModal(photo)"
+            @mouseenter="uiStore.handleMouseEnter(photo)"
+            @mouseleave="uiStore.handleMouseLeave()"
+            @click="uiStore.openModal(photo)"
           >
             <img
               loading="eager"
@@ -113,7 +113,7 @@
               :alt="photo.title || ''"
               class="w-full h-full object-cover transition-opacity duration-300"
             />
-            <HoverInfo v-if="showHoverInfo?.id === photo.id" :photo="photo" />
+            <HoverInfo v-if="uiStore.hoveredPhoto?.id === photo.id" :photo="photo" />
           </div>
         </div>
       </div>
@@ -121,33 +121,33 @@
 
     <!-- Photo Modal -->
     <PhotoModal
-      v-if="selectedPhoto"
-      v-model="selectedPhoto"
+      v-if="uiStore.selectedPhoto"
+      v-model="uiStore.selectedPhoto"
       :photos="selectedShoot?.photos || []"
-      @close="closeModal"
+      @close="uiStore.closeModal"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-  import { computed, ref } from 'vue'
+  import { computed } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import ActionBar from '../components/ActionBar.vue'
   import PhotoModal from '../components/PhotoModal.vue'
   import HoverInfo from '../components/HoverInfo.vue'
   import ChevronNav from '../components/ChevronNav.vue'
-  import type { NavigationAction, Photo } from '../types'
+  import type { NavigationAction } from '../types'
   import { usePhotoShootStore } from '@/stores/photoShootStore'
+  import { useUiStore } from '@/stores/uiStore'
 
   const route = useRoute()
   const router = useRouter()
   const photoShootStore = usePhotoShootStore()
+  const uiStore = useUiStore()
   const photoShoots = computed(() => photoShootStore.photoShoots)
-  const selectedPhoto = ref<Photo | null>(null)
-  const showHoverInfo = ref<Photo | null>(null)
 
   const photoShootsNav: NavigationAction = {
-    title: 'Photo Shoots',
+    title: 'Portfolio',
     type: 'navigation',
     basePath: 'portfolio',
     count: photoShoots.value.length,
@@ -203,18 +203,5 @@
       // Last shoot, wrap to index
       router.push('/portfolio')
     }
-  }
-
-  // Mouse interaction and modal functions
-  const handleMouseInteraction = (photo: Photo | null) => {
-    showHoverInfo.value = photo
-  }
-
-  const openModal = (photo: Photo) => {
-    selectedPhoto.value = photo
-  }
-
-  const closeModal = () => {
-    selectedPhoto.value = null
   }
 </script>

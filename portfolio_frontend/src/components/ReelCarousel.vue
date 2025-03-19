@@ -2,42 +2,17 @@
   <div class="overflow-hidden carousel-container w-full relative">
     <div
       class="scroll-track"
-      :style="{ animationPlayState: isPaused ? 'paused' : 'running' }"
+      :style="{ animationPlayState: uiStore.isPaused ? 'paused' : 'running' }"
       ref="scrollTrack"
     >
-      <!-- First set of photos -->
-      <div class="flex">
+    <div class="flex">
         <div
-          v-for="photo in photoShootStore.carouselPhotos"
-          :key="photo.id"
+          v-for="photo in carouselPhotos"
+          :key="photo.id + '-' + photo.duplicateIndex"
           class="max-w-4xl max-h-2xl shadow-lg overflow-hidden relative cursor-pointer"
-          @mouseenter="handleMouseEnter(photo)"
-          @mouseleave="handleMouseLeave()"
-          @click="openModal(photo)"
-        >
-          <img
-            v-show="photoShootStore.carouselPhotos"
-            :src="photo.optimized_images.full"
-            :alt="photo.title"
-            loading="eager"
-            :class="[
-              !photo?.is_portrait
-                ? 'h-auto w-auto max-h-[60vh]'
-                : 'w-auto h-auto max-h-[60vh] max-w-3xl'
-            ]"
-          />
-          <HoverInfo v-if="showHoverInfo?.id === photo.id" :photo="photo" />
-        </div>
-      </div>
-      <!-- Clone set for smooth looping -->
-      <div class="flex">
-        <div
-          v-for="photo in photoShootStore.carouselPhotos"
-          :key="photo.id"
-          class="max-w-4xl max-h-2xl shadow-lg overflow-hidden relative cursor-pointer"
-          @mouseenter="handleMouseEnter(photo)"
-          @mouseleave="handleMouseLeave()"
-          @click="openModal(photo)"
+          @mouseenter="uiStore.handleMouseEnter(photo)"
+          @mouseleave="uiStore.handleMouseLeave()"
+          @click="uiStore.openModal(photo)"
         >
           <img
             :src="photo.optimized_images.full"
@@ -49,53 +24,36 @@
                 : 'w-auto h-auto max-h-[60vh] max-w-3xl'
             ]"
           />
-          <HoverInfo v-if="showHoverInfo?.id === photo.id" :photo="photo" />
+          <HoverInfo v-if="uiStore.hoveredPhoto?.id === photo.id" :photo="photo" />
         </div>
       </div>
     </div>
-      <PhotoModal
-        v-if="selectedPhoto"
-        v-model="selectedPhoto"
-        :photos="photoShootStore.carouselPhotos"
-        @close="closeModal"
-      />
+    <PhotoModal
+      v-if="uiStore.selectedPhoto"
+      v-model="uiStore.selectedPhoto"
+      :photos="photoShootStore.carouselPhotos"
+      @close="uiStore.closeModal"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, onMounted } from 'vue'
+  import { ref, onMounted, computed } from 'vue'
   import PhotoModal from '../components/PhotoModal.vue'
   import HoverInfo from './HoverInfo.vue'
-  import type { Photo } from '../types'
   import { usePhotoShootStore } from '@/stores/photoShootStore'
+  import { useUiStore } from '@/stores/uiStore'
 
   const photoShootStore = usePhotoShootStore()
-  const selectedPhoto = ref<Photo | null>(null)
-  const isModalOpen = ref<boolean>(false)
+  const uiStore = useUiStore()
   const scrollTrack = ref<HTMLElement | null>(null)
-  const showHoverInfo = ref<Photo | null>(null)
 
-  const isPaused = computed(() => {
-    return showHoverInfo.value !== null || isModalOpen.value
-  })
-
-  const closeModal = () => {
-    selectedPhoto.value = null
-    isModalOpen.value = false
-  }
-
-  const openModal = (photo: Photo) => {
-    isModalOpen.value = true
-    selectedPhoto.value = photo
-  }
-
-  const handleMouseEnter = (photo: Photo) => {
-    showHoverInfo.value = photo
-  }
-
-  const handleMouseLeave = () => {
-    showHoverInfo.value = null
-  }
+  const carouselPhotos = computed(() => {
+  return [...photoShootStore.carouselPhotos, ...photoShootStore.carouselPhotos].map((photo, index) => ({
+    ...photo,
+    duplicateIndex: index < photoShootStore.carouselPhotos.length ? 0 : 1
+  }))
+})
   onMounted(() => {
     if (photoShootStore.carouselPhotos.length === 0) {
       photoShootStore.fetchCarouselPhotos()
