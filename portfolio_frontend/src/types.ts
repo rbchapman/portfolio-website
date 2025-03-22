@@ -58,7 +58,7 @@ export interface Photo {
   created_at: string
   updated_at: string
   optimized_images: OptimizedImages
-  location: string
+  shoot_location: string
   date: string
 }
 

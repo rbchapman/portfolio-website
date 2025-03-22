@@ -16,7 +16,7 @@
     <div>
       <dt class="inline text-white/70 uppercase text-xs">Location:</dt>
       <dd class="inline ml-1 text-white/90 font-medium text-xs uppercase">
-        {{ photo.location }}
+        {{ photo.shoot_location }}
       </dd>
     </div>
 
