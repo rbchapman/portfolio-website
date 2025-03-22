@@ -8,14 +8,15 @@
       class="flex content-transition px-16 pt-2 pb-8"
     >
       <!-- Left side - large photo -->
-      <div class="flex-1 pr-8 border-r border-r-white/70 border-r-[0.5px]">
+      <div
+        class="flex-1 mr-6 relative"
+        @mouseenter="uiStore.setHover(photoShoots[0].photos[0])"
+        @mouseleave="uiStore.clearHover()"
+      >
         <RouterLink
           v-show="photoShoots.length && photoShoots[0]?.photos?.length"
           :to="`/portfolio/${photoShoots[0].order}`"
           class="relative block h-full"
-          @mouseenter="uiStore.handleMouseEnter(photoShoots[0].photos[0])"
-          @mouseleave="uiStore.handleMouseLeave()"
-          @click="uiStore.handleMouseLeave()"
         >
           <img
             v-show="photoShoots.length && photoShoots[0].photos?.length"
@@ -24,29 +25,35 @@
             :alt="photoShoots[0].photos[0].title || ''"
             class="w-full content-transition h-full object-cover transition-opacity duration-300"
           />
-          <HoverInfo
-            v-if="uiStore.hoveredPhoto?.id === photoShoots[0].photos[0].id"
-            :photo="photoShoots[0].photos[0]"
-          />
+
+          <!-- Overlay with PhotoDetails inside the RouterLink -->
+          <div
+            v-show="
+              uiStore.hoveredPhoto?.id === photoShoots[0].photos[0]?.id &&
+              !uiStore.isModalOpen
+            "
+            class="absolute inset-0 bg-black bg-opacity-60 transition-opacity duration-200"
+          >
+            <PhotoDetails :photo="photoShoots[0].photos[0]" class="z-10 mt-6" />
+          </div>
         </RouterLink>
       </div>
 
       <!-- Right side - photo grid -->
-      <div class="pl-8">
-        <div class="grid grid-cols-2 gap-8">
+      <div>
+        <div class="grid grid-cols-2 gap-6">
           <div
             v-for="shoot in photoShoots.slice(1)"
             :key="shoot.id"
             v-memo="[shoot.id, shoot.photos[0]?.optimized_images?.large]"
             class="aspect-[4/5] max-h-[350px] overflow-hidden"
+            @mouseenter="uiStore.setHover(shoot.photos[0])"
+            @mouseleave="uiStore.clearHover()"
           >
             <RouterLink
               v-if="shoot.photos?.length"
               :to="`/portfolio/${shoot.order}`"
               class="relative block h-full"
-              @mouseenter="uiStore.handleMouseEnter(shoot.photos[0])"
-              @mouseleave="uiStore.handleMouseLeave()"
-              @click="uiStore.handleMouseLeave()"
             >
               <img
                 loading="eager"
@@ -55,17 +62,24 @@
                 :alt="shoot.photos[0].title || ''"
                 class="w-full h-full object-cover transition-opacity duration-300"
               />
-              <HoverInfo
-                v-if="uiStore.hoveredPhoto?.id === shoot.photos[0].id"
-                :photo="shoot.photos[0]"
-              />
+
+              <!-- Overlay for grid photos -->
+              <div
+                v-show="
+                  uiStore.hoveredPhoto?.id === shoot.photos[0]?.id &&
+                  !uiStore.isModalOpen
+                "
+                class="absolute inset-0 bg-black bg-opacity-60 transition-opacity duration-200 flex"
+              >
+                <PhotoDetails :photo="shoot.photos[0]" class="z-10 mt-6" />
+              </div>
             </RouterLink>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- show for selected photo shoot -->
+    <!-- show for selected photo shoot - NO HOVER DETAILS HERE -->
     <div
       v-else
       :key="'shoot-' + selectedShoot.id + '-' + $route.fullPath"
@@ -77,9 +91,7 @@
           selectedShoot?.id,
           selectedShoot?.photos?.[0]?.optimized_images?.large
         ]"
-        class="flex-1 pr-8 border-r border-r-white/70 border-r-[0.5px] cursor-pointer relative"
-        @mouseenter="uiStore.handleMouseEnter(selectedShoot.photos[0])"
-        @mouseleave="uiStore.handleMouseLeave()"
+        class="flex-1 pr-6 cursor-pointer relative"
         @click="uiStore.openModal(selectedShoot.photos[0])"
       >
         <img
@@ -89,23 +101,17 @@
           :alt="selectedShoot.photos[0].title || ''"
           class="w-full h-full object-cover transition-opacity duration-300"
         />
-        <HoverInfo
-          v-if="uiStore.hoveredPhoto?.id === selectedShoot.photos[0].id"
-          :photo="selectedShoot.photos[0]"
-        />
       </div>
 
       <!-- Right side - photo grid -->
-      <div class="pl-8">
-        <div class="grid grid-cols-2 gap-8">
+      <div>
+        <div class="grid grid-cols-2 gap-6">
           <div
             v-for="photo in selectedShoot.photos.slice(1)"
             v-memo="[photo.id, photo.optimized_images?.large]"
             :key="photo.id"
             class="aspect-[4/5] max-h-[350px] overflow-hidden cursor-pointer relative"
-            @mouseenter="uiStore.handleMouseEnter(photo)"
-            @mouseleave="uiStore.handleMouseLeave()"
-            @click="uiStore.openModal(photo)"
+            @click="uiStore.openModal(photo)" 
           >
             <img
               loading="eager"
@@ -113,7 +119,6 @@
               :alt="photo.title || ''"
               class="w-full h-full object-cover transition-opacity duration-300"
             />
-            <HoverInfo v-if="uiStore.hoveredPhoto?.id === photo.id" :photo="photo" />
           </div>
         </div>
       </div>
@@ -134,8 +139,8 @@
   import { useRoute, useRouter } from 'vue-router'
   import ActionBar from '../components/ActionBar.vue'
   import PhotoModal from '../components/PhotoModal.vue'
-  import HoverInfo from '../components/HoverInfo.vue'
   import ChevronNav from '../components/ChevronNav.vue'
+  import PhotoDetails from '../components/PhotoDetails.vue'
   import type { NavigationAction } from '../types'
   import { usePhotoShootStore } from '@/stores/photoShootStore'
   import { useUiStore } from '@/stores/uiStore'

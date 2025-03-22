@@ -5,13 +5,13 @@
       :style="{ animationPlayState: uiStore.isPaused ? 'paused' : 'running' }"
       ref="scrollTrack"
     >
-    <div class="flex">
+      <div class="flex">
         <div
           v-for="photo in carouselPhotos"
           :key="photo.id + '-' + photo.duplicateIndex"
-          class="max-w-4xl max-h-2xl shadow-lg overflow-hidden relative cursor-pointer"
-          @mouseenter="uiStore.handleMouseEnter(photo)"
-          @mouseleave="uiStore.handleMouseLeave()"
+          class="max-w-4xl max-h-2xl mr-6 shadow-lg overflow-hidden relative cursor-pointer"
+          @mouseenter="uiStore.setHover(photo)"
+          @mouseleave="uiStore.clearHover()"
           @click="uiStore.openModal(photo)"
         >
           <img
@@ -24,7 +24,17 @@
                 : 'w-auto h-auto max-h-[60vh] max-w-3xl'
             ]"
           />
-          <HoverInfo v-if="uiStore.hoveredPhoto?.id === photo.id" :photo="photo" />
+          <!-- Overlay with photo details, only shown when this specific photo is hovered -->
+          <div
+            v-show="uiStore.hoveredPhoto?.id === photo.id"
+            class="absolute inset-0 bg-black bg-opacity-60 transition-opacity duration-200"
+          >
+            <PhotoDetails
+              v-if="uiStore.hoveredPhoto?.id === photo.id"
+              :photo="uiStore.hoveredPhoto"
+              class="mt-6"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -40,7 +50,7 @@
 <script setup lang="ts">
   import { ref, onMounted, computed } from 'vue'
   import PhotoModal from '../components/PhotoModal.vue'
-  import HoverInfo from './HoverInfo.vue'
+  import PhotoDetails from './PhotoDetails.vue'
   import { usePhotoShootStore } from '@/stores/photoShootStore'
   import { useUiStore } from '@/stores/uiStore'
 
@@ -49,11 +59,15 @@
   const scrollTrack = ref<HTMLElement | null>(null)
 
   const carouselPhotos = computed(() => {
-  return [...photoShootStore.carouselPhotos, ...photoShootStore.carouselPhotos].map((photo, index) => ({
-    ...photo,
-    duplicateIndex: index < photoShootStore.carouselPhotos.length ? 0 : 1
-  }))
-})
+    return [
+      ...photoShootStore.carouselPhotos,
+      ...photoShootStore.carouselPhotos
+    ].map((photo, index) => ({
+      ...photo,
+      duplicateIndex: index < photoShootStore.carouselPhotos.length ? 0 : 1
+    }))
+  })
+
   onMounted(() => {
     if (photoShootStore.carouselPhotos.length === 0) {
       photoShootStore.fetchCarouselPhotos()

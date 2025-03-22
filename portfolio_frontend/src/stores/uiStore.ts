@@ -1,8 +1,12 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import type { Photo } from '../types'
 
 export const useUiStore = defineStore('ui', () => {
+  // Get current route to watch for changes
+  const route = useRoute()
+  
   // Initial load state
   const hasCompletedInitialLoad = ref(false)
   
@@ -10,6 +14,24 @@ export const useUiStore = defineStore('ui', () => {
   const hoveredPhoto = ref<Photo | null>(null)
   const selectedPhoto = ref<Photo | null>(null)
   const isModalOpen = ref(false)
+  const showDetails = ref(false)
+  
+  // Previous route path to detect changes
+  const previousRoutePath = ref(route.path)
+  
+  // Watch for route changes to close modal
+  watch(() => route.path, (newPath) => {
+    if (newPath !== previousRoutePath.value) {
+      // Route has changed, close modal and reset hover state
+      if (isModalOpen.value) {
+        closeModal()
+      }
+      if (showDetails.value) {
+        setShowDetails(false)
+      }
+      previousRoutePath.value = newPath
+    }
+  })
   
   // Initial load function
   function completeInitialLoad() {
@@ -17,11 +39,11 @@ export const useUiStore = defineStore('ui', () => {
   }
   
   // Hover functions
-  function handleMouseEnter(photo: Photo) {
+  function setHover(photo: Photo) {
     hoveredPhoto.value = photo
   }
   
-  function handleMouseLeave() {
+  function clearHover() {
     hoveredPhoto.value = null
   }
   
@@ -29,13 +51,29 @@ export const useUiStore = defineStore('ui', () => {
   function openModal(photo: Photo) {
     selectedPhoto.value = photo
     isModalOpen.value = true
+    // When modal is opened, set event listeners for ESC key
+    document.addEventListener('keydown', handleKeyDown)
   }
   
+  function setShowDetails(value: boolean) {
+    showDetails.value = value
+  }
+
   function closeModal() {
     selectedPhoto.value = null
     isModalOpen.value = false
+    
+    // When modal is closed, remove event listeners
+    document.removeEventListener('keydown', handleKeyDown)
   }
-
+  
+  // Handle keyboard events for modal
+  function handleKeyDown(event: KeyboardEvent) {
+    if (event.key === 'Escape' && isModalOpen.value) {
+      closeModal()
+    }
+  }
+  
   const isPaused = computed(() => {
     return hoveredPhoto.value !== null || isModalOpen.value
   })
@@ -43,16 +81,18 @@ export const useUiStore = defineStore('ui', () => {
   return {
     // State
     hasCompletedInitialLoad,
-    hoveredPhoto,
+    showDetails,
     selectedPhoto,
     isModalOpen,
     isPaused,
+    hoveredPhoto,
     
     // Functions
     completeInitialLoad,
-    handleMouseEnter,
-    handleMouseLeave,
+    setHover,
+    clearHover,
     openModal,
-    closeModal
+    closeModal,
+    setShowDetails
   }
 })
