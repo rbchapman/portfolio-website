@@ -42,27 +42,31 @@ export enum CampaignType {
 }
 
 export interface Photo {
-  id: number;
-  image: string;
-  title: string;
-  description: string;
-  photographer: Photographer;
-  photo_shoot: PhotoShoot;
-  shoot_slug: number;
-  is_portrait: boolean;
-  photo_shoot_order: number;
-  carousel_order: number | null;
-  show: boolean;
-  created_at: string;
-  updated_at: string;
-  optimized_images: OptimizedImages;
+  id: number
+  image: string
+  title: string
+  description: string
+  photographer: Photographer
+  photo_shoot: PhotoShoot
+  shoot_order: number
+  is_portrait: boolean
+  photo_shoot_order: number
+  carousel_order: number | null
+  show: boolean
+  shoot_date: string
+  photo_count: number
+  created_at: string
+  updated_at: string
+  optimized_images: OptimizedImages
+  location: string
+  date: string
 }
 
 export interface OptimizedImages {
-  thumbnail: string;
-  medium: string;
-  large: string;
-  full: string;
+  thumbnail: string
+  medium: string
+  large: string
+  full: string
 }
 
 export type ToggleAction = {

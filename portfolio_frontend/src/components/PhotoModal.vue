@@ -41,69 +41,10 @@
           />
         </div>
         <div class="flex items-start">
-          <!-- Photo Metadata Container -->
-          <dl
-            class="flex ml-6 flex-col border-l border-white/70 pl-2 h-44 justify-start"
-          >
-            <div class="-mt-1">
-              <dt class="inline text-white/70 uppercase text-xs">
-                Photographer:
-              </dt>
-              <dd class="inline ml-1">
-                <a
-                  class="text-white/90 uppercase font-medium text-xs hover:text-white cursor-pointer hover:underline transition-colors duration-200"
-                  :href="`https://www.instagram.com/${currentPhoto.photographer.instagram}/`"
-                  target="_blank"
-                >
-                  {{ currentPhoto.photographer.name }}
-                </a>
-              </dd>
-            </div>
-
-            <div>
-              <dt class="inline text-white/70 uppercase text-xs">Location:</dt>
-              <dd
-                class="inline ml-1 text-white/90 font-medium text-xs uppercase"
-              >
-              {{ currentPhoto.photo_shoot.location }}
-
-              </dd>
-            </div>
-
-            <div>
-              <dt class="inline text-white/70 uppercase text-xs">Date:</dt>
-              <dd
-                class="inline ml-1 text-white/90 font-medium text-xs uppercase"
-              >
-              {{ currentPhoto.photo_shoot.date }}
-
-              </dd>
-            </div>
-
-            <div>
-              <dt class="inline text-white/70 uppercase text-xs">Photo:</dt>
-              <dd
-                class="inline ml-1 text-white/90 font-medium text-xs uppercase"
-              >
-              {{ currentPhoto.photo_shoot_order }}/8
-                
-              </dd>
-            </div>
-            <div class="mt-auto">
-              <router-link
-                :to="`/portfolio/${currentPhoto.shoot_slug}`"
-                class="flex items-center text-white/70 -mb-2 hover:text-white transition-colors"
-                @click="uiStore.closeModal"
-              >
-                <span
-                  class="text-xs hover:underline uppercase underline-offset-4"
-                >
-                  Full Shoot
-                </span>
-                <span class="text-lg ml-1">→</span>
-              </router-link>
-            </div>
-          </dl>
+          <!-- Photo Metadata Container - Now using the PhotoDetails component -->
+          <PhotoDetails 
+            :photo="currentPhoto" 
+          />
         </div>
       </div>
     </div>
@@ -113,6 +54,7 @@
 <script setup lang="ts">
   import { ref, nextTick } from 'vue'
   import ChevronNav from './ChevronNav.vue'
+  import PhotoDetails from './PhotoDetails.vue'
   import type { Photo } from '../types'
   import { useUiStore } from '@/stores/uiStore'
 

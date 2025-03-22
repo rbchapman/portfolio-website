@@ -1,14 +1,13 @@
 <template>
-  <div
-    class="w-full h-[45px] text-sm uppercase tracking-wider"
-  >
+  <div class="w-full h-[45px] text-sm uppercase tracking-wider">
     <div class="flex text-white/70 justify-between items-center px-8 h-full">
       <!-- Toggle Action Template -->
       <template v-if="props.action.type === 'toggle'">
         <h1
-          class="cursor-pointer bg-transparent transition-all duration-500 hover:text-white uppercase "
+          class="cursor-pointer bg-transparent transition-all duration-500 hover:text-white uppercase"
           :class="{
-            'text-white opacity-100 underline-offset-4 underline decoration-[0.25px]': isOpen,
+            'text-white opacity-100 underline-offset-4 underline decoration-[0.25px]':
+              isOpen,
             'opacity-70': !isOpen
           }"
           @click="isOpen = !isOpen"
@@ -49,6 +48,7 @@
             :key="route.path"
             :to="route.path"
             class="px-2 text-sm hover:text-white opacity-70"
+            @mouseleave="uiStore.clearHover()"
             :class="[
               {
                 'underline text-white opacity-100 underline-offset-4 decoration-[0.25px]':
@@ -68,6 +68,9 @@
   import { ref, computed } from 'vue'
   import { type ActionType } from '../types'
   import { useRoute } from 'vue-router'
+  import { useUiStore } from '@/stores/uiStore'
+
+  const uiStore = useUiStore()
 
   const route = useRoute()
   const props = defineProps<{

@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full h-40 border-b border-b-white/70 border-b-[0.5px] flex items-center justify-center">
+  <div class="w-full h-40  flex items-center justify-center">
     <router-link 
       :to="{ name: 'home' }"
       class="text-6xl text-center text-white font-serif scale-y-110 uppercase inline-block"
