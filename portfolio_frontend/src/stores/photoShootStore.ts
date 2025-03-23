@@ -10,7 +10,9 @@ const CLOUDINARY_BASE_URL = import.meta.env.VITE_CLOUDINARY_BASE_URL
 export const usePhotoShootStore = defineStore('photoshoot', () => {
   const isCarouselLoading = ref<boolean>(false)
   const isPhotoShootsLoading = ref<boolean>(false)
-  const isLoading = computed(() => isCarouselLoading.value || isPhotoShootsLoading.value)
+  const isLoading = computed(
+    () => isCarouselLoading.value || isPhotoShootsLoading.value
+  )
   const photoShoots = ref<PhotoShoot[]>([])
   const carouselPhotos = ref<Photo[]>([])
   const hasError = ref<boolean>(false)
@@ -20,7 +22,7 @@ export const usePhotoShootStore = defineStore('photoshoot', () => {
     return new Promise((resolve) => {
       const img = new Image()
       img.src = url
-      
+
       // If image is already loaded/cached
       if (img.complete) {
         resolve()
@@ -33,10 +35,10 @@ export const usePhotoShootStore = defineStore('photoshoot', () => {
       }
     })
   }
-  
+
   // Preload a batch of images without waiting (background)
   function preloadImagesInBackground(urls: string[]): void {
-    urls.forEach(url => {
+    urls.forEach((url) => {
       const img = new Image()
       img.src = url
     })
@@ -46,16 +48,17 @@ export const usePhotoShootStore = defineStore('photoshoot', () => {
   async function fetchCarouselPhotos() {
     isCarouselLoading.value = true
     try {
-      const carouselResponse: AxiosResponse<Photo[]> = await api.get('/photos/?carousel=true')
-      carouselPhotos.value = carouselResponse.data.map(photo => ({
+      const carouselResponse: AxiosResponse<Photo[]> = await api.get(
+        '/photos/?carousel=true'
+      )
+      carouselPhotos.value = carouselResponse.data.map((photo) => ({
         ...photo,
         image: `${CLOUDINARY_BASE_URL}/${photo.image}`
       }))
-      
+
       // Wait for carousel images to load (high priority)
-      const carouselUrls = carouselPhotos.value.map(photo => photo.image)
-      await Promise.all(carouselUrls.map(url => preloadImage(url)))
-      
+      const carouselUrls = carouselPhotos.value.map((photo) => photo.image)
+      await Promise.all(carouselUrls.map((url) => preloadImage(url)))
     } catch (error) {
       console.error('Error loading carousel photos:', error)
       hasError.value = true
@@ -68,29 +71,29 @@ export const usePhotoShootStore = defineStore('photoshoot', () => {
   async function fetchAllPhotoShoots() {
     isPhotoShootsLoading.value = true
     try {
-      const response: AxiosResponse<PhotoShoot[]> = await api.get('/photo-shoots/')
-      photoShoots.value = response.data.map(shoot => ({
+      const response: AxiosResponse<PhotoShoot[]> =
+        await api.get('/photo-shoots/')
+      photoShoots.value = response.data.map((shoot) => ({
         ...shoot,
-        photos: shoot.photos.map(photo => ({
+        photos: shoot.photos.map((photo) => ({
           ...photo,
           image: `${CLOUDINARY_BASE_URL}/${photo.image}`
         }))
       }))
-      
+
       // Wait for first image of each photoshoot to load (medium priority)
       const indexImages = photoShoots.value
-        .map(shoot => shoot.photos?.[0]?.image)
+        .map((shoot) => shoot.photos?.[0]?.image)
         .filter(Boolean) as string[]
-      
-      await Promise.all(indexImages.map(url => preloadImage(url)))
-      
+
+      await Promise.all(indexImages.map((url) => preloadImage(url)))
+
       // Preload remaining images in background (low priority)
-      const remainingImages = photoShoots.value.flatMap(shoot => 
-        shoot.photos.slice(1).map(photo => photo.image)
+      const remainingImages = photoShoots.value.flatMap((shoot) =>
+        shoot.photos.slice(1).map((photo) => photo.image)
       )
-      
+
       preloadImagesInBackground(remainingImages)
-      
     } catch (error) {
       console.error('Error loading photo shoots:', error)
       hasError.value = true
@@ -98,13 +101,32 @@ export const usePhotoShootStore = defineStore('photoshoot', () => {
       isPhotoShootsLoading.value = false
     }
   }
+  const getPortfolioDisplayPhotos = (
+    isIndex: boolean,
+    params: Record<string, string> = {}
+  ) => {
+    if (isIndex) {
+      // For index page: first photo of each photoshoot
+      return photoShoots.value.map((shoot) => shoot.photos[0]).filter(Boolean)
+    } else if (params.order) {
+      // For specific photoshoot: all photos in that shoot
+      const shoot = photoShoots.value.find(
+        (s) => s.order === Number(params.order)
+      )
+      return shoot?.photos || []
+    }
+
+    return []
+  }
 
   // Load specific photoshoot images with priority
   async function prioritizePhotoShoot(shootId: number) {
-    const shoot = photoShoots.value.find(s => s.id === shootId || s.order === shootId)
+    const shoot = photoShoots.value.find(
+      (s) => s.id === shootId || s.order === shootId
+    )
     if (shoot?.photos?.length) {
-      const imageUrls = shoot.photos.map(photo => photo.image)
-      await Promise.all(imageUrls.slice(0, 3).map(url => preloadImage(url)))
+      const imageUrls = shoot.photos.map((photo) => photo.image)
+      await Promise.all(imageUrls.slice(0, 3).map((url) => preloadImage(url)))
       preloadImagesInBackground(imageUrls.slice(3))
     }
   }
@@ -113,11 +135,8 @@ export const usePhotoShootStore = defineStore('photoshoot', () => {
   async function fetchInitialData(currentRoute = '') {
     try {
       // Fetch and preload high-priority content
-      await Promise.all([
-        fetchCarouselPhotos(),
-        fetchAllPhotoShoots()
-      ])
-      
+      await Promise.all([fetchCarouselPhotos(), fetchAllPhotoShoots()])
+
       // If on a specific photoshoot page, prioritize those images
       if (currentRoute.includes('portfolio/')) {
         const shootId = currentRoute.split('/').pop()
@@ -125,9 +144,10 @@ export const usePhotoShootStore = defineStore('photoshoot', () => {
           await prioritizePhotoShoot(Number(shootId))
         }
       }
-      
-      console.log('Priority images loaded, remaining images loading in background')
-      
+
+      console.log(
+        'Priority images loaded, remaining images loading in background'
+      )
     } catch (error) {
       console.error('Error in initial data load:', error)
       hasError.value = true
@@ -144,6 +164,7 @@ export const usePhotoShootStore = defineStore('photoshoot', () => {
     fetchCarouselPhotos,
     fetchAllPhotoShoots,
     prioritizePhotoShoot,
-    fetchInitialData
+    fetchInitialData,
+    getPortfolioDisplayPhotos
   }
 })

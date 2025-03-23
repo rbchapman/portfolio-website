@@ -39,7 +39,7 @@
         class="flex items-center text-white/70 -mb-2 hover:text-white transition-colors"
         @click="uiStore.clearHover"
       >
-        <div v-if="$route.path !== '/' && !uiStore.isModalOpen ||  uiStore.isModalOpen && $route.path === '/'" @click="updateStore()">
+        <div v-if="uiStore.isModalOpen && uiStore.isHome || uiStore.isPortfolioIndex && !uiStore.isModalOpen" @click="updateStore()">
           <span class="text-xs hover:underline uppercase underline-offset-4">
             Full Shoot
           </span>
@@ -47,7 +47,7 @@
         </div>
     </router-link>
     <div
-      v-if="!uiStore.isModalOpen && $route.path === '/'"
+      v-if="!uiStore.isModalOpen && uiStore.isHome"
       class="flex hover:text-white items-center"
     >
       <span
