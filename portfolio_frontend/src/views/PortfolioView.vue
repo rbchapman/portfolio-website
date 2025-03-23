@@ -2,7 +2,6 @@
   <div class="relative overflow-hidden">
     <ActionBar :action="photoShootsNav" />
 
-
     <div class="flex px-16 pt-6">
       <!-- Featured Photo Component -->
       <FeaturedPhoto
@@ -24,7 +23,7 @@
     <PhotoModal
       v-if="uiStore.selectedPhoto"
       v-model="uiStore.selectedPhoto"
-      :photos="selectedShoot?.photos || []"
+      :photos="displayPhotos"
       @close="uiStore.closeModal"
     />
   </div>
@@ -32,7 +31,6 @@
 
 <script setup lang="ts">
   import { computed } from 'vue'
-  import { useRoute } from 'vue-router'
   import ActionBar from '../components/ActionBar.vue'
   import PhotoModal from '../components/PhotoModal.vue'
   import FeaturedPhoto from '@/components/FeaturedPhoto.vue'
@@ -41,7 +39,6 @@
   import { usePhotoShootStore } from '@/stores/photoShootStore'
   import { useUiStore } from '@/stores/uiStore'
 
-  const route = useRoute()
   const photoShootStore = usePhotoShootStore()
   const uiStore = useUiStore()
   const photoShoots = computed(() => photoShootStore.photoShoots)
@@ -54,51 +51,45 @@
     showBasePath: true
   }
 
-  const selectedShoot = computed(() => {
-    if (!route.params.order) return null
-    return photoShoots.value.find(
-      (shoot) => shoot.order === Number(route.params.order)
+  // Get all display photos for the current page
+  const displayPhotos = computed(() => {
+    return photoShootStore.getPortfolioDisplayPhotos(
+      uiStore.isPortfolioIndex,
+      uiStore.currentPageParams
     )
   })
 
   const featuredPhoto = computed(() => {
-    const photos = photoShootStore.getPortfolioDisplayPhotos(
-      uiStore.isPortfolioIndex,
-      uiStore.currentPageParams
-    )
-    return photos.length > 0 ? photos[0] : null
+    return displayPhotos.value.length > 0 ? displayPhotos.value[0] : null
   })
 
   const gridPhotos = computed(() => {
-    const photos = photoShootStore.getPortfolioDisplayPhotos(
-      uiStore.isPortfolioIndex,
-      uiStore.currentPageParams
-    )
-    return photos.slice(1)
+    return displayPhotos.value.slice(1)
   })
 </script>
+
 <style scoped>
-.custom-scrollbar {
-  scrollbar-width: thin; /* For Firefox */
-  scrollbar-color: rgba(255, 255, 255, 0.2) transparent; /* For Firefox */
-}
+  .custom-scrollbar {
+    scrollbar-width: thin; /* For Firefox */
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent; /* For Firefox */
+  }
 
-.custom-scrollbar::-webkit-scrollbar {
-  width: 2px; /* Slightly wider for the circular feel */
-}
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 2px; /* Slightly wider for the circular feel */
+  }
 
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 10px; /* Full rounded edges to simulate a circle */
-  height: 60px; /* Make the thumb shorter */
-  min-height: 60px;
-}
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px; /* Full rounded edges to simulate a circle */
+    height: 60px; /* Make the thumb shorter */
+    min-height: 60px;
+  }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
 </style>
