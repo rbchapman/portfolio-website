@@ -1,5 +1,5 @@
 <template>
-  <div class="flex-1 mr-6 relative max-w-[45vw] h-[60vh] sticky top-0" v-if="props.photo">
+  <div class="relative w-[45vw] h-[60vh] sticky top-0" v-if="props.photo">
     <!-- Index page version -->
     <RouterLink
       v-if="isPortfolioIndex"

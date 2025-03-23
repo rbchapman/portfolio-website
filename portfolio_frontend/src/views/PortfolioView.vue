@@ -2,7 +2,7 @@
   <div class="relative overflow-hidden">
     <ActionBar :action="photoShootsNav" />
 
-    <div class="flex px-16 pt-6">
+    <div class="flex gap-6 px-24 pt-6">
       <!-- Featured Photo Component -->
       <FeaturedPhoto
         v-if="featuredPhoto"
@@ -11,7 +11,7 @@
       />
 
       <!-- Right side - photo grid with scrollable container -->
-      <div class="flex-1 overflow-y-auto custom-scrollbar h-[60vh]">
+      <div class="overflow-y-auto custom-scrollbar h-[60vh]">
         <PhotoGrid
           :photos="gridPhotos"
           :isPortfolioIndex="uiStore.isPortfolioIndex"

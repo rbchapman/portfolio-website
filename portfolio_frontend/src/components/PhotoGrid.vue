@@ -1,13 +1,13 @@
 <template>
     <div>
-      <div class="grid grid-cols-2 gap-y-6">
+      <div class="grid grid-cols-2 gap-6">
         <!-- Index page grid items -->
         <template v-if="uiStore.isPortfolioIndex">
           <RouterLink
             v-for="photo in props.photos"
             :key="photo.id"
             :to="`/portfolio/${photo.photo_shoot_order}`"
-            class="aspect-[4/5] max-h-[350px] overflow-hidden relative"
+            class="aspect-[9/10] max-h-[350px] overflow-hidden relative"
             @mouseenter="uiStore.setHover(photo)"
             @mouseleave="uiStore.clearHover()"
           >
@@ -33,7 +33,7 @@
           <div
             v-for="photo in props.photos"
             :key="photo.id"
-            class="aspect-[4/5] max-h-[350px] overflow-hidden cursor-pointer relative"
+            class="aspect-[9/10] max-h-[350px] overflow-hidden cursor-pointer relative"
             @click="uiStore.openModal(photo)" 
           >
             <img
