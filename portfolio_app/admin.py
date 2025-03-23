@@ -25,8 +25,8 @@ class PhotoShootAdmin(SortableAdminMixin, admin.ModelAdmin):
     ordering = ['order']
     inlines = [PhotoInline]
 @admin.register(Photo)
-class PhotoAdmin(SortableAdminMixin, admin.ModelAdmin):
-    list_display = ['title', 'photo_shoot', 'photographer', 'photo_shoot_order', 'carousel_order', 'show']
+class PhotoAdmin(admin.ModelAdmin):
+    list_display = ['title', 'photo_shoot', 'photographer', 'carousel_order', 'show']
     list_filter = ['show', 'is_portrait', 'photo_shoot', 'photographer']
     search_fields = ['title', 'description']
     ordering = ['photo_shoot_order']
