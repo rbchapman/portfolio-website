@@ -1,16 +1,16 @@
 <template>
   <footer class="flex justify-between mt-auto py-3 px-8">
     <div>
-      <span class="text-white/70 text-sm uppercase">agency: </span>
+      <span class="text-white/70 text-xs uppercase">agency: </span>
       <a
         :href="agencyUrl"
-        class="text-sm hover:underline uppercase bg-transparent transition-all duration-500 text-white/70 hover:text-white"
+        class="text-xs hover:underline uppercase bg-transparent transition-all duration-500 text-white/70 hover:text-white"
       >
         {{ agencyName }}
       </a>
     </div>
     <div>
-      <span class="uppercase text-sm text-white/70">{{ contactEmail }}</span>
+      <span class="uppercase text-xs text-white/70">{{ contactEmail }}</span>
     </div>
   </footer>
 </template>

@@ -1,8 +1,8 @@
 <template>
   <div class="relative overflow-hidden">
-    <ActionBar :action="photoShootsNav" />
+    <!-- <ActionBar :action="photoShootsNav" /> -->
 
-    <div class="flex gap-6 px-24 pt-6">
+    <div class="flex gap-6 px-24">
       <!-- Featured Photo Component -->
       <FeaturedPhoto
         v-if="featuredPhoto"

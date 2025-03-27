@@ -31,7 +31,7 @@
       <div
         v-show="currentPhoto"
         :key="currentPhoto.id"
-        class="flex modal-transition items-end z-50"
+        class="flex items-end z-50"
       >
         <div class="relative">
           <img
@@ -96,22 +96,3 @@
     emit('update:modelValue', currentPhoto.value)
   }
 </script>
-<style>
-  .modal-transition {
-    animation: simpleSlide 1.2s ease-out forwards;
-  }
-
-  @keyframes simpleSlide {
-    0% {
-      opacity: 0;
-      transform: translateX(-25px);
-    }
-    50% {
-      opacity: 0.7;
-    }
-    100% {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-</style>

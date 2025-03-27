@@ -1,112 +1,134 @@
 <template>
   <div class="w-full h-[45px] text-sm uppercase tracking-wider">
-    <div class="flex text-white/70 justify-between items-center px-8 h-full">
-      <!-- Toggle Action Template -->
-      <template v-if="props.action.type === 'toggle'">
+    <div class="flex text-white/70 items-center h-full relative px-6">
+      <!-- Left: Measurements Toggle -->
+      <div class="flex items-center">
         <h1
-          class="cursor-pointer bg-transparent transition-all duration-500 hover:text-white uppercase"
+          class="cursor-pointer bg-transparent transition-all duration-700 hover:text-white uppercase mr-2"
           :class="{
-            'text-white opacity-100 underline-offset-4 underline decoration-[0.25px]':
-              isOpen,
-            'opacity-70': !isOpen
+            'text-white opacity-100 underline-offset-4 underline decoration-[0.25px]': isMeasurementsOpen,
+            'opacity-70': !isMeasurementsOpen
           }"
-          @click="isOpen = !isOpen"
+          @click="toggleMeasurements"
         >
-          {{ props.action.title }}
+          MEASUREMENTS
         </h1>
-
-        <div
-          class="mr-16 flex h-full flex-1 items-center justify-center overflow-hidden"
-        >
+        
+        <!-- Compact Measurements Display -->
+        <div class="overflow-hidden flex items-center">
           <div
-            class="absolute transition-all duration-500"
+            class="transition-all duration-500 flex"
             :class="{
-              'opacity-0': !isOpen,
-              'opacity-100': isOpen
+              'opacity-0 max-w-0': !isMeasurementsOpen,
+              'opacity-100 max-w-md': isMeasurementsOpen
             }"
           >
-            <span
-              v-for="(value, key) in props.action.content"
-              :key="key"
-              class="px-2 opacity-70"
-            >
-              {{ key }} {{ value }}
+            <span v-for="(value, key) in measurementsData" :key="key" class="px-1 text-xs opacity-70">
+              {{ key }} 
+              <span class="text-white">
+                {{ value }}
+              </span>
             </span>
           </div>
         </div>
-      </template>
+      </div>
 
-      <!-- Navigation Action Template -->
-      <template v-else>
-        <h1>
-          {{ props.action.title }}
-        </h1>
+      <!-- Center: Navigation Buttons - Fixed Position -->
+      <div 
+        class="flex justify-center h-full items-center absolute left-1/2 transform -translate-x-1/2 transition-all duration-500 overflow-hidden"
+        :class="{
+          'opacity-0 max-w-0': isMeasurementsOpen,
+          'opacity-100 max-w-md': !isMeasurementsOpen
+        }"
+      >
+        <router-link
+          v-for="route in navigationRoutes"
+          :key="route.path"
+          :to="route.path"
+          class="px-2 text-sm hover:text-white opacity-70"
+          @mouseleave="uiStore.clearHover()"
+          :class="{
+            'underline text-white opacity-100 underline-offset-4 decoration-[0.25px]': isUnderlined(route.label)
+          }"
+        >
+          {{ route.label }}
+        </router-link>
+      </div>
 
-        <div class="flex-1 flex justify-center h-full items-center mr-28">
-          <router-link
-            v-for="route in routes"
-            :key="route.path"
-            :to="route.path"
-            class="px-2 text-sm hover:text-white opacity-70"
-            @mouseleave="uiStore.clearHover()"
-            :class="[
-              {
-                'underline text-white opacity-100 underline-offset-4 decoration-[0.25px]':
-                  isUnderlined(route.label)
-              }
-            ]"
-          >
-            {{ route.label }}
-          </router-link>
-        </div>
-      </template>
+      <!-- Right: Always Visible Portfolio and Campaigns Links -->
+      <div class="flex items-center absolute right-8">
+        <router-link 
+          to="/portfolio" 
+          class="px-2 text-sm hover:text-white opacity-70"
+          :class="{
+            'underline text-white opacity-100 underline-offset-4 decoration-[0.25px]': !uiStore.isCampaigns
+          }"
+        >
+          PORTFOLIO
+        </router-link>
+        <router-link 
+          to="/campaigns/1" 
+          class="px-2 text-sm hover:text-white opacity-70"
+          :class="{
+            'underline text-white opacity-100 underline-offset-4 decoration-[0.25px]': uiStore.isCampaigns
+          }"
+        >
+          CAMPAIGNS
+        </router-link>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { ref, computed } from 'vue'
-  import { type ActionType } from '../types'
-  import { useRoute } from 'vue-router'
-  import { useUiStore } from '@/stores/uiStore'
+import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
+import { useUiStore } from '@/stores/uiStore'
 
-  const uiStore = useUiStore()
+const uiStore = useUiStore()
+const route = useRoute()
 
-  const route = useRoute()
-  const props = defineProps<{
-    action: ActionType
-  }>()
+// State management
+const isMeasurementsOpen = ref(false)
 
-  const isOpen = ref(false)
+// Measurements data
+const measurementsData = {
+  'HEIGHT': '180CM',
+  'WAIST': '71CM',
+  'SHOES': '42',
+  'HAIR': 'RED',
+  'EYES': 'BLUE'
+}
 
-  const routes = computed(() => {
-    if (props.action.type === 'navigation') {
-      const navAction = props.action
-      const indexedRoutes = Array.from({ length: navAction.count }, (_, i) => ({
-        path: `/${navAction.basePath}/${i + 1}`,
-        label: `${i + 1}`
-      }))
+// Navigation routes
+const navigationRoutes = computed(() => {
+  // Base navigation path (portfolio, etc)
+  const basePath = 'portfolio'
+  // Number of pages
+  const count = 4
+  
+  const indexedRoutes = Array.from({ length: count }, (_, i) => ({
+    path: `/${basePath}/${i + 1}`,
+    label: `${i + 1}`
+  }))
+  
+  return [
+    { path: `/${basePath}`, label: 'ALL' },
+    ...indexedRoutes
+  ]
+})
 
-      if (navAction.showBasePath) {
-        return [
-          { path: `/${navAction.basePath}`, label: 'ALL' },
-          ...indexedRoutes
-        ]
-      }
-      return indexedRoutes
-    }
-    return []
-  })
-
-  const isUnderlined = (label: string | number) => {
-    if (!route.params.order) {
-      return (
-        props.action.type === 'navigation' &&
-        props.action.showBasePath &&
-        label === 'ALL'
-      )
-    } else {
-      return String(label) === String(route.params.order)
-    }
+// Check if a route should be underlined
+const isUnderlined = (label: string | number) => {
+  if (!route.params.order) {
+    return label === 'ALL'
+  } else {
+    return String(label) === String(route.params.order)
   }
+}
+
+// Toggle function for measurements only
+const toggleMeasurements = () => {
+  isMeasurementsOpen.value = !isMeasurementsOpen.value
+}
 </script>

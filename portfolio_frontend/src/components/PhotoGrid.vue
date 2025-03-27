@@ -15,7 +15,7 @@
               loading="eager"
               :src="photo.optimized_images.large"
               :alt="photo.title || ''"
-              class="w-full h-full object-cover content-transition transition-opacity duration-300"
+              class="w-full h-full object-cover transition-opacity duration-300"
             />
   
             <!-- Overlay for grid photos -->
@@ -40,7 +40,7 @@
               loading="eager"
               :src="photo.optimized_images.large"
               :alt="photo.title || ''"
-              class="w-full h-full object-cover content-transition transition-opacity duration-300"
+              class="w-full h-full object-cover transition-opacity duration-300"
             />
           </div>
         </template>

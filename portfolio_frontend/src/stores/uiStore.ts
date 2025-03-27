@@ -16,7 +16,9 @@ export const useUiStore = defineStore('ui', () => {
 
   // Initial load function
   function completeInitialLoad() {
-    hasCompletedInitialLoad.value = true
+    setTimeout(() => {
+      hasCompletedInitialLoad.value = true
+    }, 5000)
   }
 
   function setCurrentPage(
@@ -69,6 +71,10 @@ export const useUiStore = defineStore('ui', () => {
   const isPortfolioIndex = computed(
     () => currentPage.value === 'portfolio' && !currentPageParams.value.order
   )
+
+  const isCampaigns = computed(
+    () => currentPage.value === 'campaigns'
+  )
   const isHome = computed(() => currentPage.value === 'home')
 
   return {
@@ -77,6 +83,7 @@ export const useUiStore = defineStore('ui', () => {
     currentPage,
     currentPageParams,
     isPortfolioIndex,
+    isCampaigns,
     isHome,
     showDetails,
     selectedPhoto,

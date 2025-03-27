@@ -1,15 +1,23 @@
+<!-- Updated template section with the typewriter effect -->
 <template>
-  <div class="overflow-hidden carousel-container w-full relative">
+  <div class="overflow-hidden w-full relative">
     <div
       class="scroll-track"
       :style="{ animationPlayState: uiStore.isPaused ? 'paused' : 'running' }"
       ref="scrollTrack"
     >
       <div class="flex">
+        <!-- This div now contains the typewriter animation -->
+        <div class="w-[100vw] flex items-center justify-center">
+          <div class="typewriter">
+            <p>Loading...</p>
+          </div>
+        </div>
+        
         <div
           v-for="photo in carouselPhotos"
           :key="photo.id + '-' + photo.duplicateIndex"
-          class="max-w-4xl max-h-2xl mr-6 shadow-lg overflow-hidden relative cursor-pointer"
+          class="max-w-4xl mr-6 shadow-lg overflow-hidden relative cursor-pointer"
           @mouseenter="uiStore.setHover(photo)"
           @mouseleave="uiStore.clearHover()"
           @click="uiStore.openModal(photo)"
@@ -20,8 +28,8 @@
             loading="eager"
             :class="[
               !photo?.is_portrait
-                ? 'h-auto w-auto max-h-[60vh]'
-                : 'w-auto h-auto max-h-[60vh] max-w-3xl'
+                ? 'h-auto max-h-[60vh]'
+                : 'w-auto max-h-[60vh] max-w-3xl'
             ]"
           />
           <!-- Overlay with photo details, only shown when this specific photo is hovered -->
@@ -48,55 +56,84 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted, computed } from 'vue'
-  import PhotoModal from '../components/PhotoModal.vue'
-  import PhotoDetails from './PhotoDetails.vue'
-  import { usePhotoShootStore } from '@/stores/photoShootStore'
-  import { useUiStore } from '@/stores/uiStore'
+import { ref, onMounted, computed } from 'vue'
+import PhotoModal from '../components/PhotoModal.vue'
+import PhotoDetails from './PhotoDetails.vue'
+import { usePhotoShootStore } from '@/stores/photoShootStore'
+import { useUiStore } from '@/stores/uiStore'
 
-  const photoShootStore = usePhotoShootStore()
-  const uiStore = useUiStore()
-  const scrollTrack = ref<HTMLElement | null>(null)
+const photoShootStore = usePhotoShootStore()
+const uiStore = useUiStore()
+const scrollTrack = ref<HTMLElement | null>(null)
 
-  const carouselPhotos = computed(() => {
-    return [
-      ...photoShootStore.carouselPhotos,
-      ...photoShootStore.carouselPhotos
-    ].map((photo, index) => ({
-      ...photo,
-      duplicateIndex: index < photoShootStore.carouselPhotos.length ? 0 : 1
-    }))
-  })
+// Clone the photos for continuous scrolling effect
+const carouselPhotos = computed(() => {
+  return [
+    ...photoShootStore.carouselPhotos,
+    ...photoShootStore.carouselPhotos
+  ].map((photo, index) => ({
+    ...photo,
+    duplicateIndex: index < photoShootStore.carouselPhotos.length ? 0 : 1
+  }))
+})
 
-  onMounted(() => {
-    if (photoShootStore.carouselPhotos.length === 0) {
-      photoShootStore.fetchCarouselPhotos()
-    }
-  })
+onMounted(() => {
+  if (photoShootStore.carouselPhotos.length === 0) {
+    photoShootStore.fetchCarouselPhotos()
+  }
+})
 </script>
 
-<style scoped>
-  @keyframes scroll {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(-50%);
-    }
+<style>
+@keyframes slide-from-right {
+  0% {
+    transform: translateX(0);
   }
+  100% {
+    transform: translateX(-100%);
+  }
+}
 
-  .scroll-track {
-    display: flex;
-    width: max-content;
-    animation: scroll 100s linear infinite;
-  }
+.scroll-track {
+  display: flex;
+  width: max-content;
+  animation: slide-from-right 200s linear infinite;
+}
 
-  .scroll-track::-webkit-scrollbar {
-    display: none;
-  }
+.scroll-track::-webkit-scrollbar {
+  display: none;
+}
 
-  .scroll-track {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
+.scroll-track {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Typewriter effect styles */
+.typewriter p {
+  overflow: hidden;
+  border-right: 0.15em solid #666;
+  white-space: nowrap;
+  margin: 0 auto;
+  letter-spacing: 0.15em;
+  color: #333;
+  font-size: 1.5rem;
+  animation: 
+    typing 3.5s steps(30, end) infinite,
+    blink-caret 0.75s step-end infinite;
+}
+
+/* The typing effect */
+@keyframes typing {
+  0% { width: 0 }
+  50% { width: 100% }
+  90% { width: 100% }
+  100% { width: 0 }
+}
+
+/* The typewriter cursor effect */
+@keyframes blink-caret {
+  from, to { border-color: transparent }
+  50% { border-color: #666 }
+}
 </style>

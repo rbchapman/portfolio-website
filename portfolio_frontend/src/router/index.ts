@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+// import HomeView from '../views/HomeView.vue'
 import { usePhotoShootStore } from '@/stores/photoShootStore'
 import { useUiStore } from '@/stores/uiStore'
 import { useCampaignStore } from '@/stores/campaignStore'
@@ -10,7 +10,9 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView
+      component: () => import('../views/PortfolioView.vue'),
+      // You can add a prop to indicate it's the home view if needed
+      props: { isHome: true }
     },
     {
       path: '/campaigns/:order?',

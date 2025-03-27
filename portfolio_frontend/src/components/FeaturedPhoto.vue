@@ -1,5 +1,5 @@
 <template>
-  <div class="relative w-[45vw] h-[60vh] sticky top-0" v-if="props.photo">
+  <div class="relative w-[45vw] h-[70vh] sticky top-0" v-if="props.photo">
     <!-- Index page version -->
     <RouterLink
       v-if="isPortfolioIndex"
@@ -12,7 +12,7 @@
         loading="eager"
         :src="props.photo.optimized_images.full"
         :alt="props.photo.title || ''"
-        class="w-full h-full object-cover content-transition transition-opacity duration-300"
+        class="w-full h-full object-cover transition-opacity duration-300"
       />
 
       <!-- Overlay with PhotoDetails -->
@@ -34,7 +34,7 @@
         loading="eager"
         :src="props.photo.optimized_images.full"
         :alt="props.photo.title || ''"
-        class="w-full h-full object-cover content-transition transition-opacity duration-300"
+        class="w-full h-full object-cover transition-opacity duration-300"
       />
     </div>
   </div>
