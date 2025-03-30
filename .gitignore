@@ -4,6 +4,9 @@ __pycache__/
 db.sqlite3
 venvgp/
 venv/
+env/
+**/env/
+**/env/bin/
 
 # Node
 node_modules/
@@ -26,3 +29,10 @@ media/
 
 # Django logs
 *.log
+
+# Distribution / packaging
+*.egg-info/
+dist/
+build/
+eggs/
+.eggs/
