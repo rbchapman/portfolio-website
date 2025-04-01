@@ -2,16 +2,13 @@
   <div class="absolute inset-0 flex flex-col justify-center items-center">
     <div class="absolute inset-0 bg-black opacity-50"></div>
     <div class="absolute top-4 right-4 z-10">
-      <div v-if="route.path === '/portfolio'">
+      <div v-if="uiStore.isHome">
         <span
             class="text-sm mt-10 hover:underline uppercase underline-offset-4"
           >
             Full Shoot
           </span>
           <span class="text-lg mt-10 hover:none ml-1">→</span>
-      </div>
-      <div v-else>
-        <ArrowsPointingOutIcon class="h-6 w-6 stroke-[.75] text-white/70 hover:text-white" />
       </div>
     </div>
     <div class="relative text-white text-center p-4">
@@ -33,6 +30,8 @@
   import type { Photo } from '../types'
   import { ArrowsPointingOutIcon } from '@heroicons/vue/24/outline'
   import { useRoute } from 'vue-router'
+  import { useUiStore } from '@/stores/uiStore'
+  const uiStore = useUiStore()
 
   const route = useRoute()
 

@@ -1,24 +1,24 @@
 <template>
-  <div class="relative overflow-hidden">
-    <ActionBar :action="photoShootsNav" />
-
-    <div class="flex gap-6 px-24 pt-6">
-      <!-- Featured Photo Component -->
-      <FeaturedPhoto
-        v-if="featuredPhoto"
-        :photo="featuredPhoto"
-        :isPortfolioIndex="uiStore.isPortfolioIndex"
-      />
-
-      <!-- Right side - photo grid with scrollable container -->
-      <div class="overflow-y-auto custom-scrollbar h-[60vh]">
+  <div class="relative">
+    <div class="max-w-[1200px] h-[64vh] mx-8 grid grid-cols-2 gap-6">
+      <!-- Left side - Featured Photo -->
+      <div class="h-full">
+        <FeaturedPhoto
+          v-if="featuredPhoto"
+          :photo="featuredPhoto"
+          :isPortfolioIndex="uiStore.isPortfolioIndex"
+        />
+      </div>
+      
+      <!-- Right side - Photo grid -->
+      <div class="h-full overflow-y-auto custom-scrollbar">
         <PhotoGrid
           :photos="gridPhotos"
           :isPortfolioIndex="uiStore.isPortfolioIndex"
         />
       </div>
     </div>
-
+    
     <!-- Photo Modal -->
     <PhotoModal
       v-if="uiStore.selectedPhoto"
@@ -69,27 +69,12 @@
 </script>
 
 <style scoped>
-  .custom-scrollbar {
-    scrollbar-width: thin; /* For Firefox */
-    scrollbar-color: rgba(255, 255, 255, 0.2) transparent; /* For Firefox */
-  }
 
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 2px; /* Slightly wider for the circular feel */
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 10px; /* Full rounded edges to simulate a circle */
-    height: 60px; /* Make the thumb shorter */
-    min-height: 60px;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
-  }
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  padding-right: 10px;
+  margin-right: -8px;
+  -webkit-overflow-scrolling: touch;
+}
 </style>

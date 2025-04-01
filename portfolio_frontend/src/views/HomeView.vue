@@ -1,6 +1,6 @@
 <template>
   <div>
-    <ActionBar :action="toggleBar" />
+    <!-- <ActionBar :action="toggleBar" /> -->
     <ReelCarousel
       class="pt-6"
       :photos="photoShootStore.carouselPhotos"

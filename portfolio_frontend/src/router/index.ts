@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+// import HomeView from '../views/HomeView.vue'
 import { usePhotoShootStore } from '@/stores/photoShootStore'
 import { useUiStore } from '@/stores/uiStore'
 import { useCampaignStore } from '@/stores/campaignStore'
@@ -10,7 +10,9 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView
+      component: () => import('../views/PortfolioView.vue'),
+      // You can add a prop to indicate it's the home view if needed
+      props: { isHome: true }
     },
     {
       path: '/campaigns/:order?',
@@ -18,8 +20,8 @@ const router = createRouter({
       component: () => import('../views/CampaignView.vue')
     },
     {
-      path: '/portfolio/:order?',
-      name: 'portfolio',
+      path: '/photoshoot/:order?',
+      name: 'photoshoot',
       component: () => import('../views/PortfolioView.vue')
     }
   ]
@@ -31,7 +33,7 @@ router.beforeEach(async (to, from, next) => {
   const photoShootStore = usePhotoShootStore()
   const campaignStore = useCampaignStore()
 
-  if (from.name === 'home' || from.name === 'portfolio') {
+  if (from.name === 'home' || from.name === 'photoshoot') {
     uiStore.clearHover()
   }
 

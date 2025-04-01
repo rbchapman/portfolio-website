@@ -1,18 +1,19 @@
+<!-- Updated template section with the typewriter effect -->
 <template>
-  <div class="overflow-hidden carousel-container w-full relative">
+  <div class="w-full relative">
     <div
       class="scroll-track"
       :style="{ animationPlayState: uiStore.isPaused ? 'paused' : 'running' }"
       ref="scrollTrack"
     >
       <div class="flex">
+        
         <div
           v-for="photo in carouselPhotos"
           :key="photo.id + '-' + photo.duplicateIndex"
-          class="max-w-4xl max-h-2xl mr-6 shadow-lg overflow-hidden relative cursor-pointer"
+          class="max-w-4xl mr-6 shadow-lg relative cursor-pointer"
           @mouseenter="uiStore.setHover(photo)"
           @mouseleave="uiStore.clearHover()"
-          @click="uiStore.openModal(photo)"
         >
           <img
             :src="photo.optimized_images.full"
@@ -20,8 +21,8 @@
             loading="eager"
             :class="[
               !photo?.is_portrait
-                ? 'h-auto w-auto max-h-[60vh]'
-                : 'w-auto h-auto max-h-[60vh] max-w-3xl'
+                ? 'h-auto max-h-[70vh]'
+                : 'w-auto max-h-[70vh] max-w-3xl'
             ]"
           />
           <!-- Overlay with photo details, only shown when this specific photo is hovered -->
@@ -48,55 +49,61 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted, computed } from 'vue'
-  import PhotoModal from '../components/PhotoModal.vue'
-  import PhotoDetails from './PhotoDetails.vue'
-  import { usePhotoShootStore } from '@/stores/photoShootStore'
-  import { useUiStore } from '@/stores/uiStore'
+import { ref, onMounted, computed } from 'vue'
+import PhotoModal from '../components/PhotoModal.vue'
+import PhotoDetails from './PhotoDetails.vue'
+import { usePhotoShootStore } from '@/stores/photoShootStore'
+import { useUiStore } from '@/stores/uiStore'
+const uiStore = useUiStore()
 
-  const photoShootStore = usePhotoShootStore()
-  const uiStore = useUiStore()
-  const scrollTrack = ref<HTMLElement | null>(null)
+const photoShootStore = usePhotoShootStore()
+const scrollTrack = ref<HTMLElement | null>(null)
 
-  const carouselPhotos = computed(() => {
-    return [
-      ...photoShootStore.carouselPhotos,
-      ...photoShootStore.carouselPhotos
-    ].map((photo, index) => ({
-      ...photo,
-      duplicateIndex: index < photoShootStore.carouselPhotos.length ? 0 : 1
-    }))
-  })
+// Clone the photos for continuous scrolling effect
+const carouselPhotos = computed(() => {
+  return [
+    ...photoShootStore.carouselPhotos,
+    ...photoShootStore.carouselPhotos
+  ].map((photo, index) => ({
+    ...photo,
+    duplicateIndex: index < photoShootStore.carouselPhotos.length ? 0 : 1
+  }))
+})
 
-  onMounted(() => {
-    if (photoShootStore.carouselPhotos.length === 0) {
-      photoShootStore.fetchCarouselPhotos()
-    }
-  })
+onMounted(() => {
+  if (photoShootStore.carouselPhotos.length === 0) {
+    photoShootStore.fetchCarouselPhotos()
+  }
+})
 </script>
 
-<style scoped>
-  @keyframes scroll {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(-50%);
-    }
+<style>
+@keyframes slide-from-right {
+  0% {
+    transform: translateX(0);
   }
+  100% {
+    transform: translateX(-100%);
+  }
+}
 
-  .scroll-track {
-    display: flex;
-    width: max-content;
-    animation: scroll 100s linear infinite;
-  }
+.scroll-track {
+  display: flex;
+  width: max-content;
+  animation: slide-from-right 100s linear infinite;
+  -webkit-animation: slide-from-right 100s linear infinite; /* Safari needs this */
+  will-change: transform; /* Performance hint */
+  transform: translateZ(0); /* Force hardware acceleration */
+  -webkit-transform: translateZ(0);
+}
 
-  .scroll-track::-webkit-scrollbar {
-    display: none;
-  }
+/* Hide scrollbars across browsers */
+.scroll-track::-webkit-scrollbar {
+  display: none;
+}
 
-  .scroll-track {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
+.scroll-track {
+  scrollbar-width: none;
+
+}
 </style>

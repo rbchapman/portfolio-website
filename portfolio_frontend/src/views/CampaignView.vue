@@ -6,7 +6,7 @@
     tabindex="0"
     class="focus:outline-none"
   >
-    <ActionBar :action="campaignsNav" />
+    <!-- <ActionBar :action="campaignsNav" /> -->
     <ChevronNav @previous="previousCampaign" @next="nextCampaign" />
     <transition name="slide-transition" mode="out-in">
       <div v-if="currentCampaign" :key="currentCampaign.id" class="flex items-center justify-center">

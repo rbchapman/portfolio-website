@@ -138,7 +138,7 @@ export const usePhotoShootStore = defineStore('photoshoot', () => {
       await Promise.all([fetchCarouselPhotos(), fetchAllPhotoShoots()])
 
       // If on a specific photoshoot page, prioritize those images
-      if (currentRoute.includes('portfolio/')) {
+      if (currentRoute.includes('photoshoot/')) {
         const shootId = currentRoute.split('/').pop()
         if (shootId && !isNaN(Number(shootId))) {
           await prioritizePhotoShoot(Number(shootId))
