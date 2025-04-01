@@ -180,6 +180,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 CLOUDINARY_URL = os.getenv('CLOUDINARY_URL')
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+CLOUDINARY_STORAGE = {
+    'SECURE': True
+}
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
