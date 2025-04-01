@@ -6,7 +6,6 @@
         <FeaturedPhoto
           v-if="featuredPhoto"
           :photo="featuredPhoto"
-          :isPortfolioIndex="uiStore.isPortfolioIndex"
         />
       </div>
       
@@ -14,7 +13,6 @@
       <div class="h-full overflow-y-auto custom-scrollbar">
         <PhotoGrid
           :photos="gridPhotos"
-          :isPortfolioIndex="uiStore.isPortfolioIndex"
         />
       </div>
     </div>
@@ -54,7 +52,7 @@
   // Get all display photos for the current page
   const displayPhotos = computed(() => {
     return photoShootStore.getPortfolioDisplayPhotos(
-      uiStore.isPortfolioIndex,
+      uiStore.isHome,
       uiStore.currentPageParams
     )
   })

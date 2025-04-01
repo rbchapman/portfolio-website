@@ -2,7 +2,7 @@
   <div class="relative w-full h-full" v-if="props.photo">
     <!-- Index page version -->
     <RouterLink
-      v-if="isPortfolioIndex"
+      v-if="uiStore.isHome"
       :to="`/photoshoot/${props.photo.photo_shoot_order +1}`"
       class="relative block w-full h-full"
       @mouseenter="uiStore.setHover(props.photo)"
@@ -48,7 +48,6 @@ import type { Photo } from '@/types';
 // Props
 const props = defineProps<{
   photo: Photo;
-  isPortfolioIndex: boolean;
 }>();
 
 // Store
