@@ -1,10 +1,10 @@
 <template>
-  <LoadScreen :is-loading="!uiStore.hasCompletedInitialLoad" />
+  <LoadScreen />
   <div class="min-h-screen flex flex-col">
     <div class="flex-1 flex flex-col">
       <!-- <NavMenu class="z-40" /> -->
-      <PageTitle firstName="Riley" middleName="Benjamin" lastName="Chapman" />
-      <ActionBar :action="toggleBar" />
+      <PageTitle boldText="RileyBenjamin" italicText="Chapman" />
+      <ActionBar />
 
       <main class="flex-1 justify-center overflow-hidden">
         <RouterView v-slot="{ Component, route }">
@@ -42,17 +42,6 @@
     }
     return route.path
   }
-
-  onMounted(async () => {
-    if (uiStore.hasCompletedInitialLoad) return
-
-    await photoShootStore.fetchInitialData(router.currentRoute.value.fullPath)
-
-    // Minimum 1 second delay before hiding loading screen
-    setTimeout(() => {
-      uiStore.completeInitialLoad()
-    }, 1000)
-  })
 
   // Set up route change detection (outside onMounted to avoid multiple registrations)
   router.beforeEach((to, from, next) => {

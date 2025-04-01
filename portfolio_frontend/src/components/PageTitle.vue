@@ -1,13 +1,13 @@
 <template>
-  <div class="w-full flex justify-center items-center pb-8">
+  <div class="w-full flex justify-center items-center pb-4">
     <div class="w-full max-w-5xl mx-auto px-8">
       <router-link
         :to="{ name: 'home' }"
-        class="block text-6xl md:text-6xl lg:text-8xl text-white"
+        class="block text-white"
         @click.prevent="navigateToHome"
       >
-        <span class="font-['Inter'] font-medium tracking-tight">RileyBenjamin</span><!--
-        --><span class="font-['Cormorant'] text-9xl font-light normal-case italic">Chapman</span>
+        <span class="font-['Inter'] text-6xl md:text-6xl lg:text-8xl font-medium tracking-tight">{{ boldText }}</span>
+        <span class="font-['Cormorant'] text-9xl font-light normal-case italic -ml-1">{{ italicText }}</span>
       </router-link>
     </div>
   </div>
@@ -17,7 +17,11 @@
 import { useRouter } from 'vue-router'
 
 const props = defineProps({
-  title: {
+  boldText: {
+    type: String,
+    required: true
+  },
+  italicText: {
     type: String,
     required: true
   }

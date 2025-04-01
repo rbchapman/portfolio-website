@@ -1,10 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { Photo } from '../types'
+import { usePhotoShootStore } from './photoShootStore'
+import { useCampaignStore } from './campaignStore'
 
 export const useUiStore = defineStore('ui', () => {
   // Initial load state
-  const hasCompletedInitialLoad = ref(false)
+  const showLoadScreen = ref(true)
 
   // Hover and modal states
   const hoveredPhoto = ref<Photo | null>(null)
@@ -15,10 +17,8 @@ export const useUiStore = defineStore('ui', () => {
   const currentPageParams = ref<Record<string, string>>({})
 
   // Initial load function
-  function completeInitialLoad() {
-    setTimeout(() => {
-      hasCompletedInitialLoad.value = true
-    }, 5000)
+  function noLoad() {
+    showLoadScreen.value = false
   }
 
   function setCurrentPage(
@@ -28,6 +28,7 @@ export const useUiStore = defineStore('ui', () => {
     currentPage.value = routeName
     currentPageParams.value = params
   }
+  
   // Hover functions
   function setHover(photo: Photo) {
     hoveredPhoto.value = photo
@@ -52,7 +53,7 @@ export const useUiStore = defineStore('ui', () => {
   function closeModal() {
     selectedPhoto.value = null
     isModalOpen.value = false
-
+    
     // When modal is closed, remove event listeners
     document.removeEventListener('keydown', handleKeyDown)
   }
@@ -62,6 +63,9 @@ export const useUiStore = defineStore('ui', () => {
     if (event.key === 'Escape' && isModalOpen.value) {
       closeModal()
     }
+    if (event.key === 'Enter' && showLoadScreen.value) {
+      noLoad()
+    }
   }
 
   const isPaused = computed(() => {
@@ -69,7 +73,7 @@ export const useUiStore = defineStore('ui', () => {
   })
 
   const isPortfolioIndex = computed(
-    () => currentPage.value === 'portfolio' && !currentPageParams.value.order
+    () => currentPage.value === 'home' && !currentPageParams.value.order
   )
 
   const isCampaigns = computed(
@@ -77,9 +81,63 @@ export const useUiStore = defineStore('ui', () => {
   )
   const isHome = computed(() => currentPage.value === 'home')
 
+  // NEW COMPUTED PROPERTIES FOR NAVIGATION
+  
+  // Get store instances
+  const photoShootStore = usePhotoShootStore()
+  const campaignStore = useCampaignStore()
+  
+  // Get the total count of photoshoots and campaigns
+  const photoShootCount = computed(() => photoShootStore.photoShoots.length)
+  const campaignCount = computed(() => campaignStore.campaigns.length)
+  
+  // Determine which section is active (photoShoot or campaign)
+  const currentSection = computed(() => 
+    isCampaigns.value ? 'campaigns' : 'photoshoot'
+  )
+  
+  // Get the base path for the current section
+  const currentBasePath = computed(() => 
+    isCampaigns.value ? '/campaigns' : '/photoshoot'
+  )
+  
+  // Generate navigation routes for the current section
+  const navigationRoutes = computed(() => {
+    const count = isCampaigns.value ? campaignCount.value : photoShootCount.value
+    const basePath = currentBasePath.value
+    
+    // Generate numbered routes (1, 2, 3, etc.)
+    const indexedRoutes = Array.from({ length: count }, (_, i) => ({
+      path: `${basePath}/${i + 1}`,
+      label: `${i + 1}`
+    }))
+    
+    // For photoshoots, add the "ALL" route (home page)
+    if (!isCampaigns.value) {
+      return [
+        { path: '/', label: 'ALL' },
+        ...indexedRoutes
+      ]
+    }
+    
+    // For campaigns, just return the numbered routes
+    return indexedRoutes
+  })
+  
+  // Determine if a route should be underlined (active)
+  const isRouteActive = (label: string | number) => {
+    // For home page or "ALL" route
+    if ((currentPage.value === 'home' || !currentPageParams.value.order) && label === 'ALL') {
+      return true
+    }
+    
+    // For numbered routes
+    return String(label) === String(currentPageParams.value.order)
+  }
+
   return {
     // State
-    hasCompletedInitialLoad,
+    showLoadScreen,
     currentPage,
     currentPageParams,
     isPortfolioIndex,
@@ -90,9 +148,17 @@ export const useUiStore = defineStore('ui', () => {
     isModalOpen,
     isPaused,
     hoveredPhoto,
+    
+    // New navigation properties
+    photoShootCount,
+    campaignCount,
+    navigationRoutes,
+    currentSection,
+    currentBasePath,
+    isRouteActive,
 
     // Functions
-    completeInitialLoad,
+    noLoad,
     setCurrentPage,
     setHover,
     clearHover,

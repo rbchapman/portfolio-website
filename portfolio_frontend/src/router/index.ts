@@ -20,8 +20,8 @@ const router = createRouter({
       component: () => import('../views/CampaignView.vue')
     },
     {
-      path: '/portfolio/:order?',
-      name: 'portfolio',
+      path: '/photoshoot/:order?',
+      name: 'photoshoot',
       component: () => import('../views/PortfolioView.vue')
     }
   ]
@@ -33,7 +33,7 @@ router.beforeEach(async (to, from, next) => {
   const photoShootStore = usePhotoShootStore()
   const campaignStore = useCampaignStore()
 
-  if (from.name === 'home' || from.name === 'portfolio') {
+  if (from.name === 'home' || from.name === 'photoshoot') {
     uiStore.clearHover()
   }
 

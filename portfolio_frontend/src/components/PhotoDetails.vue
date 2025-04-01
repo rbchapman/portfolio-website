@@ -30,12 +30,12 @@
     <div>
       <dt class="inline text-white/70 uppercase text-xs">Photo:</dt>
       <dd class="inline ml-1 text-white/90 font-medium text-xs uppercase">
-        {{ photo.photo_shoot_order }}/ {{photo.photo_count}}
+        {{ photo.photo_shoot_order + 1 }}/ {{photo.photo_count}}
       </dd>
     </div>
     <div class="mt-auto">
       <router-link
-        :to="`/portfolio/${photo.shoot_order}`"
+        :to="`/photoshoot/${photo.shoot_order}`"
         class="flex items-center text-white/70 -mb-2 hover:text-white transition-colors"
         @click="uiStore.clearHover"
       >
@@ -45,21 +45,7 @@
           </span>
           <span class="text-lg ml-1">→</span>
         </div>
-    </router-link>
-    <div
-      v-if="!uiStore.isModalOpen && uiStore.isHome"
-      class="flex hover:text-white items-center"
-    >
-      <span
-        class="text-xs hover:underline uppercase underline-offset-4"
-        @click="updateStore()"
-      >
-        FULL SIZE
-      </span>
-      <ArrowsPointingOutIcon
-        class="h-4 w-4 ml-2 text-white/70 hover:text-white"
-      />
-    </div>
+      </router-link>
     </div>
   </dl>
 </template>

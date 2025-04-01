@@ -7,9 +7,13 @@
 @layer base {
   body {
     background-color: #0c1001;
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+  html, body {
+    position: relative;
   }
   
   a {

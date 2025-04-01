@@ -1,46 +1,40 @@
 <template>
-  <div
-    class="fixed z-[51] inset-0 bg-black flex flex-col justify-between transition-opacity duration-700 ease-in-out"
-    :class="isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'"
-  >
-    <!-- Title section with loading text -->
-    <div class="pt-10 flex flex-col items-center">
-      <h1
-        class="text-6xl w-full text-center text-white/90 font-serif scale-y-110 uppercase font-light transform"
-      >
-        {{ props.title }}
-      </h1>
-      
-      <!-- Pulsating loading text -->
-      <div 
-        v-if="isLoading" 
-        class="loading-text text-white/80 text-xl font-serif mt-4"
-      >
-        LOADING
+  <Transition name="fade">
+    <div
+      v-if="uiStore.showLoadScreen"
+      class="fixed z-[51] inset-0 bg-black flex flex-col justify-between"
+    >
+      <!-- Title section -->
+      <div class="flex flex-col items-center">
+        <PageTitle boldText="RileyBenjamin" italicText="Chapman" />
+        
+        <!-- Pulsating enter text -->
+        <div class="text-center">
+          <div
+            @click="uiStore.noLoad()"
+            class="inline-block cursor-pointer transition-all duration-300 pulsate-text"
+          >
+            <span>ENTER</span>
+          </div>
+        </div>
       </div>
       
-      <!-- Open Portfolio button (when not loading) -->
-      <button
-        v-else
-        @click="onOpenPortfolio"
-        class="open-portfolio-btn mt-6"
-      >
-        OPEN PORTFOLIO
-      </button>
+      <!-- Carousel at bottom -->
+      <ReelCarousel
+        class="w-full"
+        :photos="photoShootStore.carouselPhotos"
+      />
     </div>
-    
-    <!-- Carousel at bottom -->
-    <ReelCarousel
-      class="w-full pb-8"
-      :photos="photoShootStore.carouselPhotos"
-    />
-  </div>
+  </Transition>
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue'
+import { defineProps, defineEmits, onMounted } from 'vue'
 import ReelCarousel from './ReelCarousel.vue'
 import { usePhotoShootStore } from '@/stores/photoShootStore'
+import PageTitle from './PageTitle.vue'
+import { useUiStore } from '@/stores/uiStore'
+
 
 const props = defineProps({
   isLoading: {
@@ -55,40 +49,42 @@ const props = defineProps({
 
 const emit = defineEmits(['openPortfolio'])
 const photoShootStore = usePhotoShootStore()
+const uiStore = useUiStore()
 
 const onOpenPortfolio = () => {
   emit('openPortfolio')
 }
+
+onMounted(() => {
+  // Auto-hide the load screen after 10 seconds (adjust time as needed)
+  setTimeout(() => {
+    uiStore.noLoad()
+  }, 10000) // 10 seconds
+})
 </script>
 
 <style scoped>
-.loading-text {
-  animation: pulse 2s infinite;
-  letter-spacing: 3px;
+.pulsate-text {
+  animation: textPulsate 3s infinite ease-in-out;
 }
 
-@keyframes pulse {
+@keyframes textPulsate {
   0%, 100% {
-    opacity: 0.4;
+    opacity: 0.6;
   }
   50% {
     opacity: 1;
   }
 }
 
-.open-portfolio-btn {
-  padding: 0.75rem 1.5rem;
-  background-color: transparent;
-  color: white;
-  border: 1px solid white;
-  font-family: serif;
-  letter-spacing: 3px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
+/* Transition styles */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.7s ease;
 }
 
-.open-portfolio-btn:hover {
-  background-color: white;
-  color: black;
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
