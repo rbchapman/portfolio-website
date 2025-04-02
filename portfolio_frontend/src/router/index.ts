@@ -11,8 +11,6 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: () => import('../views/PortfolioView.vue'),
-      // You can add a prop to indicate it's the home view if needed
-      props: { isHome: true }
     },
     {
       path: '/campaigns/:order?',
@@ -44,7 +42,7 @@ router.beforeEach(async (to, from, next) => {
       await photoShootStore.fetchCarouselPhotos()
     }
     if (
-      (to.name === 'portfolio' || to.name === 'photoshoot') &&
+      (to.name === 'home' || to.name === 'photoshoot') &&
       photoShootStore.photoShoots.length === 0
     ) {
       await photoShootStore.fetchAllPhotoShoots()

@@ -127,7 +127,7 @@ export const useUiStore = defineStore('ui', () => {
   // Determine if a route should be underlined (active)
   const isRouteActive = (label: string | number) => {
     // For home page or "ALL" route
-    if ((currentPage.value === 'home' || !currentPageParams.value.order) && label === 'ALL') {
+    if (currentPage.value === 'home' && label === 'ALL') {
       return true
     }
     
