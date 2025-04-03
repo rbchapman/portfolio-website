@@ -35,7 +35,7 @@
     </div>
     <div class="mt-auto">
       <router-link
-        :to="`/photoshoot/${photo.shoot_order}`"
+        :to="`/photoshoot/${photo.shoot_order + 1}`"
         class="flex items-center text-white/70 -mb-2 hover:text-white transition-colors"
         @click="uiStore.clearHover"
       >
