@@ -184,5 +184,9 @@ CLOUDINARY_STORAGE = {
     'SECURE': True
 }
 
+cloudinary.config(
+    secure=True
+)
+
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
