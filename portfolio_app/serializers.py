@@ -26,10 +26,10 @@ def get_optimized_images(image):
     # Build URLs with transformations
     return {
         # Large for slightly lower resolution
-        'large': f"{cloudinary_base}/upload/c_limit,w_1200,q_auto:good,f_auto/{cloudinary_id}",
+        'large': f"{cloudinary_base}/upload/c_scale,w_200,f_auto,dpr_2.0/{cloudinary_id}",
         
         # Full resolution (original)
-        'full': base_url
+        'full': f"{cloudinary_base}/upload/c_scale,w_1000,q_auto,f_auto,/{cloudinary_id}",
     }
 
 class PhotographerSerializer(serializers.ModelSerializer):
