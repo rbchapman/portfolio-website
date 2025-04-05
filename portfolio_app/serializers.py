@@ -9,15 +9,12 @@ def get_optimized_images(image):
         
     # Handle CloudinaryResource objects
     if hasattr(image, 'url'):
-        # Get the base URL
         base_url = image.url
     else:
-        # Handle it as a string if somehow it's not a CloudinaryResource
         base_url = str(image)
     
     # Extract cloudinary part
     try:
-        # Form: https://res.cloudinary.com/your-cloud/image/upload/v1234/path/to/image.jpg
         cloudinary_id = base_url.split('/upload/')[-1]
         cloudinary_base = base_url.split('/upload/')[0]
     except (ValueError, IndexError, AttributeError):
@@ -25,11 +22,11 @@ def get_optimized_images(image):
     
     # Build URLs with transformations
     return {
-        # Large for slightly lower resolution
-        'large': f"{cloudinary_base}/upload/c_scale,w_200,f_auto,dpr_2.0/{cloudinary_id}",
-        
         # Full resolution (original)
-        'full': f"{cloudinary_base}/upload/c_scale,w_1000,q_auto,f_auto,/{cloudinary_id}",
+        'full': f"{cloudinary_base}/upload/c_fill,w_1300,h_800,g_face,q_auto:eco,f_auto/{cloudinary_id}",
+        
+        # Large version with default width for portrait
+        'large': f"{cloudinary_base}/upload/c_scale,w_200,q_auto:good,f_auto,dpr_2.0/{cloudinary_id}",
     }
 
 class PhotographerSerializer(serializers.ModelSerializer):
@@ -66,7 +63,15 @@ class PhotoSerializer(serializers.ModelSerializer):
         ]
     
     def get_optimized_images(self, obj):
-        return get_optimized_images(obj.image)
+        result = get_optimized_images(obj.image)
+        
+        # Modify the large URL if it's a landscape photo
+        if hasattr(obj, 'is_portrait') and not obj.is_portrait and 'large' in result:
+            # Extract the URL parts
+            large_url = result['large']
+            result['large'] = large_url.replace('w_200', 'w_400')
+        
+        return result
     def get_photo_count(self, obj):
         return obj.photo_shoot.photos.count()
     def validate(self, data):
