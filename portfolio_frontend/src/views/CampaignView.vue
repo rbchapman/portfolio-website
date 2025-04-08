@@ -4,108 +4,127 @@
     @keyup.left="previousCampaign"
     @keyup.right="nextCampaign"
     tabindex="0"
-    class="focus:outline-none"
+    class="focus:outline-none w-full"
   >
-    <!-- <ActionBar :action="campaignsNav" /> -->
-    <ChevronNav @previous="previousCampaign" @next="nextCampaign" />
-    <transition name="slide-transition" mode="out-in">
-      <div v-if="currentCampaign" :key="currentCampaign.id" class="flex items-center justify-center">
-        <div class="flex video-fade-in p-8 justify-start">
+    <!-- Main container with relative positioning for absolute iframe -->
+    <div class="relative pt-2 w-full">
+      <!-- Absolutely positioned and centered iframe container -->
+      <div class="absolute  left-1/2 transform -translate-x-1/2 w-auto">
+        <div v-if="currentCampaign" :key="currentCampaign.id" class="video-fade-in">
           <iframe
-            width="750"
-            height="422"
-            :src="currentCampaign?.video_url"
+            width="700" 
+            height="395"
+            :src="currentCampaign.video_url"
             title="YouTube video player"
             frameborder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             referrerpolicy="strict-origin-when-cross-origin"
             allowfullscreen
           ></iframe>
-          <div
-            class="h-24 border-l border-white/70 border-l-[0.5px] flex flex-col ml-6"
+        </div>
+      </div>
+      
+      <!-- Campaign client navigation list - right side (stays at the top) -->
+      <div class="flex justify-end relative z-10">
+        <div class="space-y-2 min-w-[120px] pr-8">
+          <div 
+            v-for="campaign in campaigns" 
+            :key="campaign.client"
+            class="flex items-center justify-end"
           >
-            <p
-              class="text-white/90 -mb-1 ml-2 uppercase font-medium text-m w-40 truncate"
+            <!-- Active indicator dot -->
+            <div
+              class="w-1.5 h-1.5 rounded-full mr-2 transition-opacity duration-200"
+              :class="{ 
+                'bg-white': currentCampaign?.client === campaign.client, 
+                'opacity-0': currentCampaign?.client !== campaign.client 
+              }"
+            ></div>
+            <router-link
+              :to="`/campaigns/${campaign.client}`"
+              class="uppercase text-sm hover:text-white transition-opacity duration-200"
+              :class="{
+                'text-white opacity-100': currentCampaign?.client === campaign.client,
+                'opacity-70': currentCampaign?.client !== campaign.client
+              }"
             >
-              {{ currentCampaign?.client }}
-            </p>
-            <p
-              class="text-white/70 -mb-1 ml-2 mt-1 cursor-default text-xs"
-              tabindex="0"
-            >
-              {{ campaignYear }}
-            </p>
+              {{ campaign.client }}
+            </router-link>
           </div>
         </div>
       </div>
-    </transition>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, nextTick } from 'vue'
+import { computed, ref, onMounted, nextTick, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import ActionBar from '../components/ActionBar.vue'
-import ChevronNav from '../components/ChevronNav.vue'
-import type { NavigationAction } from '../types'
 import { useCampaignStore } from '@/stores/campaignStore'
+import { useUiStore } from '@/stores/uiStore'
 
+const uiStore = useUiStore()
 const containerRef = ref<HTMLElement | null>(null)
 const campaignStore = useCampaignStore()
 const campaigns = computed(() => campaignStore.campaigns)
 const route = useRoute()
 const router = useRouter()
 
+// Focus the container on mount for keyboard navigation
 onMounted(() => {
   nextTick(() => {
-    containerRef.value?.focus()
+    if (containerRef.value) {
+      containerRef.value.focus()
+    }
   })
 })
 
+watch(() => route.path, () => {
+  nextTick(() => {
+    if (containerRef.value) {
+      containerRef.value.focus()
+    }
+  })
+})
+
+// Get the currently selected campaign based on route params
 const currentCampaign = computed(() => {
   return campaigns.value.find(
-    (campaign) => campaign.order === Number(route.params.order)
+    (campaign) => campaign.client === String(route.params.client)
   )
 })
 
+// Campaign year (kept for reference)
 const campaignYear = computed(() => {
   if (!currentCampaign.value?.date) return 'N/A'
   return new Date(currentCampaign.value.date).getFullYear()
 })
 
-const campaignsNav: NavigationAction = {
-  title: 'Campaigns',
-  type: 'navigation',
-  basePath: 'campaigns',
-  count: campaigns.value.length,
-  showBasePath: false
-}
-
-
+// Navigate to previous campaign
 const previousCampaign = () => {
   if (campaigns.value.length === 0) return
   
   const currentIndex = campaigns.value.findIndex(
-    (campaign) => campaign.order === Number(route.params.order)
+    (campaign) => campaign.client === String(route.params.client)
   )
-  const newIndex = 
-    (currentIndex - 1 + campaigns.value.length) % 
-    campaigns.value.length
-  router.push(`/campaigns/${campaigns.value[newIndex].order}`)
+  const newIndex = (currentIndex - 1 + campaigns.value.length) % campaigns.value.length
+  
+  router.push(`/campaigns/${campaigns.value[newIndex].client}`)
 }
 
+// Navigate to next campaign
 const nextCampaign = () => {
   if (campaigns.value.length === 0) return
   
   const currentIndex = campaigns.value.findIndex(
-    (campaign) => campaign.order === Number(route.params.order)
+    (campaign) => campaign.client === String(route.params.client)
   )
-  const newIndex = 
-    (currentIndex + 1) % 
-    campaigns.value.length
-  router.push(`/campaigns/${campaigns.value[newIndex].order}`)
+  const newIndex = (currentIndex + 1) % campaigns.value.length
+  
+  router.push(`/campaigns/${campaigns.value[newIndex].client}`)
 }
 </script>
+
 <style scoped>
 /* Simple fade-in animation for iframe */
 .video-fade-in {
@@ -114,11 +133,7 @@ const nextCampaign = () => {
 }
 
 @keyframes iframe-fade-in {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }
 </style>
