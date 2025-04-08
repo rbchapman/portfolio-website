@@ -1,5 +1,5 @@
 <template>
-  <dl class="flex ml-6 flex-col h-44 justify-start">
+  <dl class="flex ml-6 flex-col justify-start">
     <div class="-mt-1">
       <dt class="inline text-white/70 uppercase text-xs">Photographer:</dt>
       <dd class="inline ml-1">
@@ -33,27 +33,26 @@
         {{ photo.photo_shoot_order + 1 }}/ {{photo.photo_count}}
       </dd>
     </div>
-    <div class="mt-auto">
+    <!-- <div class="mt-auto">
       <router-link
         :to="`/photoshoot/${photo.shoot_order + 1}`"
         class="flex items-center text-white/70 -mb-2 hover:text-white transition-colors"
         @click="uiStore.clearHover"
       >
-        <div v-if="uiStore.isModalOpen && uiStore.isHome || uiStore.isPortfolioIndex && !uiStore.isModalOpen" @click="updateStore()">
+        <div v-if="uiStore.isModalOpen && !uiStore.isHome || uiStore.isPortfolioIndex && !uiStore.isModalOpen" @click="updateStore()">
           <span class="text-xs hover:underline uppercase underline-offset-4">
             Full Shoot
           </span>
           <span class="text-lg ml-1">→</span>
         </div>
       </router-link>
-    </div>
+    </div> -->
   </dl>
 </template>
 
 <script setup lang="ts">
   import type { Photo } from '../types'
   import { useUiStore } from '@/stores/uiStore'
-  import { ArrowsPointingOutIcon } from '@heroicons/vue/24/outline'
 
   const uiStore = useUiStore()
 

@@ -19,7 +19,7 @@
             'underline text-white opacity-100 underline-offset-4 decoration-[0.25px]': !uiStore.isCampaigns
           }"
         >
-          Photo Shoots
+          Photos
         </router-link>
       </div>
 
@@ -32,7 +32,7 @@
         }"
       >
         <!-- ALL button only for PhotoShoots -->
-        <router-link
+        <!-- <router-link
           v-if="!uiStore.isCampaigns"
           to="/"
           class="px-2 text-sm hover:text-white opacity-70"
@@ -42,10 +42,11 @@
           }"
         >
           ALL
-        </router-link>
+        </router-link> -->
         
         <!-- Numbered routes for both PhotoShoots and Campaigns -->
-        <router-link
+        <!-- <router-link
+          v-if="!uiStore.isHome"
           v-for="i in (uiStore.isCampaigns ? uiStore.campaignCount : uiStore.photoShootCount)"
           :key="`${uiStore.currentBasePath}/${i}`"
           :to="`${uiStore.currentBasePath}/${i}`"
@@ -56,7 +57,7 @@
           }"
         >
           {{ i }}
-        </router-link>
+        </router-link> -->
       </div>
 
       <!-- Right: Measurements Toggle with Left Expansion -->
