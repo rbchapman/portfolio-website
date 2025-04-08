@@ -12,7 +12,7 @@ const router = createRouter({
       component: () => import('../views/HomeView.vue'),
     },
     {
-      path: '/campaigns/:order?',
+      path: '/campaigns/:client?',
       name: 'campaigns',
       component: () => import('../views/CampaignView.vue')
     },
@@ -29,11 +29,11 @@ router.beforeEach(async (to, from, next) => {
   const uiStore = useUiStore()
   const photoShootStore = usePhotoShootStore()
   const campaignStore = useCampaignStore()
-
+  
   if (from.name === 'home' || from.name === 'photoshoot') {
     uiStore.clearHover()
   }
-
+  
   uiStore.setCurrentPage(to.name as string, to.params as Record<string, string>)
   try {
     // Load data based on route
@@ -46,9 +46,22 @@ router.beforeEach(async (to, from, next) => {
     ) {
       await photoShootStore.fetchAllPhotoShoots()
     }
-    if (to.name === 'campaigns' && campaignStore.campaigns.length === 0) {
-      await campaignStore.fetchCampaigns()
+    
+    // Handle campaigns route
+    if (to.name === 'campaigns') {
+      // Fetch campaigns if they haven't been loaded yet
+      if (campaignStore.campaigns.length === 0) {
+        await campaignStore.fetchCampaigns()
+      }
+      
+      // If no client param is specified and we have campaigns, redirect to first campaign
+      if (!to.params.client && campaignStore.campaigns.length > 0) {
+        return next({
+          path: `/campaigns/${campaignStore.campaigns[0].client}`
+        })
+      }
     }
+    
     next()
   } catch (error) {
     console.error('Error during route navigation:', error)
