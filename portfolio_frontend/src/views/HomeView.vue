@@ -1,30 +1,66 @@
 <template>
-  <div>
-    <!-- <ActionBar :action="toggleBar" /> -->
-    <ReelCarousel
-      class="pt-6"
-      :photos="photoShootStore.carouselPhotos"
+  <div class="relative">
+    <div class="max-w-[1500px] h-[64vh] mx-8 grid grid-cols-2 gap-6">
+      <!-- Left side - Featured Photo -->
+      <div class="h-full">
+        <FeaturedPhoto
+          v-if="featuredPhoto"
+          :photo="featuredPhoto"
+        />
+      </div>
+      
+      <!-- Right side - Photo grid -->
+      <div class="h-full overflow-y-auto custom-scrollbar">
+        <PhotoGrid
+          :photos="gridPhotos"
+        />
+      </div>
+    </div>
+    
+    <!-- Photo Modal -->
+    <PhotoModal
+      v-if="uiStore.isModalOpen"
+      v-model="uiStore.selectedPhoto"
+      :photos="displayPhotos"
+      @close="uiStore.closeModal"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-  import ReelCarousel from '../components/ReelCarousel.vue'
-  import ActionBar from '../components/ActionBar.vue'
-  import type { ToggleAction } from '../types'
+  import { computed, onMounted } from 'vue'
+  import PhotoModal from '../components/PhotoModal.vue'
+  import FeaturedPhoto from '@/components/FeaturedPhoto.vue'
+  import PhotoGrid from '@/components/PhotoGrid.vue'
   import { usePhotoShootStore } from '@/stores/photoShootStore'
+  import { useUiStore } from '@/stores/uiStore'
 
   const photoShootStore = usePhotoShootStore()
-  const toggleBar: ToggleAction = {
-    title: 'Measurements',
-    type: 'toggle',
-    content: {
-      HEIGHT: '180CM',
-      WAIST: '71CM',
-      SHOES: '42',
-      HAIR: 'RED',
-      EYES: 'BLUE'
-    }
-  }
+  const uiStore = useUiStore()
 
+  onMounted(() => {
+  photoShootStore.fetchAllPhotos()
+})
+
+  // Get all display photos for the current page
+  const displayPhotos = computed(() => photoShootStore.allPhotos)
+
+  const featuredPhoto = computed(() => {
+    return displayPhotos.value.length > 0 ? displayPhotos.value[0] : null
+  })
+
+  const gridPhotos = computed(() => {
+    return displayPhotos.value.slice(1)
+  })
 </script>
+
+<style scoped>
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  padding-right: 10px;
+  margin-right: -8px;
+  -webkit-overflow-scrolling: touch;
+}
+</style>

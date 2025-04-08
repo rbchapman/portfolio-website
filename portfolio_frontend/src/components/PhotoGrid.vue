@@ -2,7 +2,7 @@
   <div class="w-full h-full">
     <div class="grid grid-cols-2 gap-6 pb-6">
       <!-- Index page grid items -->
-      <template v-if="uiStore.isHome">
+      <template v-if="!uiStore.isHome">
         <RouterLink
           v-for="photo in props.photos"
           :key="photo.id"

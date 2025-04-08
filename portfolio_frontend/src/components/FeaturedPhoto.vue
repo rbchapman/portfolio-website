@@ -2,7 +2,7 @@
   <div class="relative w-full h-full" v-if="props.photo">
     <!-- Index page version -->
     <RouterLink
-      v-if="uiStore.isHome"
+      v-if="!uiStore.isHome"
       :to="`/photoshoot/${props.photo.photo_shoot_order +1}`"
       class="relative block w-full h-full"
       @mouseenter="uiStore.setHover(props.photo)"
@@ -16,12 +16,12 @@
       />
 
       <!-- Overlay with PhotoDetails -->
-      <div
+      <!-- <div
         v-show="uiStore.hoveredPhoto?.id === props.photo.id && !uiStore.isModalOpen"
         class="absolute inset-0 bg-black bg-opacity-60 transition-opacity duration-200"
       >
         <PhotoDetails :photo="props.photo" class="z-10 mt-6" />
-      </div>
+      </div> -->
     </RouterLink>
 
     <!-- Detail page version -->

@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-// import HomeView from '../views/HomeView.vue'
 import { usePhotoShootStore } from '@/stores/photoShootStore'
 import { useUiStore } from '@/stores/uiStore'
 import { useCampaignStore } from '@/stores/campaignStore'
@@ -10,7 +9,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: () => import('../views/PortfolioView.vue'),
+      component: () => import('../views/HomeView.vue'),
     },
     {
       path: '/campaigns/:order?',

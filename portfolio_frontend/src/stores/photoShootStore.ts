@@ -16,6 +16,7 @@ export const usePhotoShootStore = defineStore('photoshoot', () => {
   const photoShoots = ref<PhotoShoot[]>([])
   const carouselPhotos = ref<Photo[]>([])
   const hasError = ref<boolean>(false)
+  const allPhotos = ref<Photo[]>([])
 
   // Preload a single image and return a promise
   function preloadImage(url: string): Promise<void> {
@@ -65,6 +66,20 @@ export const usePhotoShootStore = defineStore('photoshoot', () => {
     } finally {
       isCarouselLoading.value = false
     }
+  }
+
+  async function fetchAllPhotos() {
+    try {
+      const response: AxiosResponse<Photo[]> =
+        await api.get('/photos/')
+        allPhotos.value = response.data.map((photo: Photo) => ({
+          ...photo,
+          image: `${CLOUDINARY_BASE_URL}/${photo.image}`
+        }))
+    }catch (error) {
+      console.error('Error fetching photos:', error)
+    }
+    
   }
 
   // Fetch all photo shoots
@@ -155,6 +170,7 @@ export const usePhotoShootStore = defineStore('photoshoot', () => {
   }
 
   return {
+    allPhotos,
     photoShoots,
     carouselPhotos,
     isCarouselLoading,
@@ -162,6 +178,7 @@ export const usePhotoShootStore = defineStore('photoshoot', () => {
     isLoading,
     hasError,
     fetchCarouselPhotos,
+    fetchAllPhotos,
     fetchAllPhotoShoots,
     prioritizePhotoShoot,
     fetchInitialData,
