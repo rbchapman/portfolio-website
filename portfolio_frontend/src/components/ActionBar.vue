@@ -65,7 +65,7 @@ const isMeasurementsOpen = ref(false)
 // Measurements data
 const measurementsData = {
   'HEIGHT': '180CM',
-  'WAIST': '71CM',
+  'SUIT': '48',
   'SHOES': '42',
   'HAIR': 'RED',
   'EYES': 'BLUE'
