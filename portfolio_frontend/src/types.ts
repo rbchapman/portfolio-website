@@ -3,6 +3,7 @@ export interface Photographer {
   name: string
   instagram: string
   website: string
+  website_display: string
 }
 
 export interface PhotoShoot {
@@ -54,6 +55,7 @@ export interface Photo {
   carousel_order: number | null
   show: boolean
   shoot_date: string
+  shoot_year: string
   photo_count: number
   created_at: string
   updated_at: string
