@@ -7,7 +7,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        // 'custom-dark': '#181818',
+        'custom-dark': '#121808',
         'custom-grey': '#232323',
         'custom-text': 'rgba(235, 235, 235, 0.64)',
         'text-primary': 'rgba(245, 245, 245, 0.9)'
