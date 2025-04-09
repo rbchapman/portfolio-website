@@ -2,7 +2,7 @@
   <Transition name="fade">
     <div
       v-if="uiStore.showLoadScreen"
-      class="fixed z-[51] inset-0 bg-black flex flex-col justify-between"
+      class="fixed z-[51] inset-0 bg-custom-dark flex flex-col justify-between"
     >
       <!-- Title section -->
       <div class="flex flex-col items-center">

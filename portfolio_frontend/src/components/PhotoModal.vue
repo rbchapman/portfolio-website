@@ -7,7 +7,7 @@
   >
     <!-- Overlay -->
     <div
-      class="absolute -m-5 inset-0 bg-black bg-opacity-96 z-40"
+      class="absolute -m-5 inset-0 bg-custom-dark bg-opacity-96 z-40"
       @click.self="emitClose"
     ></div>
 
@@ -37,7 +37,7 @@
       >
         <swiper-slide v-for="photo in photos" :key="photo.id" class="h-auto overflow-y-auto">
           <div class="flex items-end justify-center">
-            <div class="max-w-[80%] overflow-y-auto">
+            <div class="max-w-[70%] overflow-y-auto">
               <img
                 :src="photo.image"
                 :alt="photo.title"
@@ -50,13 +50,6 @@
           </div>
         </swiper-slide>
       </swiper>
-      
-      <!-- Custom Navigation using Swiper instance directly -->
-      <!-- <ChevronNav
-        class="z-60"
-        @previous="swiperInstance?.slidePrev()"
-        @next="swiperInstance?.slideNext()"
-      /> -->
     </div>
   </div>
 </template>
@@ -66,13 +59,11 @@ import { ref, computed, onMounted, nextTick } from 'vue'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Navigation, Keyboard, A11y } from 'swiper/modules'
 import type { Swiper as SwiperInstance } from 'swiper'
+import PhotoDetails from './PhotoDetails.vue'
+import type { Photo } from '../types'
 import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/keyboard'
-
-import ChevronNav from './ChevronNav.vue'
-import PhotoDetails from './PhotoDetails.vue'
-import type { Photo } from '../types'
 
 const modules = [Navigation, Keyboard, A11y]
 const modalRef = ref<HTMLElement | null>(null)
