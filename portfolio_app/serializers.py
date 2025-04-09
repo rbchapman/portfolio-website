@@ -30,9 +30,26 @@ def get_optimized_images(image):
     }
 
 class PhotographerSerializer(serializers.ModelSerializer):
+    website_display = serializers.SerializerMethodField()
+    
     class Meta:
         model = Photographer
-        fields = ['id', 'name', 'instagram', 'website']
+        fields = ['id', 'name', 'instagram', 'website', 'website_display']
+    
+    def get_website_display(self, obj):
+        """Return a clean version of the website URL without protocol and trailing slash"""
+        if not obj.website:
+            return None
+            
+        # Remove protocol (http://, https://)
+        clean_url = obj.website.replace('http://', '').replace('https://', '')
+        
+        # Remove trailing slash if present
+        if clean_url.endswith('/'):
+            clean_url = clean_url[:-1]
+            
+        return clean_url
+    
 class CampaignSerializer(serializers.ModelSerializer):
     class Meta:
         model = Campaign
@@ -49,6 +66,7 @@ class PhotoSerializer(serializers.ModelSerializer):
     shoot_id = serializers.IntegerField(source='photo_shoot.id')
     shoot_title = serializers.CharField(source='photo_shoot.title')
     shoot_date = serializers.DateField(source='photo_shoot.date')
+    shoot_year = serializers.SerializerMethodField()
     photo_count = serializers.SerializerMethodField()
     shoot_location = serializers.CharField(source='photo_shoot.location')
     shoot_order = serializers.IntegerField(source='photo_shoot.order')
@@ -59,8 +77,14 @@ class PhotoSerializer(serializers.ModelSerializer):
             'id', 'image', 'title', 'description', 
             'photographer', 'is_portrait', 'photo_shoot_order',
             'carousel_order', 'show', 'optimized_images',
-            'shoot_id', 'shoot_title', 'shoot_date', 'shoot_location', 'shoot_order', 'photo_count'
+            'shoot_id', 'shoot_title', 'shoot_date', 'shoot_year', 'shoot_location', 'shoot_order', 'photo_count'
         ]
+    
+    def get_shoot_year(self, obj):
+        """Extract only the year from the photo shoot date"""
+        if obj.photo_shoot and obj.photo_shoot.date:
+            return obj.photo_shoot.date.year
+        return None
     
     def get_optimized_images(self, obj):
         result = get_optimized_images(obj.image)

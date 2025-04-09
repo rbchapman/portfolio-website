@@ -1,36 +1,39 @@
 <template>
   <dl class="flex ml-6 flex-col justify-start">
     <div class="-mt-1">
-      <dt class="inline text-white/70 uppercase text-xs">Photographer:</dt>
-      <dd class="inline ml-1">
+      <dt class="inline text-white/70 uppercase text-xs">Photo by:</dt>
+      <dd class="inline ml-1 text-white/90 font-medium text-xs uppercase">
+        {{ photo.photographer.name }}
+      </dd>
+    </div>
+    <div>
+      <dt class="inline text-white/70 uppercase text-xs">Website:</dt>
+      <dd class="inline ml-1 text-white/90 font-medium text-xs uppercase">
+        <a
+          class="text-white/90 uppercase font-medium text-xs hover:text-white cursor-pointer hover:underline transition-colors duration-200"
+          :href="photo.photographer.website"
+          target="_blank"
+        >
+          {{ photo.photographer.website_display }}
+        </a>
+      </dd>
+    </div>
+    <div>
+      <dt class="inline text-white/70 uppercase text-xs">Instagram:</dt>
+      <dd class="inline ml-1 text-white/90 font-medium text-xs uppercase">
         <a
           class="text-white/90 uppercase font-medium text-xs hover:text-white cursor-pointer hover:underline transition-colors duration-200"
           :href="`https://www.instagram.com/${photo.photographer.instagram}/`"
           target="_blank"
         >
-          {{ photo.photographer.name }}
+          @{{ photo.photographer.instagram }}
         </a>
       </dd>
     </div>
-
-    <div>
-      <dt class="inline text-white/70 uppercase text-xs">Location:</dt>
-      <dd class="inline ml-1 text-white/90 font-medium text-xs uppercase">
-        {{ photo.shoot_location }}
-      </dd>
-    </div>
-
     <div>
       <dt class="inline text-white/70 uppercase text-xs">Date:</dt>
       <dd class="inline ml-1 text-white/90 font-medium text-xs uppercase">
-        {{ photo.shoot_date }}
-      </dd>
-    </div>
-
-    <div>
-      <dt class="inline text-white/70 uppercase text-xs">Photo:</dt>
-      <dd class="inline ml-1 text-white/90 font-medium text-xs uppercase">
-        {{ photo.photo_shoot_order + 1 }}/ {{photo.photo_count}}
+        {{ photo.shoot_year }}
       </dd>
     </div>
     <!-- <div class="mt-auto">
