@@ -83,11 +83,21 @@ export const usePhotoShootStore = defineStore('photoshoot', () => {
   }
 
   // Fetch all photo shoots
-  async function fetchAllPhotoShoots() {
+  async function fetchAllPhotoShoots({ photographerType = null } = {}) {
     isPhotoShootsLoading.value = true
     try {
-      const response: AxiosResponse<PhotoShoot[]> =
-        await api.get('/photo-shoots/')
+      // Build query parameters
+      const params = new URLSearchParams()
+      
+      if (photographerType) {
+        params.append('photographer_type', photographerType)
+      }
+      
+      // Construct URL with params
+      const url = `/photo-shoots/${params.toString() ? '?' + params.toString() : ''}`
+      
+      const response: AxiosResponse<PhotoShoot[]> = await api.get(url)
+      
       photoShoots.value = response.data.map((shoot) => ({
         ...shoot,
         photos: shoot.photos.map((photo) => ({
@@ -95,19 +105,19 @@ export const usePhotoShootStore = defineStore('photoshoot', () => {
           image: `${CLOUDINARY_BASE_URL}/${photo.image}`
         }))
       }))
-
+  
       // Wait for first image of each photoshoot to load (medium priority)
       const indexImages = photoShoots.value
         .map((shoot) => shoot.photos?.[0]?.image)
         .filter(Boolean) as string[]
-
+  
       await Promise.all(indexImages.map((url) => preloadImage(url)))
-
+  
       // Preload remaining images in background (low priority)
       const remainingImages = photoShoots.value.flatMap((shoot) =>
         shoot.photos.slice(1).map((photo) => photo.image)
       )
-
+  
       preloadImagesInBackground(remainingImages)
     } catch (error) {
       console.error('Error loading photo shoots:', error)

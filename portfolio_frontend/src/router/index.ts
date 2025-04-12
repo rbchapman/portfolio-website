@@ -17,8 +17,8 @@ const router = createRouter({
       component: () => import('../views/CampaignView.vue')
     },
     {
-      path: '/photoshoot/:order?',
-      name: 'photoshoot',
+      path: '/photography/:location?',
+      name: 'photography',
       component: () => import('../views/PortfolioView.vue')
     }
   ]
@@ -45,6 +45,10 @@ router.beforeEach(async (to, from, next) => {
       photoShootStore.photoShoots.length === 0
     ) {
       await photoShootStore.fetchAllPhotoShoots()
+    }
+
+    if (to.name === 'photography' && photoShootStore.photoShoots.length === 0) {
+      await photoShootStore.fetchAllPhotoShoots({ photographerType: 'me' })
     }
     
     // Handle campaigns route

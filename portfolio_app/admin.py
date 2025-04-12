@@ -9,7 +9,7 @@ class PhotoInline(SortableInlineAdminMixin, admin.TabularInline):
     ordering = ['photo_shoot_order']
 @admin.register(Photographer)
 class PhotographerAdmin(admin.ModelAdmin):
-    list_display = ['name', 'instagram', 'website']
+    list_display = ['name', 'instagram', 'website', 'id']
     search_fields = ['name']
 @admin.register(Campaign)
 class CampaignAdmin(SortableAdminMixin, admin.ModelAdmin):
