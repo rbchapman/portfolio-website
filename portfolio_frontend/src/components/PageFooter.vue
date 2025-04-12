@@ -1,5 +1,5 @@
 <template>
-  <footer class="flex justify-between mt-auto py-3 px-8">
+  <footer class="flex justify-between mt-auto pb-3 px-8">
     <div>
       <span class="text-white/70 text-xs uppercase">agency: </span>
       <a

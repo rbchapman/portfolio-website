@@ -37,7 +37,7 @@
       >
         <swiper-slide v-for="photo in photos" :key="photo.id" class="h-auto overflow-y-auto">
           <div class="flex items-end justify-center">
-            <div class="max-w-[70%] overflow-y-auto">
+            <div class="max-w-[80%] overflow-y-auto">
               <img
                 :src="photo.image"
                 :alt="photo.title"
