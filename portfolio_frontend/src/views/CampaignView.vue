@@ -6,14 +6,14 @@
     tabindex="0"
     class="focus:outline-none w-full"
   >
-    <!-- Main container with relative positioning for absolute iframe -->
-    <div class="relative pt-2 w-full">
-      <!-- Absolutely positioned and centered iframe container -->
-      <div class="absolute  left-1/2 transform -translate-x-1/2 w-auto">
-        <div v-if="currentCampaign" :key="currentCampaign.id" class="video-fade-in">
+    <!-- Main container with position relative to establish positioning context -->
+    <div class="w-full pt-2 relative">
+      <!-- Centered iframe container with max-height constraint -->
+      <div class="flex justify-center w-full">
+        <div v-if="currentCampaign" :key="currentCampaign.id" class="video-fade-in max-h-[500px] overflow-hidden">
           <iframe
-            width="700" 
-            height="395"
+            width="896" 
+            height="504"
             :src="currentCampaign.video_url"
             title="YouTube video player"
             frameborder="0"
@@ -24,8 +24,8 @@
         </div>
       </div>
       
-      <!-- Campaign client navigation list - right side (stays at the top) -->
-      <div class="flex justify-end relative z-10">
+      <!-- Campaign client navigation list - right side, absolutely positioned -->
+      <div class="absolute top-2 right-0 z-10">
         <div class="space-y-2 min-w-[120px] pr-8">
           <div 
             v-for="campaign in campaigns" 
