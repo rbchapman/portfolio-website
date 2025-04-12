@@ -26,12 +26,16 @@ class PhotoShootViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = PhotoShoot.objects.all()
+        # Always filter to only your photoshoots
+        # Replace with your actual photographer ID
+        my_photographer_id = 1
+        queryset = queryset.filter(photographer_id=my_photographer_id)
         
         # Filter by show status
         show = self.request.query_params.get('show', True)
         if show:
             queryset = queryset.filter(show=show)
-
+        
         return queryset.order_by('order')
 
 class PhotoViewSet(viewsets.ModelViewSet):
@@ -41,10 +45,9 @@ class PhotoViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Photo.objects.all()
 
-        # Filter by photo shoot if specified
-        photo_shoot_id = self.request.query_params.get('photo_shoot')
-        if photo_shoot_id:
-            queryset = queryset.filter(photo_shoot_id=photo_shoot_id)
+        # Only return photos by other photographers
+        my_photographer_id = 1
+        queryset = queryset.exclude(photographer_id=my_photographer_id)
 
         # Filter by show status
         show = self.request.query_params.get('show', True)

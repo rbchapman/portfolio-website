@@ -19,7 +19,7 @@
     
     <!-- Photo Modal -->
     <PhotoModal
-      v-if="uiStore.selectedPhoto"
+      v-if="uiStore.isModalOpen"
       v-model="uiStore.selectedPhoto"
       :photos="displayPhotos"
       @close="uiStore.closeModal"
@@ -34,16 +34,29 @@
   import PhotoGrid from '@/components/PhotoGrid.vue'
   import { usePhotoShootStore } from '@/stores/photoShootStore'
   import { useUiStore } from '@/stores/uiStore'
-
-  const photoShootStore = usePhotoShootStore()
+  
   const uiStore = useUiStore()
+  const photoShootStore = usePhotoShootStore()
+    const isPhotographyIndex = computed(() => 
+    uiStore.isPhotography && !uiStore.currentPageParams.location
+  )
 
-  // Get all display photos for the current page
+  // Get the photos to display based on current route
   const displayPhotos = computed(() => {
-    return photoShootStore.getPortfolioDisplayPhotos(
-      uiStore.isHome,
-      uiStore.currentPageParams
-    )
+    if (isPhotographyIndex.value) {
+      // For the index page, get only the first photo from each photoshoot
+      return photoShootStore.photoShoots.map(shoot => shoot.photos[0]).filter(Boolean)
+    } else if (uiStore.isPhotography && uiStore.currentPageParams.location) {
+      // For a specific location, find the matching photoshoot and return all its photos
+      const location = uiStore.currentPageParams.location
+      const matchingShoot = photoShootStore.photoShoots.find(
+        shoot => shoot.location.toLowerCase() === location.toLowerCase()
+      )
+      return matchingShoot ? matchingShoot.photos : []
+    }
+    
+    // Default (shouldn't reach here, but just in case)
+    return []
   })
 
   const featuredPhoto = computed(() => {

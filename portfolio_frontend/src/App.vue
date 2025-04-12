@@ -2,7 +2,6 @@
   <LoadScreen />
   <div class="min-h-screen flex flex-col">
     <div class="flex-1 flex flex-col">
-      <!-- <NavMenu class="z-40" /> -->
       <PageTitle boldText="RileyBenjamin" italicText="Chapman" />
       <ActionBar />
 
@@ -27,7 +26,6 @@
   import type { RouteLocationNormalized } from 'vue-router'
   import { usePhotoShootStore } from '@/stores/photoShootStore'
   import { useUiStore } from '@/stores/uiStore'
-  import { onMounted } from 'vue'
 
   const uiStore = useUiStore()
   const photoShootStore = usePhotoShootStore()

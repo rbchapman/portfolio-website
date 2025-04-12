@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import api from '@/utils/axios'
-import type { PhotoShoot, Photo } from '../types'
+import type { PhotoShoot, Photo } from '../types/models'
 import type { AxiosResponse } from 'axios'
 
 const CLOUDINARY_BASE_URL = import.meta.env.VITE_CLOUDINARY_BASE_URL
@@ -86,8 +86,8 @@ export const usePhotoShootStore = defineStore('photoshoot', () => {
   async function fetchAllPhotoShoots() {
     isPhotoShootsLoading.value = true
     try {
-      const response: AxiosResponse<PhotoShoot[]> =
-        await api.get('/photo-shoots/')
+      const response: AxiosResponse<PhotoShoot[]> = await api.get('/photo-shoots/')
+      
       photoShoots.value = response.data.map((shoot) => ({
         ...shoot,
         photos: shoot.photos.map((photo) => ({
@@ -95,19 +95,19 @@ export const usePhotoShootStore = defineStore('photoshoot', () => {
           image: `${CLOUDINARY_BASE_URL}/${photo.image}`
         }))
       }))
-
+  
       // Wait for first image of each photoshoot to load (medium priority)
       const indexImages = photoShoots.value
         .map((shoot) => shoot.photos?.[0]?.image)
         .filter(Boolean) as string[]
-
+  
       await Promise.all(indexImages.map((url) => preloadImage(url)))
-
+  
       // Preload remaining images in background (low priority)
       const remainingImages = photoShoots.value.flatMap((shoot) =>
         shoot.photos.slice(1).map((photo) => photo.image)
       )
-
+  
       preloadImagesInBackground(remainingImages)
     } catch (error) {
       console.error('Error loading photo shoots:', error)

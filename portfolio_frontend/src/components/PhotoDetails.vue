@@ -54,7 +54,7 @@
 </template>
 
 <script setup lang="ts">
-  import type { Photo } from '../types'
+  import type { Photo } from '../types/models'
   import { useUiStore } from '@/stores/uiStore'
 
   const uiStore = useUiStore()

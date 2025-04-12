@@ -1,7 +1,7 @@
 <template>
   <Transition name="fade">
     <div
-      v-if="uiStore.showLoadScreen"
+      v-if="uiStore.showLoadScreen && !uiStore.isPhotography"
       class="fixed z-[51] inset-0 bg-custom-dark flex flex-col justify-between"
     >
       <!-- Title section -->

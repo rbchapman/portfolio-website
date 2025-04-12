@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import api from '@/utils/axios'
-import type { Campaign } from '../types'
+import type { Campaign } from '../types/models'
 import type { AxiosResponse } from 'axios'
 
 export const useCampaignStore = defineStore('campaign', () => {
