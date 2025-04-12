@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import api from '@/utils/axios'
-import type { PhotoShoot, Photo } from '../types'
+import type { PhotoShoot, Photo } from '../types/models'
 import type { AxiosResponse } from 'axios'
 
 const CLOUDINARY_BASE_URL = import.meta.env.VITE_CLOUDINARY_BASE_URL
@@ -83,20 +83,10 @@ export const usePhotoShootStore = defineStore('photoshoot', () => {
   }
 
   // Fetch all photo shoots
-  async function fetchAllPhotoShoots({ photographerType = null } = {}) {
+  async function fetchAllPhotoShoots() {
     isPhotoShootsLoading.value = true
     try {
-      // Build query parameters
-      const params = new URLSearchParams()
-      
-      if (photographerType) {
-        params.append('photographer_type', photographerType)
-      }
-      
-      // Construct URL with params
-      const url = `/photo-shoots/${params.toString() ? '?' + params.toString() : ''}`
-      
-      const response: AxiosResponse<PhotoShoot[]> = await api.get(url)
+      const response: AxiosResponse<PhotoShoot[]> = await api.get('/photo-shoots/')
       
       photoShoots.value = response.data.map((shoot) => ({
         ...shoot,

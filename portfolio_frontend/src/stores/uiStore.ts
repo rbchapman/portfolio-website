@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { Photo } from '../types'
+import type { Photo } from '../types/models'
 import { usePhotoShootStore } from './photoShootStore'
 import { useCampaignStore } from './campaignStore'
 
@@ -80,6 +80,7 @@ export const useUiStore = defineStore('ui', () => {
     () => currentPage.value === 'campaigns'
   )
   const isHome = computed(() => currentPage.value === 'home')
+  const isPhotography = computed(() => currentPage.value === 'photography')
 
   // NEW COMPUTED PROPERTIES FOR NAVIGATION
   
@@ -143,6 +144,7 @@ export const useUiStore = defineStore('ui', () => {
     isPortfolioIndex,
     isCampaigns,
     isHome,
+    isPhotography,
     showDetails,
     selectedPhoto,
     isModalOpen,

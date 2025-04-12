@@ -48,7 +48,7 @@ router.beforeEach(async (to, from, next) => {
     }
 
     if (to.name === 'photography' && photoShootStore.photoShoots.length === 0) {
-      await photoShootStore.fetchAllPhotoShoots({ photographerType: 'me' })
+      await photoShootStore.fetchAllPhotoShoots()
     }
     
     // Handle campaigns route

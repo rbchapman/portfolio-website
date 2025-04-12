@@ -2,11 +2,12 @@
   <div class="w-full h-full">
     <div class="grid grid-cols-2 gap-6 pb-6">
       <!-- Index page grid items -->
-      <template v-if="!uiStore.isHome">
+      <template v-if="uiStore.isPhotography && !uiStore.currentPageParams.location"
+      >
         <RouterLink
           v-for="photo in props.photos"
           :key="photo.id"
-          :to="`/photoshoot/${photo.photo_shoot_order + 1}`"
+          :to="`/photography/${photo.shoot_location}`"
           class="h-[325px] overflow-hidden relative"
           @mouseenter="uiStore.setHover(photo)"
           @mouseleave="uiStore.clearHover()"
@@ -51,7 +52,7 @@
   <script setup lang="ts">
   import { useUiStore } from '@/stores/uiStore';
   import PhotoDetails from './PhotoDetails.vue';
-  import type { Photo } from '@/types';
+  import type { Photo } from '@/types/models';
   
   // Props
   const props = defineProps<{

@@ -2,8 +2,8 @@
   <div class="relative w-full h-full" v-if="props.photo">
     <!-- Index page version -->
     <RouterLink
-      v-if="!uiStore.isHome"
-      :to="`/photoshoot/${props.photo.photo_shoot_order +1}`"
+      v-if="uiStore.isPhotography && !uiStore.currentPageParams.location"
+      :to="`/photography/${props.photo.shoot_location}`"
       class="relative block w-full h-full"
       @mouseenter="uiStore.setHover(props.photo)"
       @mouseleave="uiStore.clearHover()"
@@ -16,12 +16,12 @@
       />
 
       <!-- Overlay with PhotoDetails -->
-      <!-- <div
-        v-show="uiStore.hoveredPhoto?.id === props.photo.id && !uiStore.isModalOpen"
+      <div
+        v-show="uiStore.hoveredPhoto?.id === props.photo.id && uiStore.isPhotography"
         class="absolute inset-0 bg-black bg-opacity-60 transition-opacity duration-200"
       >
         <PhotoDetails :photo="props.photo" class="z-10 mt-6" />
-      </div> -->
+      </div>
     </RouterLink>
 
     <!-- Detail page version -->
@@ -43,7 +43,7 @@
 <script setup lang="ts">
 import { useUiStore } from '@/stores/uiStore';
 import PhotoDetails from './PhotoDetails.vue';
-import type { Photo } from '@/types';
+import type { Photo } from '@/types/models';
 
 // Props
 const props = defineProps<{
