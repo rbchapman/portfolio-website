@@ -13,7 +13,7 @@
         >
           <img
             loading="eager"
-            :src="photo.optimized_images.large"
+            :src="photo.optimized_images.grid"
             :alt="photo.title || ''"
             class="w-full h-full object-cover transition-opacity duration-300"
           />
@@ -38,7 +38,7 @@
         >
           <img
             loading="eager"
-            :src="photo.optimized_images.large"
+            :src="photo.optimized_images.grid"
             :alt="photo.title || ''"
             class="w-full h-full object-cover transition-opacity duration-300"
           />

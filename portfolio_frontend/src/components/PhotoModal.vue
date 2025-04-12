@@ -39,7 +39,7 @@
           <div class="flex items-end justify-center">
             <div class="max-w-[80%] overflow-y-auto">
               <img
-                :src="photo.image"
+                :src="photo.optimized_images.full"
                 :alt="photo.title"
                 class="max-h-full w-auto object-contain"
               />

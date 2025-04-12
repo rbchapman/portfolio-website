@@ -3,7 +3,7 @@ from .models import Photographer, PhotoShoot, Photo, Campaign
 
 # Enhanced helper function for Cloudinary image optimization
 def get_optimized_images(image):
-    """Generate optimized image variants for Cloudinary with improved quality"""
+    """Generate optimized image variants for Cloudinary with improved face detection"""
     if not image:
         return None
         
@@ -22,11 +22,14 @@ def get_optimized_images(image):
     
     # Build URLs with transformations
     return {
-        # Full resolution (original)
-        'full': f"{cloudinary_base}/upload/c_fill,w_1300,h_800,g_face,q_auto:eco,f_auto/{cloudinary_id}",
+        # Full resolution for modal view - Centered on face with appropriate padding
+        'full': f"{cloudinary_base}/upload/c_fill,g_auto:face,q_auto:good,f_auto/{cloudinary_id}",
         
-        # Large version with default width for portrait
-        'large': f"{cloudinary_base}/upload/c_scale,w_200,q_auto:good,f_auto,dpr_2.0/{cloudinary_id}",
+        # Grid view - Fixed height to match container with face focusing
+        'grid': f"{cloudinary_base}/upload/c_fill,h_325,w_400,g_auto:face,q_auto:good,f_auto/{cloudinary_id}",
+        
+        # Keep the original large version but improve it with face detection
+        'large': f"{cloudinary_base}/upload/c_fill,w_400,h_600,g_auto:face,q_auto:good,f_auto,dpr_2.0/{cloudinary_id}",
     }
 
 class PhotographerSerializer(serializers.ModelSerializer):

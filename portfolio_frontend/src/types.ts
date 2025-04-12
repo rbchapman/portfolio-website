@@ -65,7 +65,7 @@ export interface Photo {
 }
 
 export interface OptimizedImages {
-  thumbnail: string
+  grid: string
   medium: string
   large: string
   full: string
