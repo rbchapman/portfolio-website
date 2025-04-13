@@ -7,20 +7,22 @@
     class="focus:outline-none w-full"
   >
     <!-- Main container with position relative to establish positioning context -->
-    <div class="w-full pt-2 relative">
-      <!-- Centered iframe container with max-height constraint -->
+    <div class="w-full relative">
+      <!-- Centered iframe container with responsive sizing -->
       <div class="flex justify-center w-full">
-        <div v-if="currentCampaign" :key="currentCampaign.id" class="video-fade-in max-h-[500px] overflow-hidden">
-          <iframe
-            width="896" 
-            height="504"
-            :src="currentCampaign.video_url"
-            title="YouTube video player"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerpolicy="strict-origin-when-cross-origin"
-            allowfullscreen
-          ></iframe>
+        <div v-if="currentCampaign" :key="currentCampaign.id" class="video-fade-in w-full max-w-[750px]">
+          <!-- Aspect ratio container -->
+          <div class="relative w-full aspect-video">
+            <iframe
+              class="absolute inset-0 w-full h-full"
+              :src="currentCampaign.video_url"
+              title="YouTube video player"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen
+            ></iframe>
+          </div>
         </div>
       </div>
       
