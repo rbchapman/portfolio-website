@@ -28,14 +28,14 @@ export const actionBarConfigs: ActionBarConfigMap = {
   },
   
   photography: {
-    label: 'PLACES',
+    label: 'Collections',
     section: {
       type: 'links',
       baseRoute: '/photography',
-      items: [], // Will be populated in component
+      items: [],
       paramKey: 'location',
       valueKey: 'location',
-      activePath: null // Will be set in component
+      activePath: null
     },
     rightLinks: [
       {
