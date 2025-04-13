@@ -1,14 +1,14 @@
 <template>
   <div class="w-full h-[45px] text-sm uppercase tracking-wider">
-    <div class="flex text-white/70 items-center h-full justify-between px-8">
+    <div class="flex text-white/70 items-center pb-2 h-full justify-between px-8">
       <!-- Left: Section heading -->
       <div class="flex items-center overflow-hidden">
         <h1
-          class="cursor-pointer bg-transparent transition-all duration-500 hover:text-white uppercase whitespace-nowrap"
+          class="bg-transparent transition-all duration-500  uppercase whitespace-nowrap"
           :class="{
-            'text-white opacity-100 underline-offset-4 underline decoration-[0.25px]': 
+            'text-white opacity-100 cursor-pointer hover:text-white underline-offset-4 underline decoration-[0.25px]': 
               isLeftSectionOpen && currentConfig.label !== 'Collections',
-            'opacity-70': !isLeftSectionOpen || currentConfig.label === 'Collections'
+            'opacity-70 cursor-default': !isLeftSectionOpen || currentConfig.label === 'Collections'
           }"
           @click="toggleLeftSection"
         >
