@@ -71,19 +71,11 @@ export interface OptimizedImages {
   full: string
 }
 
-export type ToggleAction = {
-  type: 'toggle'
-  title: string
-  content: Record<string, string>
+export interface PhotoDetailItem {
+  field: string
+  linkField?: string
+  isInstagram?: boolean
 }
 
-export type NavigationAction = {
-  type: 'navigation'
-  title: string
-  basePath: string
-  count: number
-  showBasePath: boolean
-}
-
-export type ActionType = ToggleAction | NavigationAction
+export type PhotoDetailConfig = Record<string, PhotoDetailItem[]>
 

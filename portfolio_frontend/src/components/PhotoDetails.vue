@@ -1,70 +1,100 @@
 <template>
-  <dl class="flex ml-6 flex-col justify-start">
-    <div class="-mt-1">
-      <dt class="inline text-white/70 uppercase text-xs">Photo by:</dt>
-      <dd class="inline ml-1 text-white/90 font-medium text-xs uppercase">
-        {{ photo.photographer.name }}
+  <dl class="flex ml-6 flex-col gap-1 justify-start">
+    <div v-for="(item, index) in detailsToShow" :key="index">
+      <!-- Regular text field -->
+      <dd v-if="!item.linkField && !item.isInstagram" class="text-white/90 font-medium text-xs uppercase">
+        {{ getFieldValue(item.field) }}
       </dd>
-    </div>
-    <div>
-      <dt class="inline text-white/70 uppercase text-xs">Website:</dt>
-      <dd class="inline ml-1 text-white/90 font-medium text-xs uppercase">
-        <a
-          class="text-white/90 uppercase font-medium text-xs hover:text-white cursor-pointer hover:underline transition-colors duration-200"
-          :href="photo.photographer.website"
+      
+      <!-- Website link -->
+      <dd v-else-if="item.linkField" class="text-white/90 font-medium text-xs uppercase">
+        
+          <a class="text-white/90 uppercase font-medium text-xs hover:text-white hover:underline transition-colors duration-200"
+          :href="getFieldValue(item.linkField)"
           target="_blank"
         >
-          {{ photo.photographer.website_display }}
+          {{ getFieldValue(item.field) }}
+        </a>
+      </dd>
+      
+      <!-- Instagram link -->
+      <dd v-else-if="item.isInstagram" class="text-white/90 font-medium text-xs uppercase">
+        
+          <a class="text-white/90 uppercase font-medium text-xs hover:text-white hover:underline transition-colors duration-200"
+          :href="`https://www.instagram.com/${getFieldValue(item.field)}/`"
+          target="_blank"
+        >
+          @{{ getFieldValue(item.field) }}
         </a>
       </dd>
     </div>
-    <div>
-      <dt class="inline text-white/70 uppercase text-xs">Instagram:</dt>
-      <dd class="inline ml-1 text-white/90 font-medium text-xs uppercase">
-        <a
-          class="text-white/90 uppercase font-medium text-xs hover:text-white cursor-pointer hover:underline transition-colors duration-200"
-          :href="`https://www.instagram.com/${photo.photographer.instagram}/`"
-          target="_blank"
-        >
-          @{{ photo.photographer.instagram }}
-        </a>
-      </dd>
-    </div>
-    <div>
-      <dt class="inline text-white/70 uppercase text-xs">Date:</dt>
-      <dd class="inline ml-1 text-white/90 font-medium text-xs uppercase">
-        {{ photo.shoot_year }}
-      </dd>
-    </div>
-    <!-- <div class="mt-auto">
+    
+    <!-- Show link to location page when on photography index page -->
+    <div v-if="uiStore.isPhotography && !uiStore.currentPageParams.location">
       <router-link
-        :to="`/photoshoot/${photo.shoot_order + 1}`"
+        :to="`/photography/${photo.shoot_location}`"
         class="flex items-center text-white/70 -mb-2 hover:text-white transition-colors"
         @click="uiStore.clearHover"
       >
-        <div v-if="uiStore.isModalOpen && !uiStore.isHome || uiStore.isPortfolioIndex && !uiStore.isModalOpen" @click="updateStore()">
+        <div>
           <span class="text-xs hover:underline uppercase underline-offset-4">
-            Full Shoot
+            photos
           </span>
           <span class="text-lg ml-1">→</span>
         </div>
       </router-link>
-    </div> -->
+    </div>
   </dl>
 </template>
 
 <script setup lang="ts">
-  import type { Photo } from '../types/models'
-  import { useUiStore } from '@/stores/uiStore'
+import { computed } from 'vue'
+import type { Photo, PhotoDetailItem } from '../types/models'
+import { useUiStore } from '@/stores/uiStore'
 
-  const uiStore = useUiStore()
+const uiStore = useUiStore()
 
-  const updateStore = () => {
-    uiStore.clearHover()
-    uiStore.closeModal()
+const props = defineProps<{
+  photo: Photo
+}>()
+
+// Simple config object directly in the component
+const photoDetailConfigs: Record<string, PhotoDetailItem[]> = {
+  home: [
+    { field: "photographer.name" },
+    { field: "photographer.website_display", linkField: "photographer.website" },
+    { field: "photographer.instagram", isInstagram: true }
+  ],
+  photography: [
+    { field: "shoot_location" },
+    { field: "photoshoot.description" },
+    { field: "shoot_year" }
+  ]
+}
+
+// Get the fields to display based on current route
+const detailsToShow = computed(() => {
+  // Use your uiStore to determine the current route
+  if (uiStore.isPhotography) {
+    return photoDetailConfigs.photography
+  } else {
+    return photoDetailConfigs.home
   }
+})
 
-  defineProps<{
-    photo: Photo
-  }>()
+// Helper to get field values
+const getFieldValue = (field: string) => {
+  const parts = field.split('.')
+  let value: any = props.photo
+  
+  for (const part of parts) {
+    if (value && value[part] !== undefined) {
+      value = value[part]
+    } else {
+      return undefined
+    }
+  }
+  
+  return value
+}
 </script>

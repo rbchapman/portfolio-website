@@ -6,8 +6,9 @@
         <h1
           class="cursor-pointer bg-transparent transition-all duration-500 hover:text-white uppercase whitespace-nowrap"
           :class="{
-            'text-white opacity-100 underline-offset-4 underline decoration-[0.25px]': isLeftSectionOpen,
-            'opacity-70': !isLeftSectionOpen
+            'text-white opacity-100 underline-offset-4 underline decoration-[0.25px]': 
+              isLeftSectionOpen && currentConfig.label !== 'Collections',
+            'opacity-70': !isLeftSectionOpen || currentConfig.label === 'Collections'
           }"
           @click="toggleLeftSection"
         >
@@ -33,15 +34,11 @@
           <template v-else-if="currentConfig.section.type === 'links' && linkSection">
             <!-- ALL link -->
             <div class="flex items-center">
-              <div
-                v-if="!uiStore.currentPageParams[linkSection.paramKey]"
-                class="w-1.5 h-1.5 bg-white rounded-full mr-2 transition-opacity duration-200"
-              ></div>
               <router-link 
                 :to="linkSection.baseRoute"
                 class="hover:text-white transition-opacity duration-200"
                 :class="{
-                  'text-white': !linkSection.activePath,
+                  'text-white underline underline-offset-4 decoration-[0.25px]': !linkSection.activePath,
                   'opacity-70': linkSection.activePath
                 }"
               >
@@ -53,15 +50,12 @@
             <template v-for="(item, index) in linkSection.items" :key="index">
               <span class="mx-2 opacity-50">|</span>
               <div class="flex items-center">
-                <div
-                  v-if="uiStore.currentPageParams[linkSection.paramKey] === item[linkSection.valueKey]"
-                  class="w-1.5 h-1.5 bg-white rounded-full mr-2 transition-opacity duration-200"
-                ></div>
                 <router-link 
                   :to="`${linkSection.baseRoute}/${item[linkSection.valueKey]}`"
                   class="hover:text-white transition-opacity duration-200"
                   :class="{
-                    'text-white': uiStore.currentPageParams[linkSection.paramKey] === item[linkSection.valueKey],
+                    'text-white underline underline-offset-4 decoration-[0.25px]': 
+                      uiStore.currentPageParams[linkSection.paramKey] === item[linkSection.valueKey],
                     'opacity-70': uiStore.currentPageParams[linkSection.paramKey] !== item[linkSection.valueKey]
                   }"
                 >
@@ -142,8 +136,7 @@
   // Determine if section should be open based on route or user toggle
   const isLeftSectionOpen = computed(() => 
     isToggled.value || 
-    (currentConfig.value.section.type === 'links' && 
-    (currentConfig.value.section as LinkSection).activePath)
+    (currentConfig.value.section.type === 'links')
   )
 
   const toggleLeftSection = () => {
