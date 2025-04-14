@@ -5,7 +5,7 @@
       <PageTitle boldText="RileyBenjamin" italicText="Chapman" />
       <ActionBar />
 
-      <main class="flex-1 justify-center overflow-hidden">
+      <main class="flex-1 overflow-hidden">
         <RouterView v-slot="{ Component, route }">
           <transition name="slide-transition" mode="out-in">
             <component :is="Component" :key="getTransitionKey(route)" />

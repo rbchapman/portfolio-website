@@ -1,6 +1,6 @@
 <template>
-  <div class="relative">
-    <div class="max-w-[1500px] h-[65vh] mx-8 grid grid-cols-2 gap-6">
+  <div class="h-full flex items-center">
+    <div class="max-w-[1500px] h-full mx-8 grid grid-cols-2 gap-6">
       <!-- Left side - Featured Photo -->
       <div class="h-full">
         <FeaturedPhoto
