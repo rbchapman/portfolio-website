@@ -27,7 +27,7 @@
       </div>
       
       <!-- Campaign client navigation list - right side, absolutely positioned -->
-      <div class="absolute top-2 right-2 z-10">
+      <div class="absolute top-2 right-0 z-10">
         <div class="space-y-2 min-w-[120px] pr-8">
           <div 
             v-for="campaign in campaigns" 

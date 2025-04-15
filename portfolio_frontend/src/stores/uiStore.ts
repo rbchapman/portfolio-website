@@ -42,6 +42,7 @@ export const useUiStore = defineStore('ui', () => {
   function openModal(photo: Photo) {
     selectedPhoto.value = photo
     isModalOpen.value = true
+    clearHover()
     // When modal is opened, set event listeners for ESC key
     document.addEventListener('keydown', handleKeyDown)
   }

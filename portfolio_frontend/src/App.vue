@@ -1,19 +1,17 @@
 <template>
   <LoadScreen />
-  <div class="min-h-screen flex flex-col">
-    <div class="flex-1 flex flex-col">
-      <PageTitle boldText="RileyBenjamin" italicText="Chapman" />
-      <ActionBar />
-
-      <main class="flex-1 overflow-hidden">
-        <RouterView v-slot="{ Component, route }">
-          <transition name="slide-transition" mode="out-in">
-            <component :is="Component" :key="getTransitionKey(route)" />
-          </transition>
-        </RouterView>
-      </main>
-      <PageFooter />
-    </div>
+  <div class="h-screen flex flex-col">
+    <PageTitle boldText="RileyBenjamin" italicText="Chapman" />
+    <ActionBar />
+    
+    <main class="flex-1 flex overflow-hidden">
+      <RouterView v-slot="{ Component, route }">
+        <transition name="slide-transition" mode="out-in">
+          <component :is="Component" :key="getTransitionKey(route)" class="w-full" />
+        </transition>
+      </RouterView>
+    </main>
+    <PageFooter />
   </div>
 </template>
 
