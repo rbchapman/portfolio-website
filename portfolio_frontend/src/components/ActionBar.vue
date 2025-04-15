@@ -1,6 +1,6 @@
 <template>
   <div class="w-full h-[45px] text-sm uppercase tracking-wider">
-    <div class="flex text-white/70 items-center pb-2 h-full justify-between px-8">
+    <div class="flex text-white/70 items-center h-full justify-between px-8">
       <!-- Left: Section heading -->
       <div class="flex items-center overflow-hidden">
         <h1
@@ -80,7 +80,7 @@
         <template v-for="link in currentConfig.rightLinks" :key="link.to">
           <router-link
             :to="link.to"
-            class="px-2 text-sm hover:text-white"
+            class="pl-2 text-sm hover:text-white"
             :class="{
               'underline text-white opacity-100 underline-offset-4 decoration-[0.25px]': 
                 link.activeWhen(route)

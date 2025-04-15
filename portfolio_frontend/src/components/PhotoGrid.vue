@@ -1,6 +1,6 @@
 <template>
   <div class="w-full h-full">
-    <div class="grid grid-cols-2 gap-6 pb-6">
+    <div class="grid grid-cols-2 gap-6">
       <!-- Index page grid items -->
       <template v-if="uiStore.isPhotography && !uiStore.currentPageParams.location"
       >
