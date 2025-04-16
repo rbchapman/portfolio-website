@@ -10,7 +10,7 @@
     <div class="w-full relative">
       <!-- Centered iframe container with responsive sizing -->
       <div class="flex justify-center w-full">
-        <div v-if="currentCampaign" :key="currentCampaign.id" class="video-fade-in w-full max-w-[750px]">
+        <div v-if="currentCampaign" :key="currentCampaign.id" class="video-fade-in w-full max-w-[63vw]">
           <!-- Aspect ratio container -->
           <div class="relative w-full aspect-video">
             <iframe
