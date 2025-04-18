@@ -10,7 +10,7 @@
     >
       <img
         loading="eager"
-        :src="props.photo.optimized_images.full"
+        :src="props.photo.optimized_images.featured"
         :alt="props.photo.title || ''"
         class="w-full h-full object-cover transition-opacity duration-300"
       />
@@ -32,7 +32,7 @@
     >
       <img
         loading="eager"
-        :src="props.photo.optimized_images.full"
+        :src="props.photo.optimized_images.featured"
         :alt="props.photo.title || ''"
         class="w-full h-full object-cover transition-opacity duration-300"
       />
