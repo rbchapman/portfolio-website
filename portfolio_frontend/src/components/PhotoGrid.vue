@@ -8,7 +8,7 @@
           v-for="photo in props.photos"
           :key="photo.id"
           :to="`/photography/${photo.shoot_location}`"
-          class="h-[50vh] overflow-hidden relative"
+          class="h-[55vh] overflow-hidden relative"
           @mouseenter="uiStore.setHover(photo)"
           @mouseleave="uiStore.clearHover()"
         >
@@ -34,7 +34,7 @@
         <div
           v-for="photo in props.photos"
           :key="photo.id"
-          class="h-[50vh] overflow-hidden cursor-pointer relative"
+          class="h-[55vh] overflow-hidden cursor-pointer relative"
           @click="uiStore.openModal(photo)" 
         >
           <img
