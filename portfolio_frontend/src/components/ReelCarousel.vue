@@ -11,12 +11,12 @@
         <div
           v-for="photo in carouselPhotos"
           :key="photo.id + '-' + photo.duplicateIndex"
-          class="max-w-4xl mr-6 shadow-lg relative cursor-pointer"
+          class="max-w-4xl mr-4 shadow-lg relative cursor-pointer"
           @mouseenter="uiStore.setHover(photo)"
           @mouseleave="uiStore.clearHover()"
         >
           <img
-            :src="photo.optimized_images.full"
+            :src="photo.image"
             :alt="photo.title"
             loading="eager"
             :class="[

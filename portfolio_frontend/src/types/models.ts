@@ -69,6 +69,7 @@ export interface OptimizedImages {
   medium: string
   large: string
   full: string
+  featured: string
 }
 
 export interface PhotoDetailItem {

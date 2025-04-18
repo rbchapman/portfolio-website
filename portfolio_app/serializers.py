@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import Photographer, PhotoShoot, Photo, Campaign
 
 # Enhanced helper function for Cloudinary image optimization
-def get_optimized_images(image):
+def get_cloudinary_urls(image):
     """Generate optimized image variants for Cloudinary with improved face detection"""
     if not image:
         return None
@@ -23,12 +23,12 @@ def get_optimized_images(image):
     # Build URLs with transformations
     return {
         # Full resolution for modal view - Centered on face with appropriate padding
-        'full': f"{cloudinary_base}/upload/c_fill,g_auto:face,q_auto:good,f_auto/{cloudinary_id}",
+        'full': f"{cloudinary_base}/upload/c_fill,w_1300,h_800,g_face,q_auto:eco,f_auto/{cloudinary_id}",
+
+        'featured': f"{cloudinary_base}/upload/c_fill,w_1300,h_800,g_face,q_auto:eco,f_auto/{cloudinary_id}",
         
-        # Grid view - Fixed height to match container with face focusing
-        'grid': f"{cloudinary_base}/upload/c_fill,h_325,w_400,g_auto:face,q_auto:good,f_auto/{cloudinary_id}",
+        'grid': f"{cloudinary_base}/upload/c_fill,w_400,g_auto:face,q_auto:best,dpr_2.0,f_auto/{cloudinary_id}",
         
-        # Keep the original large version but improve it with face detection
         'large': f"{cloudinary_base}/upload/c_fill,w_400,h_600,g_auto:face,q_auto:good,f_auto,dpr_2.0/{cloudinary_id}",
     }
 
@@ -61,6 +61,7 @@ class CampaignSerializer(serializers.ModelSerializer):
             'type', 'client', 'video_url', 'web_url',
             'date', 'order'
         ]
+
 class PhotoSerializer(serializers.ModelSerializer):
     photographer = PhotographerSerializer(read_only=True)
     optimized_images = serializers.SerializerMethodField()
@@ -90,24 +91,30 @@ class PhotoSerializer(serializers.ModelSerializer):
         return None
     
     def get_optimized_images(self, obj):
-        result = get_optimized_images(obj.image)
+        """Get optimized Cloudinary images with dynamic sizing based on orientation"""
+        # Get the base URLs from the helper function
+        urls = get_cloudinary_urls(obj.image)
         
-        # Modify the large URL if it's a landscape photo
-        if hasattr(obj, 'is_portrait') and not obj.is_portrait and 'large' in result:
-            # Extract the URL parts
-            large_url = result['large']
-            result['large'] = large_url.replace('w_200', 'w_400')
+        if not urls:
+            return None
+            
+        # Modify the grid URL if it's a landscape photo
+        if hasattr(obj, 'is_portrait') and not obj.is_portrait and 'grid' in urls:
+            grid_url = urls['grid']
+            urls['grid'] = grid_url.replace('w_400', 'w_800')
         
-        return result
+        return urls
+        
     def get_photo_count(self, obj):
         return obj.photo_shoot.photos.count()
+        
     def validate(self, data):
         if 'photographer_id' in data and 'photo_shoot_id' in data:
             photo_shoot = PhotoShoot.objects.get(id=data['photo_shoot_id'])
-        if photo_shoot.photographer.id != data['photographer_id']:
-            raise serializers.ValidationError(
-                "Photographer must match the photo shoot's photographer"
-            )
+            if photo_shoot.photographer.id != data['photographer_id']:
+                raise serializers.ValidationError(
+                    "Photographer must match the photo shoot's photographer"
+                )
         return data
     
 class PhotoShootSerializer(serializers.ModelSerializer):
