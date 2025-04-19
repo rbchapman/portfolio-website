@@ -22,11 +22,11 @@
   import PageTitle from './components/PageTitle.vue'
   import PageFooter from './components/PageFooter.vue'
   import type { RouteLocationNormalized } from 'vue-router'
-  import { usePhotoShootStore } from '@/stores/photoShootStore'
+  import { usePhotoStore } from '@/stores/photoStore'
   import { useUiStore } from '@/stores/uiStore'
 
   const uiStore = useUiStore()
-  const photoShootStore = usePhotoShootStore()
+  const photoShootStore = usePhotoStore()
   const router = useRouter()
 
   function getTransitionKey(route: RouteLocationNormalized) {
@@ -40,16 +40,16 @@
   }
 
   // Set up route change detection (outside onMounted to avoid multiple registrations)
-  router.beforeEach((to, from, next) => {
-    // If navigating to a specific photoshoot
-    if (to.name === 'portfolio' && to.params.id) {
-      const shootId = to.params.id
-      if (shootId && !isNaN(Number(shootId))) {
-        photoShootStore.prioritizePhotoShoot(Number(shootId))
-      }
-    }
-    next()
-  })
+  // router.beforeEach((to, from, next) => {
+  //   // If navigating to a specific photoshoot
+  //   if (to.name === 'portfolio' && to.params.id) {
+  //     const shootId = to.params.id
+  //     if (shootId && !isNaN(Number(shootId))) {
+  //       photoShootStore.prioritizePhotoShoot(Number(shootId))
+  //     }
+  //   }
+  //   next()
+  // })
 </script>
 
 <style>

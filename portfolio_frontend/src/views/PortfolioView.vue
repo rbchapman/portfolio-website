@@ -32,11 +32,11 @@
   import PhotoModal from '../components/PhotoModal.vue'
   import FeaturedPhoto from '@/components/FeaturedPhoto.vue'
   import PhotoGrid from '@/components/PhotoGrid.vue'
-  import { usePhotoShootStore } from '@/stores/photoShootStore'
+  import { usePhotoStore } from '@/stores/photoStore'
   import { useUiStore } from '@/stores/uiStore'
   
   const uiStore = useUiStore()
-  const photoShootStore = usePhotoShootStore()
+  const photoShootStore = usePhotoStore()
     const isPhotographyIndex = computed(() => 
     uiStore.isPhotography && !uiStore.currentPageParams.location
   )

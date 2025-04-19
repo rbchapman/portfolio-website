@@ -11,7 +11,7 @@
         <div
           v-for="photo in carouselPhotos"
           :key="photo.id + '-' + photo.duplicateIndex"
-          class="max-w-4xl mr-4 shadow-lg relative cursor-pointer"
+          class="max-w-4xl mr-4 shadow-lg relative"
           @mouseenter="uiStore.setHover(photo)"
           @mouseleave="uiStore.clearHover()"
         >
@@ -52,11 +52,11 @@
 import { ref, onMounted, computed } from 'vue'
 import PhotoModal from '../components/PhotoModal.vue'
 import PhotoDetails from './PhotoDetails.vue'
-import { usePhotoShootStore } from '@/stores/photoShootStore'
+import { usePhotoStore } from '@/stores/photoStore'
 import { useUiStore } from '@/stores/uiStore'
 const uiStore = useUiStore()
 
-const photoShootStore = usePhotoShootStore()
+const photoShootStore = usePhotoStore()
 const scrollTrack = ref<HTMLElement | null>(null)
 
 // Clone the photos for continuous scrolling effect

@@ -1,12 +1,16 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { Photo } from '../types/models'
-import { usePhotoShootStore } from './photoShootStore'
+import { usePhotoStore } from './photoStore'
 import { useCampaignStore } from './campaignStore'
 
 export const useUiStore = defineStore('ui', () => {
   // Initial load state
   const showLoadScreen = ref(true)
+
+  // Progressive loading states
+  const carouselLoaded = ref(false)
+  const displayPhotosLoaded = ref(false)
 
   // Hover and modal states
   const hoveredPhoto = ref<Photo | null>(null)
@@ -20,6 +24,23 @@ export const useUiStore = defineStore('ui', () => {
   function noLoad() {
     showLoadScreen.value = false
   }
+
+  // Loading state management
+  function setCarouselLoaded(loaded: boolean) {
+    carouselLoaded.value = loaded
+  }
+  
+  function setDisplayPhotosLoaded(loaded: boolean) {
+    displayPhotosLoaded.value = loaded
+  }
+  
+  function resetLoadingState() {
+    carouselLoaded.value = false
+    displayPhotosLoaded.value = false
+  }
+  
+  // Computed loading states for UI
+  const initialLoadComplete = computed(() => carouselLoaded.value && displayPhotosLoaded.value)
 
   function setCurrentPage(
     routeName: string,
@@ -86,7 +107,7 @@ export const useUiStore = defineStore('ui', () => {
   // NEW COMPUTED PROPERTIES FOR NAVIGATION
   
   // Get store instances
-  const photoShootStore = usePhotoShootStore()
+  const photoShootStore = usePhotoStore()
   const campaignStore = useCampaignStore()
   
   // Get the total count of photoshoots and campaigns
@@ -152,6 +173,12 @@ export const useUiStore = defineStore('ui', () => {
     isPaused,
     hoveredPhoto,
     
+    // Progressive loading states
+    carouselLoaded,
+    displayPhotosLoaded,
+    initialLoadComplete,
+    
+    
     // New navigation properties
     photoShootCount,
     campaignCount,
@@ -167,6 +194,11 @@ export const useUiStore = defineStore('ui', () => {
     clearHover,
     openModal,
     closeModal,
-    setShowDetails
+    setShowDetails,
+    
+    // Loading state functions
+    setCarouselLoaded,
+    setDisplayPhotosLoaded,
+    resetLoadingState
   }
 })

@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { usePhotoShootStore } from '@/stores/photoShootStore'
+import { usePhotoStore } from '@/stores/photoStore'
 import { useUiStore } from '@/stores/uiStore'
 import { useCampaignStore } from '@/stores/campaignStore'
 
@@ -27,7 +27,7 @@ const router = createRouter({
 // Add navigation guard for data loading and transitions
 router.beforeEach(async (to, from, next) => {
   const uiStore = useUiStore()
-  const photoShootStore = usePhotoShootStore()
+  const photoShootStore = usePhotoStore()
   const campaignStore = useCampaignStore()
   
   if (from.name === 'home' || from.name === 'photoshoot') {
