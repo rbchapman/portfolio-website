@@ -98,13 +98,13 @@
   import { ref, computed } from 'vue'
   import { useRoute } from 'vue-router'
   import { useUiStore } from '@/stores/uiStore'
-  import { usePhotoShootStore } from '@/stores/photoShootStore'
+  import { usePhotoStore } from '@/stores/photoStore'
   import { getActionBarConfig } from '@/config/actionBarConfig'
   import type { LinkSection, ListSection } from '@/types/actionBar'
 
   const route = useRoute()
   const uiStore = useUiStore()
-  const photoShootStore = usePhotoShootStore()
+  const photoShootStore = usePhotoStore()
 
   // Determine the current configuration based on route
   const currentConfig = computed(() => {

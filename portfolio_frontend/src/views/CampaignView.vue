@@ -36,12 +36,9 @@
           >
             <!-- Active indicator dot -->
             <div
-              class="w-1.5 h-1.5 rounded-full mr-2 transition-opacity duration-200"
-              :class="{ 
-                'bg-white': currentCampaign?.client === campaign.client, 
-                'opacity-0': currentCampaign?.client !== campaign.client 
-              }"
-            ></div>
+              v-show="currentCampaign?.client === campaign.client"
+              class="mr-2"
+            >-</div>
             <router-link
               :to="`/campaigns/${campaign.client}`"
               class="uppercase text-sm hover:text-white transition-opacity duration-200"
