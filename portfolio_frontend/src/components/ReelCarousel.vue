@@ -1,4 +1,3 @@
-<!-- Updated template section with the typewriter effect -->
 <template>
   <div class="w-full relative">
     <div
@@ -7,11 +6,10 @@
       ref="scrollTrack"
     >
       <div class="flex">
-        
         <div
-          v-for="photo in carouselPhotos"
-          :key="photo.id + '-' + photo.duplicateIndex"
-          class="max-w-4xl mr-4 shadow-lg relative"
+          v-for="photo in photos"
+          :key="photo.id"
+          class="max-w-4xl mr-4 shadow-lg relative cursor-pointer"
           @mouseenter="uiStore.setHover(photo)"
           @mouseleave="uiStore.clearHover()"
         >
@@ -25,7 +23,7 @@
                 : 'w-auto max-h-[70vh] max-w-3xl'
             ]"
           />
-          <!-- Overlay with photo details, only shown when this specific photo is hovered -->
+          <!-- Overlay with photo details -->
           <div
             v-show="uiStore.hoveredPhoto?.id === photo.id"
             class="absolute inset-0 bg-black bg-opacity-60 transition-opacity duration-200"
@@ -39,42 +37,28 @@
         </div>
       </div>
     </div>
-    <PhotoModal
+    <!-- <PhotoModal
       v-if="uiStore.selectedPhoto"
       v-model="uiStore.selectedPhoto"
-      :photos="photoShootStore.carouselPhotos"
+      :photos="photos"
       @close="uiStore.closeModal"
-    />
+    /> -->
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import PhotoModal from '../components/PhotoModal.vue'
+import { ref } from 'vue'
+// import PhotoModal from '../components/PhotoModal.vue'
 import PhotoDetails from './PhotoDetails.vue'
-import { usePhotoStore } from '@/stores/photoStore'
 import { useUiStore } from '@/stores/uiStore'
+import type { Photo } from '@/types/models'
+
+defineProps<{
+  photos: Photo[]
+}>()
+
 const uiStore = useUiStore()
-
-const photoShootStore = usePhotoStore()
 const scrollTrack = ref<HTMLElement | null>(null)
-
-// Clone the photos for continuous scrolling effect
-const carouselPhotos = computed(() => {
-  return [
-    ...photoShootStore.carouselPhotos,
-    ...photoShootStore.carouselPhotos
-  ].map((photo, index) => ({
-    ...photo,
-    duplicateIndex: index < photoShootStore.carouselPhotos.length ? 0 : 1
-  }))
-})
-
-onMounted(() => {
-  if (photoShootStore.carouselPhotos.length === 0) {
-    photoShootStore.fetchCarouselPhotos()
-  }
-})
 </script>
 
 <style>
@@ -91,19 +75,17 @@ onMounted(() => {
   display: flex;
   width: max-content;
   animation: slide-from-right 100s linear infinite;
-  -webkit-animation: slide-from-right 100s linear infinite; /* Safari needs this */
-  will-change: transform; /* Performance hint */
-  transform: translateZ(0); /* Force hardware acceleration */
+  -webkit-animation: slide-from-right 100s linear infinite;
+  will-change: transform;
+  transform: translateZ(0);
   -webkit-transform: translateZ(0);
 }
 
-/* Hide scrollbars across browsers */
 .scroll-track::-webkit-scrollbar {
   display: none;
 }
 
 .scroll-track {
   scrollbar-width: none;
-
 }
 </style>

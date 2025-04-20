@@ -44,11 +44,11 @@ router.beforeEach(async (to, from, next) => {
       (to.name === 'home' || to.name === 'photoshoot') &&
       photoShootStore.photoShoots.length === 0
     ) {
-      await photoShootStore.fetchAllPhotoShoots()
+      await photoShootStore.fetchAllCollections()
     }
 
     if (to.name === 'photography' && photoShootStore.photoShoots.length === 0) {
-      await photoShootStore.fetchAllPhotoShoots()
+      await photoShootStore.fetchAllCollections()
     }
     
     // Handle campaigns route

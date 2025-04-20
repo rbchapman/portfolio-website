@@ -12,12 +12,11 @@ export const usePhotoStore = defineStore('photo', () => {
   
   // Photo data state
   const carouselPhotos = ref<Photo[]>([])
+  const collectionIndexPhotos = ref<Photo[]>([])
   const displayPhotos = ref<Photo[]>([])
   const allPhotos = ref<Photo[]>([])
-  
-  // PhotoShoot data state (keeping for compatibility)
-  const photoShoots = ref<PhotoShoot[]>([])
-  const isPhotoShootsLoading = ref<boolean>(false)
+  const collections = ref<PhotoShoot[]>([])
+  const isLoadComplete = ref<boolean>(false)
   
   // Error tracking
   const hasError = ref<boolean>(false)
@@ -60,7 +59,7 @@ export const usePhotoStore = defineStore('photo', () => {
     })
   }
 
-  // PRIORITY 1: Fetch and load carousel photos
+  // PRIORITY 1: Fetch and load carousel photos for modeling portfolio
   async function fetchCarouselPhotos() {
     try {
       const response: AxiosResponse<Photo[]> = await api.get('/photos/?carousel=true')
@@ -80,11 +79,52 @@ export const usePhotoStore = defineStore('photo', () => {
     }
   }
 
-  // PRIORITY 2: Fetch and load display photos (featured + grid)
+  // NEW: Fetch collection index with only first photo from each collection for Photography section
+  async function fetchCollectionIndex() {
+    try {
+      uiStore.setCarouselLoaded(false)
+      
+      // Use the first_photo_only parameter
+      const response: AxiosResponse<PhotoShoot[]> = await api.get('/photo-shoots/?first_photo_only=true')
+      const collectionData = response.data
+      
+      // Extract the first photo from each collection for the carousel
+      const indexPhotos = collectionData
+        .map(collection => collection.photos?.[0])
+        .filter(Boolean)
+      
+      // Process photos to ensure they have complete URLs
+      const processedPhotos = getFullUrl(indexPhotos)
+      
+      // Wait for these photos to load
+      await Promise.all(processedPhotos.map(photo => preloadImage(photo.image)))
+      
+      // Store the collections and set carousel photos for photography section
+      collections.value = collectionData.map(collection => ({
+        ...collection,
+        photos: collection.photos ? getFullUrl(collection.photos) : []
+      }))
+      
+      collectionIndexPhotos.value = processedPhotos
+      uiStore.setCarouselLoaded(true)
+      
+      // Start loading full collection data in background
+      fetchAllCollections()
+      
+      return collections.value
+    } catch (error) {
+      console.error('Error loading collection index:', error)
+      hasError.value = true
+      uiStore.setCarouselLoaded(true) // Still mark as loaded to not block UI
+      return []
+    }
+  }
+
+  // PRIORITY 2: Fetch and load display photos (featured + grid) for modeling portfolio
   async function fetchDisplayPhotos() {
     try {
       // Get all non-photographer photos (modeling portfolio)
-      const response: AxiosResponse<Photo[]> = await api.get('/photos/?photographer_id__ne=1')
+      const response: AxiosResponse<Photo[]> = await api.get('/photos/')
       const photos = getFullUrl(response.data)
       
       // Load the featured image first (most important)
@@ -140,49 +180,54 @@ export const usePhotoStore = defineStore('photo', () => {
       const response: AxiosResponse<Photo[]> = await api.get('/photos/')
       const photos = getFullUrl(response.data)
       allPhotos.value = photos
+      isLoadComplete.value = true
       return photos
     } catch (error) {
       console.error('Error fetching all photos:', error)
       hasError.value = true
+      isLoadComplete.value = true
       return []
     }
   }
 
-  // KEEPING UNTOUCHED: Existing PhotoShoot loading function but updating to use getFullUrl
-  async function fetchAllPhotoShoots() {
-    isPhotoShootsLoading.value = true
+  async function fetchAllCollections() {
     try {
       const response: AxiosResponse<PhotoShoot[]> = await api.get('/photo-shoots/')
       
-      photoShoots.value = response.data.map((shoot) => ({
-        ...shoot,
-        photos: getFullUrl(shoot.photos)
+      collections.value = response.data.map((collection) => ({
+        ...collection,
+        photos: getFullUrl(collection.photos)
       }))
   
-      // Wait for first image of each photoshoot to load (medium priority)
-      const indexImages = photoShoots.value
-        .map((shoot) => shoot.photos?.[0]?.image)
+      // Wait for first image of each collection to load (medium priority)
+      const indexImages = collections.value
+        .map((collection) => collection.photos?.[0]?.image)
         .filter(Boolean) as string[]
   
       await Promise.all(indexImages.map((url) => preloadImage(url)))
   
       // Preload remaining images in background (low priority)
-      const remainingImages = photoShoots.value.flatMap((shoot) =>
-        shoot.photos.slice(1).map((photo) => photo.image)
+      const remainingImages = collections.value.flatMap((collection) =>
+        collection.photos.slice(1).map((photo) => photo.image)
       )
   
       preloadImagesInBackground(remainingImages)
+      uiStore.setDisplayPhotosLoaded(true)
     } catch (error) {
-      console.error('Error loading photo shoots:', error)
+      console.error('Error loading collections:', error)
       hasError.value = true
+      uiStore.setDisplayPhotosLoaded(true)
+      isLoadComplete.value = true
     } finally {
-      isPhotoShootsLoading.value = false
+      isLoadComplete.value = true
     }
   }
+
 
   // Main loading sequence function for modeling portfolio
   async function loadPortfolioData() {
     uiStore.resetLoadingState()
+    isLoadComplete.value = false
     try {
       // Priority 1: Carousel - wait for completion
       await fetchCarouselPhotos()
@@ -197,20 +242,41 @@ export const usePhotoStore = defineStore('photo', () => {
     }
   }
 
-  // For compatibility with existing code that expects this function
-  const getPortfolioDisplayPhotos = (
+  // Main loading sequence for photography section
+  async function loadPhotographyData() {
+    uiStore.resetLoadingState()
+    isLoadComplete.value = false
+    try {
+      // Priority 1: Fetch collection index with first photos
+      await fetchCollectionIndex()
+      
+      // Priority 2 & 3 happen automatically in background via fetchAllCollections
+    } catch (error) {
+      console.error('Error in photography data loading sequence:', error)
+      hasError.value = true
+    }
+  }
+
+  // Get photos for display based on context
+  const getCollectionPhotos = (
     isIndex: boolean,
     params: Record<string, string> = {}
   ) => {
     if (isIndex) {
-      // For index page: first photo of each photoshoot
-      return photoShoots.value.map((shoot) => shoot.photos[0]).filter(Boolean)
-    } else if (params.order) {
-      // For specific photoshoot: all photos in that shoot
-      const shoot = photoShoots.value.find(
-        (s) => s.order === Number(params.order)
+      // For index page: first photo of each collection
+      return collections.value.map((collection) => collection.photos?.[0]).filter(Boolean)
+    } else if (params.location) {
+      // For specific collection: all photos in that collection by location
+      const collection = collections.value.find(
+        (c) => c.location.toLowerCase() === params.location.toLowerCase()
       )
-      return shoot?.photos || []
+      return collection?.photos || []
+    } else if (params.order) {
+      // For backward compatibility: find by order
+      const collection = collections.value.find(
+        (c) => c.order === Number(params.order)
+      )
+      return collection?.photos || []
     }
 
     return []
@@ -219,10 +285,12 @@ export const usePhotoStore = defineStore('photo', () => {
   return {
     // State
     carouselPhotos,
+    collectionIndexPhotos,
     displayPhotos,
     allPhotos,
-    photoShoots,
-    isPhotoShootsLoading,
+    collections,
+    photoShoots: collections, // Alias for backward compatibility
+    isLoadComplete,
     hasError,
     
     // Computed
@@ -235,8 +303,10 @@ export const usePhotoStore = defineStore('photo', () => {
     fetchDisplayPhotos,
     fetchAllPhotos,
     
-    // Actions - PhotoShoot (kept untouched)
-    fetchAllPhotoShoots,
-    getPortfolioDisplayPhotos
+    // Actions - Photography section
+    loadPhotographyData,
+    fetchCollectionIndex,
+    fetchAllCollections,
+    getCollectionPhotos
   }
 })

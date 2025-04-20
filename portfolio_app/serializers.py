@@ -135,3 +135,17 @@ class PhotoShootSerializer(serializers.ModelSerializer):
 
     def get_photos_count(self, obj):
         return obj.photos.count()
+        
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get('request')
+        
+        # Check if first_photo_only parameter is set
+        if request and request.query_params.get('first_photo_only') == 'true':
+            if data.get('photos') and len(data['photos']) > 0:
+                # Sort photos by photo_shoot_order if needed
+                photos = sorted(data['photos'], key=lambda p: p.get('photo_shoot_order', 0) if p.get('photo_shoot_order') is not None else float('inf'))
+                # Only keep the first photo for each photoshoot
+                data['photos'] = [photos[0]] if photos else []
+        
+        return data
