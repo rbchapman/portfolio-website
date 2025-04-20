@@ -1,7 +1,7 @@
 <template>
   <Transition name="fade">
     <div
-      v-if="uiStore.showLoadScreen && !uiStore.isPhotography"
+      v-if="uiStore.showLoadScreen"
       class="fixed z-[51] inset-0 bg-custom-dark flex flex-col justify-between outline-none"
       @keydown.enter="handleEnterKey"
       tabindex="0"
@@ -35,9 +35,9 @@
       
       <!-- Carousel at bottom -->
       <ReelCarousel
-        v-if="uiStore.carouselLoaded"
+        v-show="uiStore.carouselLoaded"
         class="w-full"
-        :photos="photoStore.carouselPhotos"
+        :photos="uiStore.isPhotography ? photoStore.collectionIndexPhotos : photoStore.carouselPhotos"
       />
     </div>
   </Transition>
@@ -69,7 +69,7 @@ const uiStore = useUiStore()
 // Computed property to determine when to show the ENTER button
 // Will only be true when both minimum time has passed AND carousel is loaded
 const isLoaded = computed(() => 
-  minTimeElapsed.value && uiStore.carouselLoaded
+  uiStore.carouselLoaded
 )
 
 function handleEnterKey() {
@@ -81,6 +81,7 @@ function handleEnterKey() {
 onMounted(() => {
   // Start loading the portfolio data
   photoStore.loadPortfolioData()
+  photoStore.fetchCollectionIndex()
   
   // Focus the load screen to capture keydown events
   if (loadScreenRef.value) {
