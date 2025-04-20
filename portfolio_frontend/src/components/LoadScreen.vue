@@ -90,7 +90,7 @@ onMounted(() => {
   // Set minimum time flag after 2 seconds
   setTimeout(() => {
     minTimeElapsed.value = true
-  }, 700)
+  }, 500)
   
   // Auto-hide the load screen after 10 seconds
   setTimeout(() => {
