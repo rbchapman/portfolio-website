@@ -28,7 +28,6 @@
 </template>
 
 <script setup lang="ts">
-  import { onMounted } from 'vue'
   import PhotoModal from '../components/PhotoModal.vue'
   import FeaturedPhoto from '@/components/FeaturedPhoto.vue'
   import PhotoGrid from '@/components/PhotoGrid.vue'
@@ -38,13 +37,6 @@
   const photoStore = usePhotoStore()
   const uiStore = useUiStore()
   
-  onMounted(() => {
-    // Use the optimized loading sequence from the photoStore
-    // instead of just fetching all photos
-    if (photoStore.displayPhotos.length === 0) {
-      photoStore.fetchDisplayPhotos()
-    }
-  })
 </script>
 
 <style scoped>
