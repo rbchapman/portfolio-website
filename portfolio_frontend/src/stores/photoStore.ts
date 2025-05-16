@@ -4,6 +4,7 @@ import api from '@/utils/axios'
 import type { PhotoShoot, Photo } from '../types/models'
 import type { AxiosResponse } from 'axios'
 import { useUiStore } from './uiStore'
+import { siteConfig } from '@/utils/siteConfig'
 
 const CLOUDINARY_BASE_URL = import.meta.env.VITE_CLOUDINARY_BASE_URL
 
@@ -25,19 +26,6 @@ export const usePhotoStore = defineStore('photo', () => {
   const featuredPhoto = computed(() => displayPhotos.value[0] || null)
   const gridPhotos = computed(() => displayPhotos.value.slice(1) || [])
 
-  // Domain detection - more robust implementation
-  function isDomainPortfolio(): boolean {
-    if (
-      typeof window === 'undefined' ||
-      !window.location ||
-      !window.location.hostname
-    ) {
-      return false // Default value when window is not available
-    }
-    return (
-      window.location.hostname.includes('portfolio')
-    )
-  }
 
   // Helper function to ensure image URLs are complete
   function getFullUrl(photos: Photo[]): Photo[] {
@@ -301,15 +289,9 @@ export const usePhotoStore = defineStore('photo', () => {
     uiStore.resetLoadingState()
     isLoadComplete.value = false
     try {
-      console.log('Checking domain:', window.location.hostname)
-      const portfolio = isDomainPortfolio()
-      console.log('Is portfolio domain?', portfolio)
-
-      if (portfolio) {
-        console.log('Loading portfolio data')
+      if (siteConfig.isPortfolio) {
         await loadPortfolioData()
       } else {
-        console.log('Loading photography data')
         await loadPhotographyData()
       }
     } catch (error) {

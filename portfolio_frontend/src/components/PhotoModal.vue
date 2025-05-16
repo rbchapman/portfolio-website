@@ -1,6 +1,5 @@
 <template>
   <div
-    v-if="photoStore.isLoadComplete"
     class="fixed modal-container inset-0 z-40"
     tabindex="0"
     @keyup.escape="emitClose"
@@ -65,9 +64,7 @@ import type { Photo } from '../types/models'
 import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/keyboard'
-import { usePhotoStore } from '@/stores/photoStore'
 
-const photoStore = usePhotoStore()
 const modules = [Navigation, Keyboard, A11y]
 const modalRef = ref<HTMLElement | null>(null)
 const swiperInstance = ref<SwiperInstance | null>(null)

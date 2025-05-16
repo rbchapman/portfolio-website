@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { usePhotoStore } from '@/stores/photoStore'
-import { useUiStore } from '@/stores/uiStore'
-import { useCampaignStore } from '@/stores/campaignStore'
+// import { usePhotoStore } from '@/stores/photoStore'
+// import { useUiStore } from '@/stores/uiStore'
+// import { useCampaignStore } from '@/stores/campaignStore'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,15 +11,17 @@ const router = createRouter({
       name: 'home',
       component: () => import('../views/HomeView.vue'),
     },
+    // {
+    //   path: '/campaigns/:client?',
+    //   name: 'campaigns',
+    //   component: () => import('../views/CampaignView.vue')
+    // },
     {
-      path: '/campaigns/:client?',
-      name: 'campaigns',
-      component: () => import('../views/CampaignView.vue')
-    },
-    {
-      path: '/photography/:location?',
-      name: 'photography',
-      component: () => import('../views/PortfolioView.vue')
+      // Location route (using same component)
+      path: '/:location',
+      name: 'location',
+      component: () => import('../views/HomeView.vue'),
+      props: true
     }
   ]
 })

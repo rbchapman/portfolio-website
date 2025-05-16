@@ -30,9 +30,9 @@
     </div>
     
     <!-- Show link to location page when on photography index page -->
-    <div v-if="uiStore.isPhotography && !uiStore.currentPageParams.location">
+    <div v-if="!siteConfig.isPortfolio && uiStore.isHome">
       <router-link
-        :to="`/photography/${photo.shoot_location}`"
+        :to="`/${photo.shoot_location}`"
         class="flex items-center text-white/70 -mb-2 hover:text-white transition-colors"
         @click="uiStore.clearHover"
       >
@@ -51,6 +51,7 @@
 import { computed } from 'vue'
 import type { Photo, PhotoDetailItem } from '../types/models'
 import { useUiStore } from '@/stores/uiStore'
+import { siteConfig } from '@/utils/siteConfig'
 
 const uiStore = useUiStore()
 
@@ -75,7 +76,7 @@ const photoDetailConfigs: Record<string, PhotoDetailItem[]> = {
 // Get the fields to display based on current route
 const detailsToShow = computed(() => {
   // Use your uiStore to determine the current route
-  if (uiStore.isPhotography) {
+  if (!siteConfig.isPortfolio) {
     return photoDetailConfigs.photography
   } else {
     return photoDetailConfigs.home

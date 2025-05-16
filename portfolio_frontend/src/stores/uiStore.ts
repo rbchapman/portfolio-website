@@ -3,10 +3,13 @@ import { ref, computed } from 'vue'
 import type { Photo } from '../types/models'
 import { usePhotoStore } from './photoStore'
 import { useCampaignStore } from './campaignStore'
+import { useRoute } from 'vue-router'
+
 
 export const useUiStore = defineStore('ui', () => {
   // Initial load state
   const showLoadScreen = ref(true)
+  const route = useRoute()
 
   // Progressive loading states
   const carouselLoaded = ref(false)
@@ -101,7 +104,7 @@ export const useUiStore = defineStore('ui', () => {
   const isCampaigns = computed(
     () => currentPage.value === 'campaigns'
   )
-  const isHome = computed(() => currentPage.value === 'home')
+  const isHome = computed(() => route.name === 'home')
   const isPhotography = computed(() => currentPage.value === 'photography')
 
   // NEW COMPUTED PROPERTIES FOR NAVIGATION

@@ -2,12 +2,13 @@
   <div class="w-full h-full">
     <div class="grid grid-cols-2 gap-6">
       <!-- Index page grid items -->
-      <template v-if="uiStore.isPhotography && !uiStore.currentPageParams.location"
+      <template
+        v-if="!siteConfig.isPortfolio && uiStore.isHome"
       >
         <RouterLink
           v-for="photo in props.photos"
           :key="photo.id"
-          :to="`/photography/${photo.shoot_location}`"
+          :to="`/${photo.shoot_location}`"
           class="h-[55vh] overflow-hidden relative"
           @mouseenter="uiStore.setHover(photo)"
           @mouseleave="uiStore.clearHover()"
@@ -21,7 +22,9 @@
 
           <!-- Overlay for grid photos -->
           <div
-            v-show="uiStore.hoveredPhoto?.id === photo.id && !uiStore.isModalOpen"
+            v-show="
+              uiStore.hoveredPhoto?.id === photo.id && !uiStore.isModalOpen
+            "
             class="absolute inset-0 bg-black bg-opacity-60 transition-opacity duration-200 flex"
           >
             <PhotoDetails :photo="photo" class="z-10 mt-6" />
@@ -35,7 +38,7 @@
           v-for="photo in props.photos"
           :key="photo.id"
           class="h-[55vh] overflow-hidden cursor-pointer relative"
-          @click="uiStore.openModal(photo)" 
+          @click="uiStore.openModal(photo)"
         >
           <img
             loading="eager"
@@ -48,17 +51,18 @@
     </div>
   </div>
 </template>
-  
-  <script setup lang="ts">
-  import { useUiStore } from '@/stores/uiStore';
-  import PhotoDetails from './PhotoDetails.vue';
-  import type { Photo } from '@/types/models';
-  
+
+<script setup lang="ts">
+  import { useUiStore } from '@/stores/uiStore'
+  import PhotoDetails from './PhotoDetails.vue'
+  import type { Photo } from '@/types/models'
+  import { siteConfig } from '@/utils/siteConfig'
+
   // Props
   const props = defineProps<{
-    photos: Photo[];
-  }>();
-  
+    photos: Photo[]
+  }>()
+
   // Store
-  const uiStore = useUiStore();
-  </script>
+  const uiStore = useUiStore()
+</script>
