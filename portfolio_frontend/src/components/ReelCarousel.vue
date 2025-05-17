@@ -74,8 +74,8 @@ const scrollTrack = ref<HTMLElement | null>(null)
 .scroll-track {
   display: flex;
   width: max-content;
-  animation: slide-from-right 100s linear infinite;
-  -webkit-animation: slide-from-right 100s linear infinite;
+  animation: slide-from-right 25s linear infinite;
+  -webkit-animation: slide-from-right 25s linear infinite;
   will-change: transform;
   transform: translateZ(0);
   -webkit-transform: translateZ(0);

@@ -37,7 +37,7 @@
       <ReelCarousel
         v-show="uiStore.carouselLoaded"
         class="w-full"
-        :photos="uiStore.isPhotography ? photoStore.collectionIndexPhotos : photoStore.carouselPhotos"
+        :photos="photoStore.carouselPhotos"
       />
     </div>
   </Transition>
@@ -80,8 +80,8 @@ function handleEnterKey() {
 
 onMounted(() => {
   // Start loading the portfolio data
-  photoStore.loadPortfolioData()
-  photoStore.fetchCollectionIndex()
+  // photoStore.loadPortfolioData()
+  // photoStore.fetchCollectionIndex()
   
   // Focus the load screen to capture keydown events
   if (loadScreenRef.value) {

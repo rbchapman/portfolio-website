@@ -5,9 +5,9 @@
     <ActionBar />
     
     <main class="flex-1 flex overflow-hidden">
-      <RouterView v-slot="{ Component, route }">
+      <RouterView v-slot="{ Component }">
         <transition name="slide-transition" mode="out-in">
-          <component :is="Component" :key="getTransitionKey(route)" class="w-full" />
+          <component :is="Component" class="w-full" />
         </transition>
       </RouterView>
     </main>
@@ -16,40 +16,22 @@
 </template>
 
 <script setup lang="ts">
-  import { RouterView, useRouter } from 'vue-router'
+  import { onMounted } from 'vue'
+  import { RouterView } from 'vue-router'
   import LoadScreen from './components/LoadScreen.vue'
   import ActionBar from './components/ActionBar.vue'
   import PageTitle from './components/PageTitle.vue'
   import PageFooter from './components/PageFooter.vue'
-  import type { RouteLocationNormalized } from 'vue-router'
   import { usePhotoStore } from '@/stores/photoStore'
   import { useUiStore } from '@/stores/uiStore'
 
+  const photoStore = usePhotoStore()
   const uiStore = useUiStore()
-  const photoShootStore = usePhotoStore()
-  const router = useRouter()
 
-  function getTransitionKey(route: RouteLocationNormalized) {
-    if (route.name === 'campaigns') {
-      return `campaign-${route.params.id}`
-    }
-    if (route.name === 'portfolio') {
-      return `portfolio-${route.params.id}`
-    }
-    return route.path
-  }
+  onMounted(() => {
+    photoStore.fetchInitialPhotos()
+  })
 
-  // Set up route change detection (outside onMounted to avoid multiple registrations)
-  // router.beforeEach((to, from, next) => {
-  //   // If navigating to a specific photoshoot
-  //   if (to.name === 'portfolio' && to.params.id) {
-  //     const shootId = to.params.id
-  //     if (shootId && !isNaN(Number(shootId))) {
-  //       photoShootStore.prioritizePhotoShoot(Number(shootId))
-  //     }
-  //   }
-  //   next()
-  // })
 </script>
 
 <style>
