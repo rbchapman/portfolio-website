@@ -4,11 +4,10 @@
       <!-- Left: Section heading -->
       <div class="flex items-center overflow-hidden">
         <h1
-          class="bg-transparent transition-all duration-500  uppercase whitespace-nowrap"
+          class="bg-transparent cursor-pointer transition-all duration-500  uppercase whitespace-nowrap"
           :class="{
             'text-white opacity-100 cursor-pointer hover:text-white underline-offset-4 underline decoration-[0.25px]': 
-              isLeftSectionOpen && currentConfig.label !== 'Collections',
-            'opacity-70 cursor-default': !isLeftSectionOpen || currentConfig.label === 'Collections'
+              isToggled
           }"
           @click="toggleLeftSection"
         >
@@ -18,8 +17,8 @@
         <!-- Section content with conditional rendering based on type -->
         <div class="flex items-center ml-4 transition-all duration-500 overflow-hidden whitespace-nowrap"
           :class="{
-            'opacity-0 max-w-0': !isLeftSectionOpen,
-            'opacity-100 max-w-[800px]': isLeftSectionOpen
+            'opacity-0 max-w-0': !isToggled,
+            'opacity-100 max-w-[800px]': isToggled
           }"
         >
           <!-- Key-Value section (measurements) -->
@@ -38,7 +37,7 @@
                 :to="linkSection.baseRoute"
                 class="hover:text-white transition-opacity duration-200"
                 :class="{
-                  'text-white underline underline-offset-4 decoration-[0.25px]': !linkSection.activePath,
+                  'text-white': !linkSection.activePath,
                   'opacity-70': linkSection.activePath
                 }"
               >
@@ -51,12 +50,12 @@
               <span class="mx-2 opacity-50">|</span>
               <div class="flex items-center">
                 <router-link 
-                  :to="`${linkSection.baseRoute}/${item[linkSection.valueKey]}`"
+                  :to="`${item[linkSection.valueKey]}`"
                   class="hover:text-white transition-opacity duration-200"
                   :class="{
-                    'text-white underline underline-offset-4 decoration-[0.25px]': 
-                      uiStore.currentPageParams[linkSection.paramKey] === item[linkSection.valueKey],
-                    'opacity-70': uiStore.currentPageParams[linkSection.paramKey] !== item[linkSection.valueKey]
+                    'text-white': 
+                      route.params.location === item[linkSection.valueKey],
+                    'opacity-70': route.params.location !== item[linkSection.valueKey]
                   }"
                 >
                   {{ item[linkSection.displayKey || linkSection.valueKey] }}
@@ -99,24 +98,26 @@
   import { useRoute } from 'vue-router'
   import { useUiStore } from '@/stores/uiStore'
   import { usePhotoStore } from '@/stores/photoStore'
-  import { getActionBarConfig } from '@/config/actionBarConfig'
+  import { actionBarConfigs } from '@/config/actionBarConfig'
   import type { LinkSection, ListSection } from '@/types/actionBar'
+  import { siteConfig } from '@/utils/siteConfig'
 
   const route = useRoute()
-  const uiStore = useUiStore()
-  const photoShootStore = usePhotoStore()
+  const photoStore = usePhotoStore()
 
   // Determine the current configuration based on route
   const currentConfig = computed(() => {
-    let config = getActionBarConfig(route.name as string)
-    
+    if (siteConfig.isPortfolio) {
+    return actionBarConfigs.portfolio;
+  }
+  const config = actionBarConfigs.home
     // Update dynamic data for photography section
     if (config.section.type === 'links') {
       // Cast to the specific section type for better type safety
       const linkSection = config.section as LinkSection
       
       // Update with actual photoshoots data
-      linkSection.items = photoShootStore.photoShoots
+      linkSection.items = photoStore.collections
       linkSection.activePath = route.params.location as string || null
     }
     
@@ -133,11 +134,6 @@
 
   const isToggled = ref(false)
 
-  // Determine if section should be open based on route or user toggle
-  const isLeftSectionOpen = computed(() => 
-    isToggled.value || 
-    (currentConfig.value.section.type === 'links')
-  )
 
   const toggleLeftSection = () => {
     isToggled.value = !isToggled.value
