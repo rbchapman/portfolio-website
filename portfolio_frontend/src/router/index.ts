@@ -26,7 +26,7 @@ const router = createRouter({
 })
 
 // Add navigation guard for data loading and transitions
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to, from) => {
   const uiStore = useUiStore()
   const photoShootStore = usePhotoStore()
   // const campaignStore = useCampaignStore()
