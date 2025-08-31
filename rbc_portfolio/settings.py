@@ -86,6 +86,7 @@ INSTALLED_APPS = [
     
     # Local apps
     'portfolio_app',
+    'energy_analysis'
 ]
 
 # MIDDLEWARE CONFIGURATION
