@@ -1,7 +1,7 @@
 import type { ActionBarConfig, ActionBarConfigMap } from '@/types/actionBar'
 
 export const actionBarConfigs: ActionBarConfigMap = {
-  home: {
+  portfolio: {
     label: 'MEASUREMENTS',
     section: {
       type: 'keyValue',
@@ -14,35 +14,35 @@ export const actionBarConfigs: ActionBarConfigMap = {
       }
     },
     rightLinks: [
-      {
-        to: '/',
-        label: 'PHOTOS',
-        activeWhen: (route) => route.name === 'home' && !route.path.includes('/photography')
-      },
-      {
-        to: '/campaigns',
-        label: 'CAMPAIGNS',
-        activeWhen: (route) => route.name === 'campaigns'
-      }
+      // {
+      //   to: '/',
+      //   label: 'PHOTOS',
+      //   activeWhen: (route) => route.name === 'home' && !route.path.includes('/photography')
+      // },
+      // {
+      //   to: '/campaigns',
+      //   label: 'CAMPAIGNS',
+      //   activeWhen: (route) => route.name === 'campaigns'
+      // }
     ]
   },
   
-  photography: {
-    label: 'Collections',
+  home: {
+    label: 'Categories',
     section: {
       type: 'links',
-      baseRoute: '/photography',
+      baseRoute: '/',
       items: [],
       paramKey: 'location',
       valueKey: 'location',
       activePath: null
     },
     rightLinks: [
-      {
-        to: '/photography',
-        label: 'PHOTOGRAPHY',
-        activeWhen: (route) => route.path.includes('/photography')
-      }
+      // {
+      //   to: '/photography',
+      //   label: 'PHOTOGRAPHY',
+      //   activeWhen: (route) => route.path.includes('/photography')
+      // }
     ]
   },
   
