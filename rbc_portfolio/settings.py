@@ -52,7 +52,8 @@ if DEBUG:
         'http://127.0.0.1:3001',
         'http://localhost:5173',
         'http://127.0.0.1:5173',
-        'http://portfolio.localhost:3000'
+        'http://portfolio.localhost:3000',
+        'http://energy.localhost:3000'
     ]
     CSRF_TRUSTED_ORIGINS = [
         'http://localhost:3000',

@@ -1,17 +1,25 @@
 <template>
   <div class="h-full flex items-center">
-    <div class="max-w-[1500px] h-full mx-8 grid grid-cols-2 gap-6">
-      <!-- Left side - Featured Photo -->
-      <div class="h-full">
+    <div :class="[
+      'h-full mx-8 gap-6',
+      siteConfig.isEnergy ? 'flex w-full' : 'max-w-[1500px] grid grid-cols-2'
+    ]">
+      <!-- Left side - Chart/Featured Photo -->
+      <div :class="siteConfig.isEnergy ? 'flex-1' : 'h-full'">
+        <EnergyChart v-if="siteConfig.isEnergy" />
         <FeaturedPhoto
-          v-if="photoStore.featuredPhoto"
+          v-else-if="photoStore.featuredPhoto"
           :photo="photoStore.featuredPhoto"
         />
       </div>
 
-      <!-- Right side - Photo grid -->
-      <div class="h-full overflow-y-auto custom-scrollbar">
-        <PhotoGrid :photos="photoStore.gridPhotos" />
+      <!-- Right side - Panel/Photo grid -->
+      <div :class="[
+        'h-full overflow-y-auto custom-scrollbar',
+        siteConfig.isEnergy ? 'w-85' : ''
+      ]">
+        <DashboardPanel v-if="siteConfig.isEnergy" />
+        <PhotoGrid v-else :photos="photoStore.gridPhotos" />
       </div>
     </div>
 
@@ -29,10 +37,13 @@
   import PhotoModal from '../components/PhotoModal.vue'
   import FeaturedPhoto from '@/components/FeaturedPhoto.vue'
   import PhotoGrid from '@/components/PhotoGrid.vue'
+  import EnergyChart from '@/components/EnergyChart.vue'
+  import DashboardPanel from '@/components/DashboardPanel.vue'
   import { usePhotoStore } from '@/stores/photoStore'
   import { useUiStore } from '@/stores/uiStore'
   import { useRoute } from 'vue-router'
   import { watch, onMounted } from 'vue'
+  import { siteConfig } from '@/utils/siteConfig'
 
   const photoStore = usePhotoStore()
   const uiStore = useUiStore()
