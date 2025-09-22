@@ -31,9 +31,7 @@ class Command(BaseCommand):
             
         # Initialize ESIOS client
         try:
-            import os
-            token = os.environ.get('ESIOS_API_KEY')
-            client = esios.Esios(token)
+            client = esios.ESIOSClient()
             esios_indicator = client.endpoint('indicators').select(indicator_id)
         except Exception as e:
             self.stdout.write(self.style.ERROR(f'Failed to connect to ESIOS: {e}'))
