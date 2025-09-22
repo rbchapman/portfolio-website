@@ -14,14 +14,14 @@ function isSubdomain(subdomainName: string): boolean {
  * Check if the current domain is the portfolio subdomain
  */
 export function isPortfolio(): boolean {
-  return isSubdomain(import.meta.env.PORTFOLIO_SUBDOMAIN || 'portfolio')
+  return isSubdomain(import.meta.env.VITE_PORTFOLIO_SUBDOMAIN || 'portfolio')
 }
 
 /**
  * Check if the current domain is the energy subdomain
  */
 export function isEnergy(): boolean {
-  return isSubdomain(import.meta.env.ENERGY_SUBDOMAIN || 'energy')
+  return isSubdomain(import.meta.env.VITE_ENERGY_SUBDOMAIN || 'energy')
 }
 
 /**
