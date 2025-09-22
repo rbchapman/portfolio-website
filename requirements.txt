@@ -19,3 +19,5 @@ python-esios==0.2.7
 pandas
 numpy
 requests
+beautifulsoup4
+lxml
