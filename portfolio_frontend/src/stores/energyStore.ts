@@ -34,13 +34,19 @@ interface HourlyData {
     date: string
     hourly_data: HourlyData[]
     daily_insights: DailyInsights
+    data_quality?: { 
+      complete: boolean
+      total_hours: number
+      generation_hours: number
+      issues: string[]
+    }
   }
   
   export const useEnergyStore = defineStore('energy', {
     state: () => ({
       chartData: null as ChartData | null,
       loading: false,
-      selectedDate: '2024-06-02' 
+      selectedDate: '2024-05-02' 
     }),
 
   getters: {

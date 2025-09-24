@@ -7,8 +7,8 @@
         :class="{ 'cursor-default': uiStore.isHome }"
         @click.prevent="navigateToHome"
       >
-        <span class="font-['Inter'] text-6xl md:text-6xl lg:text-8xl font-medium tracking-tight">{{ boldText }}</span>
-        <span class="font-['Cormorant'] text-9xl font-light normal-case italic">{{ italicText }}</span>
+        <span class="font-['Inter'] text-6xl md:text-6xl lg:text-8xl font-medium tracking-tight">{{ displayBoldText }}</span>
+        <span class="font-['Cormorant'] text-9xl font-light normal-case italic">{{ displayItalicText }}</span>
       </router-link>
     </div>
   </div>
@@ -17,6 +17,8 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { useUiStore } from '@/stores/uiStore'
+import { siteConfig } from '@/utils/siteConfig'
+import { computed } from 'vue'
 
 const uiStore = useUiStore()
 
@@ -29,6 +31,14 @@ const props = defineProps({
     type: String,
     required: true
   }
+})
+
+const displayBoldText = computed(() => {
+  return siteConfig.isEnergy ? 'SpanishEnergy' : props.boldText
+})
+
+const displayItalicText = computed(() => {
+  return siteConfig.isEnergy ? 'Analysis' : props.italicText
 })
 
 const router = useRouter()

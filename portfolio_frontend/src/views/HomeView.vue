@@ -16,7 +16,7 @@
       <!-- Right side - Panel/Photo grid -->
       <div :class="[
         'h-full overflow-y-auto custom-scrollbar',
-        siteConfig.isEnergy ? 'w-85' : ''
+        siteConfig.isEnergy ? 'w-85 overflow-y-hidden' : ''
       ]">
         <DashboardPanel v-if="siteConfig.isEnergy" />
         <PhotoGrid v-else :photos="photoStore.gridPhotos" />
