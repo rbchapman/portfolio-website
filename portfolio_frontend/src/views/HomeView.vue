@@ -1,7 +1,7 @@
 <template>
   <div class="h-full flex items-center">
     <div :class="[
-      'h-full mx-8 gap-6',
+      'h-full mx-6 gap-6',
       siteConfig.isEnergy ? 'flex w-full' : 'max-w-[1500px] grid grid-cols-2'
     ]">
       <!-- Left side - Chart/Featured Photo -->

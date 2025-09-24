@@ -1,7 +1,7 @@
 <template>
-  <div class="h-full flex flex-col">
+  <div class="h-full my-4 flex flex-col">
     <!-- Sticky Date Picker Section -->
-    <div class="sticky top-0 z-10 bg-custom-dark bg-opacity-90 backdrop-blur-sm border-b border-custom-grey p-4">
+    <div class="sticky top-0 z-10 bg-custom-dark bg-opacity-90 backdrop-blur-sm border-b border-custom-grey py-4">
       
       <!-- Custom Date Picker -->
       <div class="relative">
@@ -19,17 +19,32 @@
           <div class="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent"></div>
         </div>
       </div>
-      <div class="flex items-center text-m text-custom-text mt-2">
-        <!-- <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span> -->
-        Data available for 2024 from Rede Elétrica de España (REE) via ESIOS API - some days are lacking data
+      
+      <!-- Navigation buttons -->
+      <div class="flex justify-between gap-2 mt-3">
+        <button 
+          @click="previousDay"
+          :disabled="energyStore.loading || localSelectedDate <= minDate"
+          class="w-24 h-8 flex items-center justify-center bg-custom-grey bg-opacity-30 border border-custom-text border-opacity-30 rounded text-white text-sm hover:bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          ←
+        </button>
+         <div class="text-xs text-custom-text text-center">
+          2024 data - Rede Elétrica de España via ESIOS API
+        </div>
+        <button 
+          @click="nextDay"
+          :disabled="energyStore.loading || localSelectedDate >= maxDate"
+          class="w-24 h-8 flex items-center justify-center bg-custom-grey bg-opacity-30 border border-custom-text border-opacity-30 rounded text-white text-sm hover:bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          →
+        </button>
       </div>
     </div>
 
     <!-- Content Section -->
     <div class="flex-1 overflow-y-auto custom-scrollbar space-y-4">
-      <div class="text-center border-custom-text border-opacity-10">
-        <span class="text-xs text-custom-text opacity-75">↓ Scroll for analysis details</span>
-      </div>
+     
       <!-- Quick Stats -->
       <div v-if="energyStore.chartData" class="grid grid-cols-2 gap-4">
         <div class="bg-custom-grey bg-opacity-30 rounded-lg p-4 border border-custom-text border-opacity-20">
@@ -61,7 +76,7 @@
         </ul>
       </div>
 
-            <!-- Project Overview -->
+      <!-- Project Overview -->
       <div class="bg-custom-grey bg-opacity-50 rounded-lg p-6 border border-custom-text border-opacity-20">
         <h3 class="text-lg font-medium text-white mb-3">Energy Sector Analysis</h3>
         <p class="text-custom-text text-sm leading-relaxed">
@@ -76,7 +91,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useEnergyStore } from '@/stores/energyStore'
 
 const energyStore = useEnergyStore()
@@ -98,6 +113,39 @@ const averageVRE = computed(() => {
   if (!energyStore.chartData?.daily_insights) return '0%'
   return `${energyStore.chartData.daily_insights.avg_vre_pct}%`
 })
+
+// Navigation functions
+const previousDay = async () => {
+  if (localSelectedDate.value <= minDate || energyStore.loading) return
+  
+  const currentDate = new Date(localSelectedDate.value)
+  currentDate.setDate(currentDate.getDate() - 1)
+  localSelectedDate.value = currentDate.toISOString().split('T')[0]
+  await energyStore.fetchChartData(localSelectedDate.value)
+}
+
+const nextDay = async () => {
+  if (localSelectedDate.value >= maxDate || energyStore.loading) return
+  
+  const currentDate = new Date(localSelectedDate.value)
+  currentDate.setDate(currentDate.getDate() + 1)
+  localSelectedDate.value = currentDate.toISOString().split('T')[0]
+  await energyStore.fetchChartData(localSelectedDate.value)
+}
+
+// Keyboard event handler
+const handleKeyPress = (event: KeyboardEvent) => {
+  // Only handle if no input is focused
+  if (document.activeElement?.tagName === 'INPUT') return
+  
+  if (event.key === 'ArrowLeft' || event.key === 'l' || event.key === 'L') {
+    event.preventDefault()
+    previousDay()
+  } else if (event.key === 'ArrowRight' || event.key === 'r' || event.key === 'R') {
+    event.preventDefault()
+    nextDay()
+  }
+}
 
 // Format date for display
 const formatDisplayDate = (dateString: string): string => {
@@ -122,12 +170,20 @@ watch(() => energyStore.selectedDate, (newDate) => {
   localSelectedDate.value = newDate
 })
 
-// Initialize on mount
+// Initialize on mount and add keyboard listener
 onMounted(() => {
   // Ensure we have initial data
   if (!energyStore.chartData) {
     energyStore.fetchChartData()
   }
+  
+  // Add keyboard event listener
+  window.addEventListener('keydown', handleKeyPress)
+})
+
+// Clean up keyboard listener
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyPress)
 })
 </script>
 
