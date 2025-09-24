@@ -1,5 +1,8 @@
 <template>
   <div class="h-full w-full p-4 flex flex-col">
+    <!-- <h3 class="text-white text-base font-normal mb-2 ml-12">
+      VARIABLE RENEWABLE GENERATION & DEMAND
+    </h3> -->
     <div class="flex-1 min-h-0">
       <Line :data="chartData" :options="chartOptions" class="h-full" />
     </div>
@@ -62,8 +65,8 @@ const chartOptions = {
   plugins: {
     title: {
       display: true,
-      text: 'Spanish Variable Renewable Energy Generation & Demand',
-      color: '#ffffff',
+      text: 'VARIABLE RENEWABLE GENERATION & DEMAND',
+      color: 'rgba(245, 245, 245, 0.9)',
       font: {
         size: 16,
         weight: 'normal' as const
