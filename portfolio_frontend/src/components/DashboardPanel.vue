@@ -68,10 +68,10 @@
             <span class="w-1.5 h-1.5 bg-yellow-500 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
             Load Shift Opportunity: {{ energyStore.chartData.daily_insights.load_balancing_gap_hours }}h gap between demand peak ({{ energyStore.chartData.daily_insights.shift_from_hour }}) and VRE peak ({{ energyStore.chartData.daily_insights.shift_to_hour }})
           </li>
-          <li class="flex items-start" v-if="energyStore.chartData.daily_insights.flexibility_window_start">
+          <!-- <li class="flex items-start" v-if="energyStore.chartData.daily_insights.flexibility_window_start">
             <span class="w-1.5 h-1.5 bg-green-500 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
             Flexibility Window: {{ energyStore.chartData.daily_insights.high_vre_window_hours }}h sustained high-VRE period ({{ energyStore.chartData.daily_insights.flexibility_window_start }}-{{ energyStore.chartData.daily_insights.flexibility_window_end }})
-          </li>
+          </li> -->
         </ul>
       </div>
 
