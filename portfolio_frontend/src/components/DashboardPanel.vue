@@ -81,7 +81,7 @@
         <p class="text-custom-text text-sm leading-relaxed">
           This project builds on my master's thesis focused on international energy markets, where I aimed to understand the sector's mechanisms in order to contribute to the further integration of renewable energy sources and drive the energy transition forward. 
           I chose Spain as a case study because of its excellent renewable resources (especially solar PV) and the increasing occurrence of negative prices. 
-          This market signal is a quintessential example of the limitations of the legacy system and infrastructure that wasn't designed to handle intermittent generation patterns and highlights the need for more sophisticated grid management. 
+          This market signal is a quintessential example of the limitations of the legacy system. Today's infrastructure wasn't designed to handle intermittent generation patterns and highlights the need for more sophisticated grid management. 
           The objective is to incrementally introduce more ESIOS energy indicators to better capture the true complexity of this multifaceted puzzle that the grid represents, ultimately delivering valuable insights for achieving net-zero electricity supply.
         </p>
       </div>
