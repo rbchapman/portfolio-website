@@ -11,7 +11,7 @@
           @change="handleDateChange"
           :min="minDate"
           :max="maxDate"
-          class="w-full px-4 py-3 bg-custom-grey bg-opacity-30 border border-custom-text border-opacity-30 rounded-lg text-white placeholder-custom-text focus:outline-none  focus:border-transparent transition-all duration-200 cursor-pointer hover:bg-opacity-80"
+          class="w-full px-4 py-3 bg-custom-grey bg-opacity-30 border border-custom-text border-opacity-30 rounded-lg text-white placeholder-custom-text focus:outline-none focus:border-transparent transition-all duration-200 cursor-pointer hover:bg-opacity-80"
           :disabled="energyStore.loading"
         />
         <!-- Loading indicator -->
@@ -25,7 +25,7 @@
         <button 
           @click="previousDay"
           :disabled="energyStore.loading || localSelectedDate <= minDate"
-          class="w-24 h-8 flex items-center justify-center bg-custom-grey bg-opacity-30 border border-custom-text border-opacity-30 rounded text-white text-sm hover:bg-opacity-80 focus:outline-none  transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="w-24 h-8 flex items-center justify-center bg-custom-grey bg-opacity-30 border border-custom-text border-opacity-30 rounded text-white text-sm hover:bg-opacity-80 focus:outline-none transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           ←
         </button>
@@ -35,7 +35,7 @@
         <button 
           @click="nextDay"
           :disabled="energyStore.loading || localSelectedDate >= maxDate"
-          class="w-24 h-8 flex items-center justify-center bg-custom-grey bg-opacity-30 border border-custom-text border-opacity-30 rounded text-white text-sm hover:bg-opacity-80 focus:outline-none  transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="w-24 h-8 flex items-center justify-center bg-custom-grey bg-opacity-30 border border-custom-text border-opacity-30 rounded text-white text-sm hover:bg-opacity-80 focus:outline-none transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           →
         </button>
@@ -51,27 +51,27 @@
           <div class="text-xs text-custom-text">Peak VRE Penetration</div>
         </div>
         <div class="bg-custom-grey bg-opacity-30 rounded-lg p-4 border border-custom-text border-opacity-20">
-          <div class="text-2xl font-light text-white">{{ averageVRE }}</div>
-          <div class="text-xs text-custom-text">Average VRE Penetration</div>
+          <div class="text-2xl font-light text-white">{{ sustainedHighVRE }}</div>
+          <div class="text-xs text-custom-text">Sustained High VRE Hours</div>
         </div>
       </div>
 
-      <!-- Analysis Notes -->
+      <!-- Grid Flexibility Insights -->
       <div v-if="energyStore.chartData?.daily_insights" class="bg-custom-grey bg-opacity-30 rounded-lg p-4 border border-custom-text border-opacity-20">
-        <h4 class="text-sm font-medium text-white mb-2">Grid Flexibility Insights</h4>
+        <h4 class="text-sm font-medium text-white mb-2">Grid Flexibility Analysis</h4>
         <ul class="space-y-2 text-xs text-custom-text">
           <li class="flex items-start">
+            <span class="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
+            Net Load Ramping: {{ energyStore.chartData.daily_insights.max_ramp_gw }}GW swing during {{ energyStore.chartData.daily_insights.ramp_window }} requiring fast-response reserves
+          </li>
+          <li class="flex items-start">
             <span class="w-1.5 h-1.5 bg-yellow-500 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
-            Load Balancing Gap: Shift {{ energyStore.chartData.daily_insights.optimal_shift_amount }}GW from {{ energyStore.chartData.daily_insights.shift_from_hour }} ({{ energyStore.chartData.daily_insights.shift_from_vre_pct }}% VRE) to {{ energyStore.chartData.daily_insights.shift_to_hour }} ({{ energyStore.chartData.daily_insights.shift_to_vre_pct }}% VRE)
+            Load Shift Opportunity: {{ energyStore.chartData.daily_insights.load_balancing_gap_hours }}h gap between demand peak ({{ energyStore.chartData.daily_insights.shift_from_hour }}) and VRE peak ({{ energyStore.chartData.daily_insights.shift_to_hour }})
           </li>
           <li class="flex items-start" v-if="energyStore.chartData.daily_insights.flexibility_window_start">
             <span class="w-1.5 h-1.5 bg-green-500 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
-            Sustained High VRE: {{ energyStore.chartData.daily_insights.high_vre_window_hours }}-hour window ({{ energyStore.chartData.daily_insights.flexibility_window_start }}-{{ energyStore.chartData.daily_insights.flexibility_window_end }}) ideal for flexible loads
+            Flexibility Window: {{ energyStore.chartData.daily_insights.high_vre_window_hours }}h sustained high-VRE period ({{ energyStore.chartData.daily_insights.flexibility_window_start }}-{{ energyStore.chartData.daily_insights.flexibility_window_end }})
           </li>
-          <!-- <li class="flex items-start">
-            <span class="w-1.5 h-1.5 bg-red-500 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
-            System Stress Signal: Peak generation at {{ energyStore.chartData.daily_insights.peak_vre_hour }}, peak demand at {{ energyStore.chartData.daily_insights.shift_from_hour }} ({{ energyStore.chartData.daily_insights.shift_from_vre_pct }}% VRE at demand peak)
-          </li> -->
         </ul>
       </div>
 
@@ -98,7 +98,7 @@ const energyStore = useEnergyStore()
 // Local reactive date for the input
 const localSelectedDate = ref(energyStore.selectedDate)
 
-// Date constraints for 2024
+// Date constraints
 const minDate = '2020-01-01'
 const maxDate = new Date().toISOString().split('T')[0]
 
@@ -108,9 +108,9 @@ const peakVRE = computed(() => {
   return `${energyStore.chartData.daily_insights.peak_vre_pct}%`
 })
 
-const averageVRE = computed(() => {
-  if (!energyStore.chartData?.daily_insights) return '0%'
-  return `${energyStore.chartData.daily_insights.avg_vre_pct}%`
+const sustainedHighVRE = computed(() => {
+  if (!energyStore.chartData?.daily_insights) return '0h'
+  return `${energyStore.chartData.daily_insights.high_vre_window_hours}h`
 })
 
 // Navigation functions
@@ -134,7 +134,6 @@ const nextDay = async () => {
 
 // Keyboard event handler
 const handleKeyPress = (event: KeyboardEvent) => {
-  // Only handle if no input is focused
   if (document.activeElement?.tagName === 'INPUT') return
   
   if (event.key === 'ArrowLeft' || event.key === 'l' || event.key === 'L') {
@@ -146,37 +145,29 @@ const handleKeyPress = (event: KeyboardEvent) => {
   }
 }
 
-// Handle date change
 const handleDateChange = async () => {
   if (localSelectedDate.value !== energyStore.selectedDate) {
     await energyStore.fetchChartData(localSelectedDate.value)
   }
 }
 
-// Sync local date with store when store updates
 watch(() => energyStore.selectedDate, (newDate) => {
   localSelectedDate.value = newDate
 })
 
-// Initialize on mount and add keyboard listener
 onMounted(() => {
-  // Ensure we have initial data
   if (!energyStore.chartData) {
     energyStore.fetchChartData()
   }
-  
-  // Add keyboard event listener
   window.addEventListener('keydown', handleKeyPress)
 })
 
-// Clean up keyboard listener
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyPress)
 })
 </script>
 
 <style scoped>
-/* Custom scrollbar styling */
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
@@ -199,7 +190,6 @@ onUnmounted(() => {
   background-color: rgba(255, 255, 255, 0.3);
 }
 
-/* Custom date input styling */
 input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(1);
   cursor: pointer;

@@ -97,9 +97,9 @@ const chartOptions = {
           if (!hourData) return ''
           
           if (context.datasetIndex === 0) { // Solar
-            return `Solar: ${hourData.solar}GW | Total VRE: ${hourData.vre_pct}%`
+            return `Solar: ${hourData.solar}GW`
           } else if (context.datasetIndex === 1) { // Wind
-            return `Wind: ${hourData.wind}GW | Total VRE: ${hourData.vre_pct}%`
+            return `Wind: ${hourData.wind}GW`
           } else { // Demand
             return `Demand: ${hourData.demand}GW`
           }

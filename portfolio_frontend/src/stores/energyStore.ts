@@ -28,6 +28,10 @@ interface HourlyData {
     high_vre_window_hours: number
     flexibility_window_start: string | null
     flexibility_window_end: string | null
+
+    max_ramp_gw: number
+    ramp_window: string
+    load_balancing_gap_hours: number
   }
   
   interface ChartData {
