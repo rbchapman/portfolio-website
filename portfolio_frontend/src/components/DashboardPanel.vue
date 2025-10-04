@@ -47,31 +47,31 @@
       <!-- Quick Stats -->
       <div v-if="energyStore.chartData" class="grid grid-cols-2 gap-4">
         <div class="bg-custom-grey bg-opacity-30 rounded-lg p-4 border border-custom-text border-opacity-20">
-          <div class="text-2xl font-light text-white">{{ peakVRE }}</div>
-          <div class="text-xs text-custom-text">Peak VRE Penetration</div>
+          <div class="text-2xl font-light text-white">{{ peakVREOutput }}</div>
+          <div class="text-xs text-custom-text">Peak Combined VRE Output ({{ peakVRE }} penetration)</div>
         </div>
         <div class="bg-custom-grey bg-opacity-30 rounded-lg p-4 border border-custom-text border-opacity-20">
-          <div class="text-2xl font-light text-white">{{ sustainedHighVRE }}</div>
-          <div class="text-xs text-custom-text">Sustained High VRE Hours</div>
+          <div class="text-2xl font-light text-white">{{ minConventionalNeed }}</div>
+          <div class="text-xs text-custom-text">Minimum Conventional Generation Required</div>
         </div>
       </div>
 
-      <!-- Grid Flexibility Insights -->
-      <div v-if="energyStore.chartData?.daily_insights" class="bg-custom-grey bg-opacity-30 rounded-lg p-4 border border-custom-text border-opacity-20">
-        <h4 class="text-sm font-medium text-white mb-2">Grid Flexibility Analysis</h4>
+      <!-- Grid Balance Summary -->
+      <div v-if="energyStore.chartData?.hourly_data" class="bg-custom-grey bg-opacity-30 rounded-lg p-4 border border-custom-text border-opacity-20">
+        <h4 class="text-sm font-medium text-white mb-2">Grid Balance Summary</h4>
         <ul class="space-y-2 text-xs text-custom-text">
           <li class="flex items-start">
             <span class="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
-            Net Load Ramping: {{ energyStore.chartData.daily_insights.max_ramp_gw }}GW swing during {{ energyStore.chartData.daily_insights.ramp_window }} requiring fast-response reserves
+            Tightest operating hour: {{ tightestHour }} ({{ minConventionalNeed }} conventional capacity needed)
           </li>
           <li class="flex items-start">
             <span class="w-1.5 h-1.5 bg-yellow-500 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
-            Load Shift Opportunity: {{ energyStore.chartData.daily_insights.load_balancing_gap_hours }}h gap between demand peak ({{ energyStore.chartData.daily_insights.shift_from_hour }}) and VRE peak ({{ energyStore.chartData.daily_insights.shift_to_hour }})
+            Largest VRE swing: {{ largestVRESwing }} ({{ vreSwingWindow }})
           </li>
-          <!-- <li class="flex items-start" v-if="energyStore.chartData.daily_insights.flexibility_window_start">
+          <li class="flex items-start">
             <span class="w-1.5 h-1.5 bg-green-500 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
-            Flexibility Window: {{ energyStore.chartData.daily_insights.high_vre_window_hours }}h sustained high-VRE period ({{ energyStore.chartData.daily_insights.flexibility_window_start }}-{{ energyStore.chartData.daily_insights.flexibility_window_end }})
-          </li> -->
+            Hours with VRE providing >70% of demand: {{ highVREHours }}h
+          </li>
         </ul>
       </div>
 
@@ -107,10 +107,59 @@ const peakVRE = computed(() => {
   if (!energyStore.chartData?.daily_insights) return '0%'
   return `${energyStore.chartData.daily_insights.peak_vre_pct}%`
 })
+const peakVREOutput = computed(() => {
+  if (!energyStore.chartData?.hourly_data) return '0GW'
+  const maxVRE = Math.max(...energyStore.chartData.hourly_data.map(d => d.wind + d.solar))
+  return `${maxVRE.toFixed(1)}GW`
+})
 
-const sustainedHighVRE = computed(() => {
-  if (!energyStore.chartData?.daily_insights) return '0h'
-  return `${energyStore.chartData.daily_insights.high_vre_window_hours}h`
+const minConventionalNeed = computed(() => {
+  if (!energyStore.chartData?.hourly_data) return '0GW'
+  const minGap = Math.min(...energyStore.chartData.hourly_data.map(d => d.demand - (d.wind + d.solar)))
+  return `${minGap.toFixed(1)}GW`
+})
+
+const tightestHour = computed(() => {
+  if (!energyStore.chartData?.hourly_data) return '00:00'
+  const hourlyData = energyStore.chartData.hourly_data
+  const gaps = hourlyData.map(d => d.demand - (d.wind + d.solar))
+  const minIdx = gaps.indexOf(Math.min(...gaps))
+  return hourlyData[minIdx].hour
+})
+
+const largestVRESwing = computed(() => {
+  if (!energyStore.chartData?.hourly_data) return '0GW'
+  const vreData = energyStore.chartData.hourly_data.map(d => d.wind + d.solar)
+  const swings = []
+  for (let i = 1; i < vreData.length; i++) {
+    swings.push(Math.abs(vreData[i] - vreData[i-1]))
+  }
+  return `${Math.max(...swings).toFixed(1)}GW`
+})
+
+const vreSwingWindow = computed(() => {
+  if (!energyStore.chartData?.hourly_data) return ''
+  const vreData = energyStore.chartData.hourly_data.map(d => d.wind + d.solar)
+  let maxSwing = 0
+  let maxIdx = 0
+  for (let i = 1; i < vreData.length; i++) {
+    const swing = Math.abs(vreData[i] - vreData[i-1])
+    if (swing > maxSwing) {
+      maxSwing = swing
+      maxIdx = i
+    }
+  }
+  const startHour = energyStore.chartData.hourly_data[maxIdx - 1].hour
+  const endHour = energyStore.chartData.hourly_data[maxIdx].hour
+  return `${startHour}-${endHour}`
+})
+
+const highVREHours = computed(() => {
+  if (!energyStore.chartData?.hourly_data) return '0'
+  return energyStore.chartData.hourly_data.filter(d => {
+    const vre = d.wind + d.solar
+    return (vre / d.demand) > 0.7
+  }).length
 })
 
 // Navigation functions
@@ -166,32 +215,3 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyPress)
 })
 </script>
-
-<style scoped>
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 3px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.3);
-}
-
-input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(1);
-  cursor: pointer;
-}
-</style>
