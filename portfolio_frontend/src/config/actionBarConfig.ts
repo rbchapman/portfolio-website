@@ -45,6 +45,25 @@ export const actionBarConfigs: ActionBarConfigMap = {
       // }
     ]
   },
+  energy: {
+    label: '',
+    section: {
+      type: 'keyValue',
+      items: {}
+    },
+    rightLinks: [
+    {
+      to: '/',
+      label: 'NET LOAD',
+      activeWhen: (route) => route.path === '/'
+    },
+    {
+      to: '/vre',
+      label: 'VRE',
+      activeWhen: (route) => route.path === '/vre'
+    }
+  ]
+  },
   
   dev: {
     label: 'TECH STACK',

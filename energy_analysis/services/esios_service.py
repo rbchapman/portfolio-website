@@ -120,9 +120,9 @@ class EsiosService:
             hour_str = timestamp.strftime('%H:00')
             
             # Get values, defaulting to 0 if missing
-            demand = float(row.get('demand', 0))
-            solar = float(row.get('solar', 0)) 
-            wind = float(row.get('wind', 0))
+            demand = float(row.get('demand', 0)) / 1000
+            solar = float(row.get('solar', 0)) / 1000
+            wind = float(row.get('wind', 0)) / 1000
             vre_total = solar + wind
             
             # Calculate percentages (avoid division by zero)

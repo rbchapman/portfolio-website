@@ -2,7 +2,7 @@
   <LoadScreen v-if="!siteConfig.isEnergy"/>
   <div class="h-screen flex flex-col">
     <PageTitle boldText="RileyBenjamin" italicText="Chapman" />
-    <ActionBar v-if="!siteConfig.isEnergy"/>
+    <ActionBar />
     
     <main class="flex-1 flex overflow-hidden">
       <RouterView v-slot="{ Component }">
