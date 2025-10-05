@@ -1,8 +1,5 @@
 <template>
   <div class="h-full w-full p-4 flex flex-col">
-    <!-- <h3 class="text-white text-base font-normal mb-2 ml-12">
-      VARIABLE RENEWABLE GENERATION & DEMAND
-    </h3> -->
     <div class="flex-1 min-h-0">
       <Line :data="chartData" :options="chartOptions" class="h-full" />
     </div>
@@ -27,33 +24,34 @@ const chartData = computed(() => {
   if (!energyStore.chartData?.hourly_data) return { labels: [], datasets: [] }
     
   const data = energyStore.chartData.hourly_data
+  const netLoad = data.map(d => d.demand - (d.wind + d.solar))
     
   return {
     labels: data.map(d => d.hour),
     datasets: [
       {
-        label: 'Solar PV',
-        data: data.map(d => d.solar),
-        backgroundColor: 'rgba(251, 191, 36, 0.6)',
-        borderColor: '#fbbf24',
+        label: 'Net Load',
+        data: netLoad,
+        backgroundColor: 'rgba(6, 182, 212, 0.5)',  // Just solid cyan
+        borderColor: '#06b6d4',
+        borderWidth: 2,
         fill: 'origin',
-        tension: 0.4
+        tension: 0.4,
+        pointRadius: 0,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: '#06b6d4'
       },
       {
-        label: 'Wind',
-        data: data.map(d => d.wind + d.solar),
-        backgroundColor: 'rgba(16, 185, 129, 0.6)',
-        borderColor: '#10b981',
-        fill: '-1',
-        tension: 0.4
-      },
-      {
-        label: 'Demand',
+        label: 'Total Demand',
         data: data.map(d => d.demand),
-        borderColor: '#3b82f6',
-        backgroundColor: 'transparent',
+        borderColor: '#9ca3af',
+        borderDash: [5, 5],
+        borderWidth: 2,
         fill: false,
-        tension: 0.4
+        tension: 0.4,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        pointHoverBackgroundColor: '#9ca3af'
       }
     ]
   }
@@ -62,10 +60,14 @@ const chartData = computed(() => {
 const chartOptions = {
   responsive: true,
   maintainAspectRatio: false,
+  interaction: {
+    mode: 'index' as const,
+    intersect: false
+  },
   plugins: {
     title: {
       display: true,
-      text: 'VARIABLE RENEWABLE GENERATION & DEMAND',
+      text: 'NET LOAD: RESIDUAL DEMAND AFTER VARIABLE RENEWABLES',
       color: 'rgba(245, 245, 245, 0.9)',
       font: {
         size: 16,
@@ -79,7 +81,7 @@ const chartOptions = {
     legend: {
       position: 'bottom' as const,
       labels: {
-        color: '#ffffff',
+        color: '#e5e7eb',
         font: {
           size: 12
         },
@@ -88,21 +90,41 @@ const chartOptions = {
       }
     },
     tooltip: {
+      backgroundColor: 'rgba(17, 24, 39, 0.95)',
+      titleColor: '#f3f4f6',
+      bodyColor: '#d1d5db',
+      borderColor: '#374151',
+      borderWidth: 1,
+      padding: 12,
       callbacks: {
-        title: function() {
-          return '' // Remove hour display
+        title: function(context: any) {
+          return context[0].label
         },
         label: function(context: any) {
           const hourData = energyStore.chartData?.hourly_data[context.dataIndex]
           if (!hourData) return ''
           
-          if (context.datasetIndex === 0) { // Solar
-            return `Solar: ${hourData.solar}GW`
-          } else if (context.datasetIndex === 1) { // Wind
-            return `Wind: ${hourData.wind}GW`
-          } else { // Demand
-            return `Demand: ${hourData.demand}GW`
+          if (context.datasetIndex === 0) {
+            const netLoad = hourData.demand - (hourData.wind + hourData.solar)
+            let status = ''
+            if (netLoad < 3) status = ' (Very tight - minimal headroom)'
+            else if (netLoad < 8) status = ' (Moderate flexibility available)'
+            return `Net Load: ${netLoad.toFixed(1)}GW${status}`
+          } else {
+            return `Total Demand: ${hourData.demand.toFixed(1)}GW`
           }
+        },
+        afterLabel: function(context: any) {
+          if (context.datasetIndex === 0) {
+            const hourData = energyStore.chartData?.hourly_data[context.dataIndex]
+            if (!hourData) return ''
+            return [
+              `Wind: ${hourData.wind.toFixed(1)}GW`,
+              `Solar: ${hourData.solar.toFixed(1)}GW`,
+              `VRE Total: ${(hourData.wind + hourData.solar).toFixed(1)}GW`
+            ]
+          }
+          return ''
         }
       }
     }
@@ -110,10 +132,10 @@ const chartOptions = {
   scales: {
     x: {
       ticks: {
-        color: '#ffffff70'
+        color: '#9ca3af'
       },
       grid: {
-        color: 'rgba(255, 255, 255, 0.1)'
+        color: 'rgba(156, 163, 175, 0.1)'
       }
     },
     y: {
@@ -121,13 +143,13 @@ const chartOptions = {
       title: {
         display: true,
         text: 'GW',
-        color: '#ffffff'
+        color: '#e5e7eb'
       },
       ticks: {
-        color: '#ffffff70'
+        color: '#9ca3af'
       },
       grid: {
-        color: 'rgba(255, 255, 255, 0.1)'
+        color: 'rgba(156, 163, 175, 0.1)'
       }
     }
   }

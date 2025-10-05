@@ -108,7 +108,10 @@
   // Determine the current configuration based on route
   const currentConfig = computed(() => {
     if (siteConfig.isPortfolio) {
-    return actionBarConfigs.portfolio;
+    return actionBarConfigs.portfolio
+  }
+  if (siteConfig.isEnergy) {
+    return actionBarConfigs.energy
   }
   const config = actionBarConfigs.home
     // Update dynamic data for photography section

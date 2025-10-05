@@ -6,7 +6,8 @@
     ]">
       <!-- Left side - Chart/Featured Photo -->
       <div :class="siteConfig.isEnergy ? 'flex-1' : 'h-full'">
-        <EnergyChart v-if="siteConfig.isEnergy" />
+        <VREEnergyChart v-if="siteConfig.isEnergy && isVREView" />
+        <EnergyChart v-else-if="siteConfig.isEnergy" />
         <FeaturedPhoto
           v-else-if="photoStore.featuredPhoto"
           :photo="photoStore.featuredPhoto"
@@ -18,7 +19,8 @@
         'h-full overflow-y-auto custom-scrollbar',
         siteConfig.isEnergy ? 'w-85 overflow-y-hidden' : ''
       ]">
-        <DashboardPanel v-if="siteConfig.isEnergy" />
+        <VREDashboardPanel v-if="siteConfig.isEnergy && isVREView" />
+        <DashboardPanel v-else-if="siteConfig.isEnergy" />
         <PhotoGrid v-else :photos="photoStore.gridPhotos" />
       </div>
     </div>
@@ -38,11 +40,13 @@
   import FeaturedPhoto from '@/components/FeaturedPhoto.vue'
   import PhotoGrid from '@/components/PhotoGrid.vue'
   import EnergyChart from '@/components/EnergyChart.vue'
+  import VREEnergyChart from '@/components/VREEnergyChart.vue'
+  import VREDashboardPanel from '@/components/VREDashboardPanel.vue'
   import DashboardPanel from '@/components/DashboardPanel.vue'
   import { usePhotoStore } from '@/stores/photoStore'
   import { useUiStore } from '@/stores/uiStore'
   import { useRoute } from 'vue-router'
-  import { watch, onMounted } from 'vue'
+  import { watch, onMounted, computed } from 'vue'
   import { siteConfig } from '@/utils/siteConfig'
 
   const photoStore = usePhotoStore()
@@ -59,6 +63,8 @@
     })
     photoStore.displayPhotos = photos
   }
+
+  const isVREView = computed(() => route.path === '/vre')
 
   onMounted(() => {
     updateDisplayPhotos()
