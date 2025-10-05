@@ -69,7 +69,7 @@
           </li>
           <li class="flex items-start">
             <span class="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
-            Baseload constraint: {{ tightHours }} with net load 8GW - limited capacity for inflexible generation
+            Baseload constraint: {{ tightHours }} potential oversupply risk
           </li>
         </ul>
       </div>
@@ -150,13 +150,20 @@
   })
 
   const tightHours = computed(() => {
-    if (!energyStore.chartData?.hourly_data) return '0h'
-    const count = energyStore.chartData.hourly_data.filter(d => {
-      const netLoad = d.demand - (d.wind + d.solar)
-      return netLoad < 8
-    }).length
-    return `${count}h`
-  })
+  if (!energyStore.chartData?.hourly_data) return '0h'
+
+  const hourly = energyStore.chartData.hourly_data
+  const netLoads = hourly.map(d => d.demand - (d.wind + d.solar))
+
+  // 20th percentile
+  const sorted = [...netLoads].sort((a, b) => a - b)
+  const idx = Math.floor(sorted.length * 0.2)
+  const percentile20 = sorted[idx]
+
+  const count = netLoads.filter(nl => nl < percentile20).length
+  return `${count}h (<${percentile20.toFixed(1)} GW)`
+})
+
 
   const maxRampRate = computed(() => {
     if (!energyStore.chartData?.hourly_data) return '0GW/h'
