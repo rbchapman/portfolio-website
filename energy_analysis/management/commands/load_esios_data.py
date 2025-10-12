@@ -81,10 +81,9 @@ class Command(BaseCommand):
         total_created = total_updated = 0
 
         while current_start <= end_date:
-            chunk_end = min(
-                current_start + timedelta(days=chunk_days),
-                end_date
-            )
+            chunk_end = min(current_start + timedelta(days=chunk_days - 1, hours=23, minutes=59, seconds=59),
+            end_date
+        )
             
             resolution_display = resolution or "native"
             self.stdout.write(f"Fetching {resolution_display} chunk: {current_start.date()} to {chunk_end.date()}")
@@ -108,7 +107,7 @@ class Command(BaseCommand):
             except Exception as e:
                 self.stdout.write(self.style.WARNING(f"  Chunk failed: {e}"))
                 
-            current_start = chunk_end + timedelta(days=1)
+            current_start = chunk_end + timedelta(seconds=1)
 
         return total_created, total_updated
 
@@ -118,10 +117,18 @@ class Command(BaseCommand):
         
         api_params = {
             'start': start.isoformat(),
-            'end': end.isoformat(),
-            'geo_trunc': 'electric_system',
-            'geo_agg': 'sum'
+            'end': end.isoformat()
         }
+
+        # Price indicator needs geo_ids filter for Spain only
+        if indicator_id == 600:
+            api_params['geo_ids'] = [3]  # Spain
+        else:
+            # Other indicators use geo aggregation
+            api_params.update({
+                'geo_trunc': 'electric_system',
+                'geo_agg': 'sum'
+            })
         
         # Add time aggregation when resolution is specified
         if resolution:
