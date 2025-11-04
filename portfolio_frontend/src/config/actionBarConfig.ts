@@ -58,6 +58,11 @@ export const actionBarConfigs: ActionBarConfigMap = {
       activeWhen: (route) => route.path === '/'
     },
     {
+      to: '/price',
+      label: 'PRICE',
+      activeWhen: (route) => route.path === '/price'
+    },
+    {
       to: '/vre',
       label: 'VRE',
       activeWhen: (route) => route.path === '/vre'

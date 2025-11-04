@@ -10,6 +10,8 @@ interface HourlyData {
     solar_pct: number
     wind_pct: number
     vre_pct: number
+    net_load: number
+    price: number
   }
   
   interface DailyInsights {
