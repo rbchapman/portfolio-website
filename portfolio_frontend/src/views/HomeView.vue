@@ -7,6 +7,7 @@
       <!-- Left side - Chart/Featured Photo -->
       <div :class="siteConfig.isEnergy ? 'flex-1' : 'h-full'">
         <VREEnergyChart v-if="siteConfig.isEnergy && isVREView" />
+        <PriceChart v-else-if="siteConfig.isEnergy && isPriceView" />
         <EnergyChart v-else-if="siteConfig.isEnergy" />
         <FeaturedPhoto
           v-else-if="photoStore.featuredPhoto"
@@ -20,6 +21,7 @@
         siteConfig.isEnergy ? 'w-85 overflow-y-hidden' : ''
       ]">
         <VREDashboardPanel v-if="siteConfig.isEnergy && isVREView" />
+        <MarketInsights v-else-if="siteConfig.isEnergy && isPriceView" />
         <DashboardPanel v-else-if="siteConfig.isEnergy" />
         <PhotoGrid v-else :photos="photoStore.gridPhotos" />
       </div>
@@ -39,10 +41,12 @@
   import PhotoModal from '../components/PhotoModal.vue'
   import FeaturedPhoto from '@/components/FeaturedPhoto.vue'
   import PhotoGrid from '@/components/PhotoGrid.vue'
-  import EnergyChart from '@/components/EnergyChart.vue'
-  import VREEnergyChart from '@/components/VREEnergyChart.vue'
-  import VREDashboardPanel from '@/components/VREDashboardPanel.vue'
-  import DashboardPanel from '@/components/DashboardPanel.vue'
+  import EnergyChart from '@/components/energy/EnergyChart.vue'
+  import VREEnergyChart from '@/components/energy/VREEnergyChart.vue'
+  import PriceChart from '@/components/energy/PriceChart.vue'
+  import MarketInsights from '@/components/energy/MarketInsights.vue'
+  import VREDashboardPanel from '@/components/energy/VREDashboardPanel.vue'
+  import DashboardPanel from '@/components/energy/DashboardPanel.vue'
   import { usePhotoStore } from '@/stores/photoStore'
   import { useUiStore } from '@/stores/uiStore'
   import { useRoute } from 'vue-router'
@@ -65,6 +69,8 @@
   }
 
   const isVREView = computed(() => route.path === '/vre')
+  const isPriceView = computed(() => route.path === '/price')
+
 
   onMounted(() => {
     updateDisplayPhotos()

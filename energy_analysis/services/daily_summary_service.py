@@ -49,7 +49,7 @@ class DailySummaryService:
         # Get hourly data for the three main indicators
         energy_data = EnergyData.objects.filter(
             timestamp__date=date_obj,
-            indicator__indicator_id__in=[1161, 1159, 1293]  # Solar, Wind, Demand
+            indicator__indicator_id__in=[1161, 1159, 1293, 600]  # Solar, Wind, Demand
         ).select_related('indicator').order_by('timestamp')
         
         if not energy_data.exists():
@@ -132,12 +132,16 @@ class DailySummaryService:
                 hourly_dict[hour_key]['solar'] = value_gw
             elif item.indicator.indicator_id == 1159:  # Wind
                 hourly_dict[hour_key]['wind'] = value_gw
+            elif item.indicator.indicator_id == 600:  # Price
+                hourly_dict[hour_key]['price'] = round(item.value, 2) # EUR/MWh
         
         # Calculate derived fields and sort
         hourly_data = []
         for hour_data in sorted(hourly_dict.values(), key=lambda x: x['hour']):
             # Add calculated fields
             hour_data['vre_total'] = round(hour_data['solar'] + hour_data['wind'], 2)
+
+            hour_data['net_load'] = round(hour_data['demand'] - hour_data['vre_total'])
             
             if hour_data['demand'] > 0:
                 hour_data['solar_pct'] = round((hour_data['solar'] / hour_data['demand']) * 100, 1)
