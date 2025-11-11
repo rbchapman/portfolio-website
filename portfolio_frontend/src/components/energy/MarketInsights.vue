@@ -60,7 +60,7 @@
             <span class="w-1.5 h-1.5 bg-yellow-400 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
             Intraday range: €{{ intradayRange }}/MWh
           </li>
-          <li class="flex items-start">
+          <li v-if="negativeHours" class="flex items-start">
             <span class="w-1.5 h-1.5 bg-blue-400 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
             Negative price hours: {{ negativeHours }}h ({{ negativePct }}%)
           </li>

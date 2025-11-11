@@ -6,23 +6,13 @@
     ]">
       <!-- Left side - Chart/Featured Photo -->
       <div :class="siteConfig.isEnergy ? 'flex-1' : 'h-full'">
-        <VREEnergyChart v-if="siteConfig.isEnergy && isVREView" />
-        <PriceChart v-else-if="siteConfig.isEnergy && isPriceView" />
-        <EnergyChart v-else-if="siteConfig.isEnergy" />
-        <FeaturedPhoto
-          v-else-if="photoStore.featuredPhoto"
-          :photo="photoStore.featuredPhoto"
-        />
+        <component :is="chartComponent" v-if="siteConfig.isEnergy" />
+        <FeaturedPhoto v-else-if="photoStore.featuredPhoto" :photo="photoStore.featuredPhoto" />
       </div>
 
       <!-- Right side - Panel/Photo grid -->
-      <div :class="[
-        'h-full overflow-y-auto custom-scrollbar',
-        siteConfig.isEnergy ? 'w-85 overflow-y-hidden' : ''
-      ]">
-        <VREDashboardPanel v-if="siteConfig.isEnergy && isVREView" />
-        <MarketInsights v-else-if="siteConfig.isEnergy && isPriceView" />
-        <DashboardPanel v-else-if="siteConfig.isEnergy" />
+      <div :class="['h-full overflow-y-auto custom-scrollbar', siteConfig.isEnergy ? 'w-85 overflow-y-hidden' : '']">
+        <component :is="panelComponent" v-if="siteConfig.isEnergy" class="mb-8 pb-4" />
         <PhotoGrid v-else :photos="photoStore.gridPhotos" />
       </div>
     </div>
@@ -52,10 +42,28 @@
   import { useRoute } from 'vue-router'
   import { watch, onMounted, computed } from 'vue'
   import { siteConfig } from '@/utils/siteConfig'
+  import BESSChart from '@/components/energy/BESSChart.vue'
+  import BESSPanel from '@/components/energy/BESSPanel.vue'
 
   const photoStore = usePhotoStore()
   const uiStore = useUiStore()
   const route = useRoute()
+
+  const chartComponent = computed(() => {
+    if (!siteConfig.isEnergy) return null
+    if (route.path === '/vre') return VREEnergyChart
+    if (route.path === '/price') return PriceChart
+    if (route.path === '/net-load') return EnergyChart
+    return BESSChart
+  })
+
+  const panelComponent = computed(() => {
+    if (!siteConfig.isEnergy) return null
+    if (route.path === '/vre') return VREDashboardPanel  
+    if (route.path === '/price') return MarketInsights
+    if (route.path === '/net-load') return DashboardPanel
+    return BESSPanel
+  })
 
   function updateDisplayPhotos() {
     const locationParam = route.params.location
@@ -67,10 +75,6 @@
     })
     photoStore.displayPhotos = photos
   }
-
-  const isVREView = computed(() => route.path === '/vre')
-  const isPriceView = computed(() => route.path === '/price')
-
 
   onMounted(() => {
     updateDisplayPhotos()

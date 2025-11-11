@@ -54,8 +54,13 @@ export const actionBarConfigs: ActionBarConfigMap = {
     rightLinks: [
     {
       to: '/',
-      label: 'NET LOAD',
+      label: 'BESS',
       activeWhen: (route) => route.path === '/'
+    },
+    {
+      to: '/net-load',
+      label: 'NET LOAD',
+      activeWhen: (route) => route.path === '/net-load'
     },
     {
       to: '/price',
