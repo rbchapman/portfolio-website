@@ -9,6 +9,10 @@ from rest_framework.decorators import action
 from .services.daily_summary_service import DailySummaryService
 from .utils.data_quality import EnergyDataValidator
 import logging
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from .services.bess_decision_service import BESSDecisionService
+from .models import BESSConfig
 
 logger = logging.getLogger(__name__)
 
@@ -92,3 +96,37 @@ class EnergyDataViewSet(viewsets.ReadOnlyModelViewSet):
             if hour_data['hour'] == target_hour_str:
                 return hour_data['vre_pct']
         return 0
+
+    @action(detail=False, methods=['get'])
+    def bess_analysis(self, request):
+        date           = request.query_params.get('date', '2024-05-11')
+        power_mw       = int(request.query_params.get('power_mw', 100))
+        duration_hours = int(request.query_params.get('duration_hours', 4))
+        efficiency     = float(request.query_params.get('efficiency', 0.87))
+
+        logger.info("BESS request  date=%s  power=%s MW  duration=%s h  efficiency=%s",
+                    date, power_mw, duration_hours, efficiency)
+
+        # 1.  show what the DB really contains
+        summary = DailyEnergySummary.objects.get(date=date)
+        sample  = summary.hourly_data_json["hourly_data"][0]
+        logger.info("DB raw sample (00:00): %s", sample)   # demand, solar, wind, price, ...
+
+        # 2.  run the analysis
+        config  = BESSConfig(power_mw=power_mw, duration_hours=duration_hours, efficiency=efficiency)
+        analysis = BESSDecisionService.analyze_day(date, config)
+
+        for i, decision in enumerate(analysis['hourly_decisions'][:5]):
+            print(f"Hour {decision['hour']}: {decision['action']} - {decision['energy_mwh']} MWh")
+            
+        # 3.  first hour numbers
+        h0 = analysis["hourly_decisions"][0]
+        logger.info("Result 00:00  action=%s  energy_mwh=%s  cost_eur=%s  price=%s",
+                    h0["action"], h0["energy_mwh"], h0["cost_eur"], h0["price"])
+
+        # 4.  daily totals
+        perf = analysis["daily_performance"]
+        logger.info("Daily totals  charged=%s MWh  discharged=%s MWh  gross_profit=%s €",
+                    perf["energy_charged_mwh"], perf["energy_discharged_mwh"], perf["gross_profit_eur"])
+
+        return Response(analysis)

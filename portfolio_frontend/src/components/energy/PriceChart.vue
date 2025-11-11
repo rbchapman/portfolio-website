@@ -56,8 +56,8 @@
         backgroundColor: colors,
         borderColor: colors.map(c => c.replace('0.7', '1')),
         borderWidth: 1,
-        pointRadius: 6,
-        pointHoverRadius: 8
+        pointRadius: 4,
+        pointHoverRadius: 6
       }]
     }
   })
@@ -91,11 +91,11 @@
         padding: 12,
         callbacks: {
           title: function(context: TooltipItem<'scatter'>[]) {
-            const point = context[0].raw as ScatterPoint  // USE INTERFACE
+            const point = context[0].raw as ScatterPoint
             return `Hour: ${point.hour}`
           },
           label: function(context: TooltipItem<'scatter'>) {
-            const point = context.raw as ScatterPoint  // USE INTERFACE
+            const point = context.raw as ScatterPoint
             return [
               `Net Load: ${point.x.toFixed(1)} GW`,
               `Price: €${point.y.toFixed(2)}/MWh`,
@@ -103,7 +103,7 @@
             ]
           },
           afterLabel: function(context: TooltipItem<'scatter'>) {
-            const point = context.raw as ScatterPoint  // USE INTERFACE
+            const point = context.raw as ScatterPoint
             const price = point.y
             if (price < 0) return 'Negative price - paid to consume!'
             if (price < 10) return 'Very low price - charge window'

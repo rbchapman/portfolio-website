@@ -35,7 +35,53 @@ interface HourlyData {
     ramp_window: string
     load_balancing_gap_hours: number
   }
-  
+
+  interface BESSConfig {
+    power_mw: number
+    duration_hours: 2 | 4 | 6
+  }
+
+  interface BESSDecision {
+    hour: string
+    action: 'CHARGE' | 'DISCHARGE' | 'HOLD'
+    price: number
+    price_percentile: number
+    net_load: number
+    vre_pct: number
+    energy_mwh: number
+    cost_eur: number
+    soc_before: number
+    soc_after: number
+    reasoning: string[]
+  }
+  interface BESSPerformance {
+    gross_profit_eur: number
+    revenue_eur: number
+    cost_eur: number
+    energy_charged_mwh: number
+    energy_discharged_mwh: number
+    avg_charge_price: number
+    avg_discharge_price: number
+    cycles_completed: number
+    charge_hours: number
+    discharge_hours: number
+    utilization_pct: number
+  }
+  interface BESSAnalysis {
+    date: string
+    config: {
+      power_mw: number
+      duration_hours: number
+      capacity_mwh: number
+      efficiency: number
+      c_rate: number
+      min_soc: number
+      max_soc: number
+    }
+    hourly_decisions: BESSDecision[]
+    daily_performance: BESSPerformance
+    data_source: string
+  }
   interface ChartData {
     date: string
     hourly_data: HourlyData[]
@@ -52,7 +98,14 @@ interface HourlyData {
     state: () => ({
       chartData: null as ChartData | null,
       loading: false,
-      selectedDate: '2024-05-02' 
+      selectedDate: '2024-06-16',
+
+      bessConfig: {
+        power_mw: 100,
+        duration_hours: 4 as 2 | 4 | 6
+      } as BESSConfig,
+      bessAnalysis: null as BESSAnalysis | null,
+      bessLoading: false
     }),
 
   getters: {
@@ -87,7 +140,7 @@ interface HourlyData {
       this.loading = true
       
       try {
-        const response = await api.get(`/energy-data/chart_data/?date=${targetDate}`)
+        const response = await api.get(`/energy/chart_data/?date=${targetDate}`)
         this.chartData = response.data
         
         // Update selectedDate only after successful fetch
@@ -97,7 +150,7 @@ interface HourlyData {
         console.error('Failed to fetch chart data:', error)
       } finally {
         this.loading = false
-      }
+      }      
     },
 
     // Method to change date (called from components)
@@ -110,14 +163,46 @@ interface HourlyData {
       }
 
       await this.fetchChartData(date)
+
+      if (this.bessAnalysis) {
+        await this.fetchBessAnalysis()
+      }
     },
 
     // Helper to get default/initial data on app load
     async initializeData(): Promise<void> {
       // Only fetch if we don't already have data
       if (!this.chartData) {
-        await this.fetchChartData()
+        await this.fetchChartData(this.selectedDate)
       }
-    }
+      await this.fetchBessAnalysis()
+    },
+
+    async fetchBessAnalysis(): Promise<void> {
+      this.bessLoading = true
+      
+      try {
+        const response = await api.get('/energy/bess_analysis/', {
+          params: {
+            date: this.selectedDate,
+            power_mw: this.bessConfig.power_mw,
+            duration_hours: this.bessConfig.duration_hours
+          }
+        })
+        
+        this.bessAnalysis = response.data
+        
+      } catch (error) {
+        console.error('Failed to fetch BESS analysis:', error)
+      } finally {
+        this.bessLoading = false
+      }
+    },
+
+    // Update BESS config and re-run analysis
+    async updateBessConfig(config: Partial<BESSConfig>): Promise<void> {
+      this.bessConfig = { ...this.bessConfig, ...config }
+      await this.fetchBessAnalysis()
+    },
   }
 })

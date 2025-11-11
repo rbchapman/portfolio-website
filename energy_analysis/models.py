@@ -1,6 +1,6 @@
 from django.db import models
-
-
+from dataclasses import dataclass
+from typing import Literal
 class EnergyIndicator(models.Model):
     """indicator metadata"""
     indicator_id = models.IntegerField(unique=True, primary_key=True)
@@ -12,8 +12,6 @@ class EnergyIndicator(models.Model):
     
     def __str__(self):
         return f"{self.indicator_id}: {self.name}"
-
-
 class EnergyData(models.Model):
     """Time series energy data points"""
     indicator = models.ForeignKey(EnergyIndicator, on_delete=models.CASCADE, related_name='data_points')
@@ -83,3 +81,69 @@ class DailyEnergySummary(models.Model):
         ordering = ['-date']
         verbose_name = "Daily Energy Summary"
         verbose_name_plural = "Daily Energy Summaries"
+
+
+@dataclass
+class BESSConfig:
+    """
+    Battery Energy Storage System configuration.
+    
+    Note on C-Rate: Not stored directly as it's derived (power_mw / capacity_mwh).
+    C-Rate determines how quickly the battery charges/discharges:
+    - 1C = full charge/discharge in 1 hour (100MW/100MWh)
+    - 0.5C = full charge/discharge in 2 hours (100MW/200MWh)
+    - 0.25C = full charge/discharge in 4 hours (100MW/400MWh)
+    
+    Higher C-Rate = more power cycling capability = better arbitrage potential
+    but typically shorter battery life and higher costs.
+    """
+    
+    # User-configurable parameters (the only 3 things users adjust)
+    power_mw: int  # Charge/discharge rate (50-200 MW typical range)
+    duration_hours: Literal[2, 4, 6]  # Storage duration options
+    efficiency: float  # Round-trip efficiency (0.85-0.92 for lithium-ion)
+    
+    # Fixed operational constraints for MVP
+    min_soc: int = 10  # Minimum state of charge % (battery protection)
+    max_soc: int = 90  # Maximum state of charge % (battery protection)
+    
+    @property
+    def capacity_mwh(self) -> float:
+        """Total energy capacity in MWh"""
+        return self.power_mw * self.duration_hours
+    
+    @property
+    def c_rate(self) -> float:
+        """
+        C-Rate: Power capability relative to capacity.
+        
+        Example: 100MW / 400MWh = 0.25C
+        This means the battery can charge from empty to full in 4 hours.
+        
+        Industry context:
+        - Utility BESS typically 0.25C-0.5C (2-4 hour duration)
+        - Frequency regulation BESS often 1C+ (sub-hourly response)
+        - Higher C-Rate = better for price arbitrage but more degradation
+        """
+        return self.power_mw / self.capacity_mwh if self.capacity_mwh > 0 else 0
+    
+    def __post_init__(self):
+        """Validate configuration on instantiation"""
+        if not 50 <= self.power_mw <= 200:
+            raise ValueError("Power must be between 50-200 MW")
+        if self.duration_hours not in [2, 4, 6]:
+            raise ValueError("Duration must be 2, 4, or 6 hours")
+        if not 0.85 <= self.efficiency <= 0.92:
+            raise ValueError("Efficiency must be between 0.85-0.92")
+    
+    def to_dict(self) -> dict:
+        """Convert to dictionary for JSON serialization"""
+        return {
+            'power_mw': self.power_mw,
+            'duration_hours': self.duration_hours,
+            'capacity_mwh': self.capacity_mwh,
+            'efficiency': self.efficiency,
+            'c_rate': round(self.c_rate, 2),
+            'min_soc': self.min_soc,
+            'max_soc': self.max_soc
+        }
