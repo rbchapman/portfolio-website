@@ -118,45 +118,47 @@ const chartOptions = computed(() => ({
       }
     },
     tooltip: {
-    backgroundColor: 'rgba(17, 24, 39, 0.95)',
-    titleColor: '#f3f4f6',
-    bodyColor: '#d1d5db',
-    borderColor: '#374151',
-    borderWidth: 1,
-    padding: 12,
-    displayColors: false,
-    callbacks: {
-      title: (context: any) => {
-        const decision = energyStore.bessAnalysis?.hourly_decisions[context[0].dataIndex]
-        const actionEmoji = decision?.action === 'CHARGE' ? '🟢' : decision?.action === 'DISCHARGE' ? '🔴' : '⚪'
-        return `${actionEmoji} ${decision?.hour} - ${decision?.action}`
-      },
-      label: (context: any) => {
-        const decision = energyStore.bessAnalysis?.hourly_decisions[context.dataIndex]
-        
-        if (context.dataset.label !== 'Market Price') {
-          return null
+      backgroundColor: 'rgba(17, 24, 39, 0.95)',
+      titleColor: '#f3f4f6',
+      bodyColor: '#d1d5db',
+      borderColor: '#374151',
+      borderWidth: 1,
+      padding: 12,
+      callbacks: {
+        title: (context: any) => {
+          const decision = energyStore.bessAnalysis?.hourly_decisions[context[0].dataIndex];
+          const actionEmoji = decision?.action === 'CHARGE' ? '🟢' : decision?.action === 'DISCHARGE' ? '🔴' : '⚪';
+          return `${actionEmoji} ${decision?.hour} - ${decision?.action}`;
+        },
+        label: (context: any) => {
+          const decision = energyStore.bessAnalysis?.hourly_decisions[context.dataIndex];
+          
+          if (context.dataset.label === 'Market Price') {
+            return `Price: €${decision?.price.toFixed(2)}/MWh (${decision?.price_percentile.toFixed(0)}th percentile)`;
+          }
+          
+          if (decision?.action === 'CHARGE' || decision?.action === 'DISCHARGE') {
+            return [
+              `Energy: ${Math.abs(decision.energy_mwh).toFixed(1)} MWh`,
+              `SoC: ${decision.soc_before.toFixed(1)}% → ${decision.soc_after.toFixed(1)}%`
+            ];
+          }
+          
+          return `No action (${decision?.soc_after.toFixed(1)}% SoC)`;
+        },
+        afterLabel: (context: any) => {
+          const decision = energyStore.bessAnalysis?.hourly_decisions[context.dataIndex];
+          if (context.datasetIndex === 0 && decision?.reasoning) {
+            return [
+              '',
+              '─────────────',
+              ...decision.reasoning
+            ];
+          }
+          return '';
         }
-        
-        return [
-          `Price: €${decision?.price.toFixed(2)}/MWh`,
-          `SoC: ${decision?.soc_before.toFixed(1)}% → ${decision?.soc_after.toFixed(1)}%`,
-          decision?.energy_mwh > 0 ? `Energy: ${decision.energy_mwh.toFixed(1)} MWh` : ''
-        ].filter(Boolean)
-      },
-      // afterLabel: (context: any) => {
-      //   const decision = energyStore.bessAnalysis?.hourly_decisions[context.dataIndex]
-        
-      //   if (context.dataset.label === 'Market Price' && decision?.reasoning) {
-      //     return [
-      //       '',
-      //       ...decision.reasoning
-      //     ]
-      //   }
-      //   return ''
-      // }
+      }
     }
-  }
   },
   scales: {
     x: {
@@ -188,7 +190,7 @@ const chartOptions = computed(() => ({
       ticks: {
         color: '#9ca3af',
         callback: function(value: any) {
-          return value + ' MWh'
+          return value + ' MWh';
         }
       },
       grid: {
@@ -206,7 +208,7 @@ const chartOptions = computed(() => ({
       ticks: {
         color: '#fbbf24',
         callback: function(value: any) {
-          return '€' + value.toFixed(0)
+          return '€' + value.toFixed(0);
         }
       },
       grid: {
@@ -214,5 +216,5 @@ const chartOptions = computed(() => ({
       }
     }
   }
-}))
+}));
 </script>
