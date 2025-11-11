@@ -17,28 +17,14 @@
 
 <script setup lang="ts">
 import { Chart } from 'vue-chartjs'
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  LineElement,
-  PointElement,
-  Title,
-  Tooltip,
-  Legend,
-  type ChartData,
-  type ChartOptions,
-  type TooltipItem,
-} from 'chart.js'
+import { Chart as ChartJS, registerables, type ChartData, type ChartOptions, type TooltipItem } from 'chart.js'
 import { useEnergyStore } from '@/stores/energyStore'
 import { computed } from 'vue'
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend)
+ChartJS.register(...registerables)
 
 const energyStore = useEnergyStore()
 
-// Mixed chart supports both 'bar' and 'line' datasets
 const chartData = computed((): ChartData<'bar' | 'line'> => {
   if (!energyStore.bessAnalysis?.hourly_decisions) return { labels: [], datasets: [] }
 
@@ -53,7 +39,7 @@ const chartData = computed((): ChartData<'bar' | 'line'> => {
     labels: hours,
     datasets: [
       {
-        type: 'line' as const,
+        type: 'line',
         label: 'Market Price',
         data: prices,
         borderColor: '#fbbf24',
@@ -66,7 +52,7 @@ const chartData = computed((): ChartData<'bar' | 'line'> => {
         order: 1,
       },
       {
-        type: 'bar' as const,
+        type: 'bar',
         label: 'Charging',
         data: chargeData,
         backgroundColor: 'rgba(34, 197, 94, 0.7)',
@@ -76,7 +62,7 @@ const chartData = computed((): ChartData<'bar' | 'line'> => {
         order: 2,
       },
       {
-        type: 'bar' as const,
+        type: 'bar',
         label: 'Discharging',
         data: dischargeData,
         backgroundColor: 'rgba(239, 68, 68, 0.7)',
@@ -93,7 +79,7 @@ const chartOptions = computed((): ChartOptions<'bar' | 'line'> => ({
   responsive: true,
   maintainAspectRatio: false,
   interaction: {
-    mode: 'index' as const,
+    mode: 'index',
     intersect: false,
   },
   plugins: {
@@ -106,7 +92,7 @@ const chartOptions = computed((): ChartOptions<'bar' | 'line'> => ({
     },
     legend: {
       display: true,
-      position: 'bottom' as const,
+      position: 'bottom',
       labels: {
         color: '#e5e7eb',
         font: { size: 12 },
@@ -153,13 +139,6 @@ const chartOptions = computed((): ChartOptions<'bar' | 'line'> => ({
           const soc = Number(decision?.soc_after ?? 0)
           return `No action (${soc.toFixed(1)}% SoC)`
         },
-        // afterLabel: (context: TooltipItem<'bar' | 'line'>) => {
-        //   const decision = energyStore.bessAnalysis?.hourly_decisions[context.dataIndex]
-        //   if (context.datasetIndex === 0 && decision?.reasoning) {
-        //     return ['', '─────────────', ...decision.reasoning]
-        //   }
-        //   return ''
-        // },
       },
     },
   },
@@ -177,7 +156,7 @@ const chartOptions = computed((): ChartOptions<'bar' | 'line'> => ({
     },
     'y-energy': {
       stacked: true,
-      position: 'left' as const,
+      position: 'left',
       title: {
         display: true,
         text: 'Energy Flow (MWh)',
@@ -191,7 +170,7 @@ const chartOptions = computed((): ChartOptions<'bar' | 'line'> => ({
       grid: { color: 'rgba(156, 163, 175, 0.1)' },
     },
     'y-price': {
-      position: 'right' as const,
+      position: 'right',
       title: {
         display: true,
         text: 'Price (€/MWh)',
