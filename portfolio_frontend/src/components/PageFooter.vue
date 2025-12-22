@@ -9,7 +9,7 @@
           GitHub
         </a>
         <span class="opacity-50">|</span>
-        <a href="https://www.linkedin.com/in/rileychapman/" 
+        <a href="https://www.linkedin.com/in/riley-b-chapman/" 
           target="_blank" 
           rel="noopener noreferrer" 
           class="footer-link hover:text-white transition-colors">
