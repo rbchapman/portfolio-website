@@ -1,6 +1,20 @@
-from typing import Dict, List
-from ..models import BESSConfig
-from .daily_summary_service import DailySummaryService
+"""
+BESS Decision Service - Optimal Scheduling with Perfect Foresight
+
+This is a BACKTEST tool. We know all 24 hours of prices in advance,
+so we can calculate the mathematically optimal charge/discharge schedule.
+
+The algorithm is simple:
+1. Sort hours by price
+2. Charge during the cheapest hours
+3. Discharge during the most expensive hours
+4. Only trade if profitable after efficiency losses
+
+No machine learning, no complex optimization - just sorting and arithmetic.
+"""
+
+from typing import Dict, List, Optional
+from dataclasses import dataclass
 import logging
 
 logger = logging.getLogger(__name__)
@@ -8,56 +22,62 @@ logger = logging.getLogger(__name__)
 
 class BESSDecisionService:
     """
-    Simple BESS operational decision analysis.
-    Pure Python - no pandas, no magic, fully explainable.
+    Optimal BESS scheduling with perfect foresight.
+    
+    This is a BACKTEST - we use complete knowledge of the day's prices
+    to calculate what the optimal trading strategy WOULD HAVE BEEN.
+    
+    Real-world trading achieves ~60-70% of this theoretical maximum
+    due to forecast errors and market constraints.
     """
     
     @staticmethod
-    def analyze_day(date_string: str, config: BESSConfig) -> Dict:
+    def analyze_day(date_string: str, config) -> Dict:
         """
-        Main entry point: analyze a full day of BESS operations.
+        Main entry point: find optimal BESS operations for a given day.
         
         Args:
             date_string: Date in 'YYYY-MM-DD' format
             config: BESSConfig with battery specifications
             
         Returns:
-            Dict with hourly decisions and daily performance summary
+            Dict with hourly decisions and daily performance
         """
-        # Get the day's data (uses your existing service!)
+        # Step 1: Get the day's data using your existing service
+        from .daily_summary_service import DailySummaryService
         summary, _ = DailySummaryService.get_or_create_summary(date_string)
-        hourly_data = summary.hourly_data_json['hourly_data']
-
+        hourly_data = summary.hourly_data_json.get('hourly_data', [])
+        
         if not hourly_data:
-            logger.warning(f"No hourly data found for {date_string}")
             return {'error': f'No data for {date_string}'}
         
-        prices = []
-        for hour in hourly_data:
-            price = hour.get('price') or hour.get('value') or hour.get('marginalpdbc')
-            if price is not None:
-                prices.append(price)
-            else:
-                logger.warning(f"⚠️ Missing price for {date_string} hour {hour.get('hour')}: keys={list(hour.keys())}")
-        # Calculate price percentiles for decision-making
-        prices = [hour['price'] for hour in hourly_data]
+        # Step 2: Extract hours with valid prices
+        hours_with_prices = BESSDecisionService._extract_valid_hours(hourly_data)
         
-        # Track battery state throughout the day
-        current_soc = 10.0  # Assuming day starts with an empty battery
+        if len(hours_with_prices) < 2:
+            return {'error': 'Insufficient price data for arbitrage'}
         
-        # Process each hour
-        decisions = []
-        for hour_data in hourly_data:
-            decision = BESSDecisionService._make_decision(
-                hour_data=hour_data,
-                all_day_prices=prices,
-                current_soc=current_soc,
-                config=config
-            )
-            decisions.append(decision)
-            current_soc = decision['soc_after']
+        # Step 3: Find optimal schedule
+        schedule = BESSDecisionService._find_optimal_schedule(hours_with_prices, config)
         
-        # Calculate daily performance
+        if schedule is None:
+            # Not profitable - return all HOLD decisions
+            decisions = BESSDecisionService._build_hold_decisions(hourly_data, config)
+            return {
+                'date': date_string,
+                'config': config.to_dict(),
+                'hourly_decisions': decisions,
+                'daily_performance': BESSDecisionService._empty_performance(),
+                'data_source': summary.data_source,
+                'optimization_note': 'No profitable arbitrage opportunity found'
+            }
+        
+        # Step 4: Build hourly decisions from optimal schedule
+        decisions = BESSDecisionService._build_decisions(
+            hourly_data, schedule, config
+        )
+        
+        # Step 5: Calculate performance metrics
         performance = BESSDecisionService._calculate_performance(decisions, config)
         
         return {
@@ -65,189 +85,272 @@ class BESSDecisionService:
             'config': config.to_dict(),
             'hourly_decisions': decisions,
             'daily_performance': performance,
-            'data_source': summary.data_source
+            'data_source': summary.data_source,
+            'optimization_note': f"Optimal single-cycle: charge {len(schedule['charge_hours'])}h, discharge {len(schedule['discharge_hours'])}h"
         }
     
-
+    # =========================================================================
+    # STEP 2: Extract valid hours
+    # =========================================================================
+    
     @staticmethod
-    def _make_decision(
-        hour_data: Dict, 
-        all_day_prices: List[float],
-        current_soc: float,
-        config: BESSConfig
-    ) -> Dict:
+    def _extract_valid_hours(hourly_data: List[Dict]) -> List[Dict]:
         """
-        Smart decision logic: Use percentiles BUT only if there's a meaningful price spread
+        Pull out hours that have valid price data.
+        
+        We need prices to do arbitrage - no price, no trade.
+        
+        Returns list of dicts with: index, hour, price, and original data
         """
-        price = hour_data['price']
+        valid_hours = []
         
-        # Calculate daily price statistics
-        min_price = min(all_day_prices)
-        max_price = max(all_day_prices)
-        price_spread = max_price - min_price
-        
-        # Only do arbitrage if there's meaningful spread (at least €15/MWh)
-        if price_spread < 15:
-            # Flat price day - don't trade
-            action = 'HOLD'
-            energy_mwh = 0
-            cost = 0
-            new_soc = current_soc
-        else:
-            # Good spread - use percentile logic
-            sorted_prices = sorted(all_day_prices)
-            price_rank = sorted_prices.index(price) if price in sorted_prices else 0
-            price_percentile = (price_rank / len(sorted_prices)) * 100
+        for i, hour in enumerate(hourly_data):
+            price = hour.get('price')
             
-            CHARGE_THRESHOLD = 30  # Bottom 30% of prices
-            DISCHARGE_THRESHOLD = 70  # Top 30% of prices
+            # Skip hours without price data
+            if price is None:
+                logger.debug(f"Hour {hour.get('hour')} missing price, skipping")
+                continue
             
-            if price_percentile < CHARGE_THRESHOLD and current_soc < config.max_soc:
-                action = 'CHARGE'
-                energy_mwh, cost, new_soc = BESSDecisionService._calculate_charge(
-                    current_soc, config, price
-                )
-            elif price_percentile > DISCHARGE_THRESHOLD and current_soc > config.min_soc:
-                action = 'DISCHARGE'
-                energy_mwh, cost, new_soc = BESSDecisionService._calculate_discharge(
-                    current_soc, config, price
-                )
-            else:
-                action = 'HOLD'
-                energy_mwh = 0
-                cost = 0
-                new_soc = current_soc
+            valid_hours.append({
+                'index': i,                    # Position in original list
+                'hour': hour.get('hour'),      # "00:00", "01:00", etc.
+                'price': float(price),         # €/MWh
+                'vre_pct': hour.get('vre_pct', 0),  # For context in output
+                'original': hour               # Keep full data for reference
+            })
         
-        # Build reasoning
-        reasoning = BESSDecisionService._build_reasoning(
-            action, price, price_spread, hour_data, current_soc, config
-        )
+        return valid_hours
+    
+    # =========================================================================
+    # STEP 3: Find optimal schedule (THE CORE ALGORITHM)
+    # =========================================================================
+    
+    @staticmethod
+    def _find_optimal_schedule(hours_with_prices: List[Dict], config) -> Optional[Dict]:
+        """
+        Find the profit-maximizing charge/discharge schedule.
         
+        THE ALGORITHM (simple but optimal for single-cycle):
+        
+        1. Calculate how many hours we need to charge/discharge
+           - Based on battery capacity and power rating
+           
+        2. Sort hours by price (lowest to highest)
+        
+        3. Pick cheapest N hours to charge
+        
+        4. Pick most expensive N hours to discharge
+        
+        5. Verify it's profitable after efficiency losses
+        
+        Returns None if not profitable, otherwise returns schedule dict.
+        """
+        
+        usable_capacity_mwh = config.capacity_mwh * (config.max_soc - config.min_soc) / 100
+        hours_needed = int(usable_capacity_mwh / config.power_mw)
+        
+        # Need at least 1 hour each for charge and discharge
+        if hours_needed < 1:
+            logger.warning("Battery too small for hourly arbitrage")
+            return None
+        
+        # Can't trade if we don't have enough hours with prices
+        if len(hours_with_prices) < hours_needed * 2:
+            logger.warning(f"Only {len(hours_with_prices)} hours with prices, need {hours_needed * 2}")
+            return None
+        
+        # --- Sort by price ---
+        sorted_by_price = sorted(hours_with_prices, key=lambda x: x['price'])
+        
+        # --- Select charge hours (cheapest) ---
+        charge_hours = sorted_by_price[:hours_needed]
+        
+        # --- Select discharge hours (most expensive) ---
+        discharge_hours = sorted_by_price[-hours_needed:]
+        
+        # --- Check profitability ---
+        #
+        # For arbitrage to be profitable:
+        #   Revenue from selling > Cost of buying + Efficiency losses
+        #
+        # With efficiency η (e.g., 0.87):
+        #   - We buy X MWh at avg_charge_price
+        #   - We sell X × η MWh at avg_discharge_price
+        #   
+        # Profit = (X × η × avg_discharge) - (X × avg_charge)
+        # Profit = X × (η × avg_discharge - avg_charge)
+        #
+        # Profitable when: η × avg_discharge > avg_charge
+        # Or: avg_discharge > avg_charge / η
+        
+        avg_charge_price = sum(h['price'] for h in charge_hours) / len(charge_hours)
+        avg_discharge_price = sum(h['price'] for h in discharge_hours) / len(discharge_hours)
+        
+        # Minimum discharge price needed to break even
+        breakeven_discharge = avg_charge_price / config.efficiency
+        
+        # Add a small margin (€2/MWh) to avoid trading for negligible profit
+        min_profitable_discharge = breakeven_discharge + 2.0
+        
+        if avg_discharge_price < min_profitable_discharge:
+            logger.info(
+                f"Not profitable: discharge €{avg_discharge_price:.2f} < "
+                f"required €{min_profitable_discharge:.2f}"
+            )
+            return None
+        
+        # --- We have a profitable schedule! ---
         return {
-            'hour': hour_data['hour'],
-            'action': action,
-            'price': round(price, 2),
-            'price_spread': round(price_spread, 2),
-            'net_load': round(hour_data.get('net_load', hour_data['demand'] - hour_data['vre_total']), 1),
-            'vre_pct': round(hour_data['vre_pct'], 1),
-            'energy_mwh': round(energy_mwh, 1),
-            'cost_eur': round(cost, 2),
-            'soc_before': round(current_soc, 1),
-            'soc_after': round(new_soc, 1),
-            'reasoning': reasoning
+            'charge_hours': charge_hours,
+            'discharge_hours': discharge_hours,
+            'hours_needed': hours_needed,
+            'avg_charge_price': avg_charge_price,
+            'avg_discharge_price': avg_discharge_price,
+            'expected_profit_per_mwh': avg_discharge_price * config.efficiency - avg_charge_price
         }
     
-    @staticmethod
-    def _calculate_charge(current_soc: float, config: BESSConfig, price: float) -> tuple:
-        """
-        Calculate charging: how much energy, cost, and new SoC.
-        
-        Simple math you can explain:
-        - We can charge at power_mw rate for 1 hour
-        - But can't exceed max_soc limit
-        - Cost = energy × price
-        """
-        # Maximum energy we could add in 1 hour
-        max_energy = config.power_mw
-        
-        # But we're limited by how much room is left in battery
-        soc_room = config.max_soc - current_soc  # % points available
-        capacity_room = (soc_room / 100) * config.capacity_mwh  # MWh available
-        
-        # Take the smaller of the two
-        energy_mwh = min(max_energy, capacity_room)
-        
-        # Calculate cost (we're spending money to charge)
-        cost = energy_mwh * price
-        
-        # Calculate new SoC
-        soc_increase = (energy_mwh / config.capacity_mwh) * 100
-        new_soc = min(current_soc + soc_increase, config.max_soc)
-        
-        return energy_mwh, cost, new_soc
+    # =========================================================================
+    # STEP 4: Build hourly decisions
+    # =========================================================================
     
     @staticmethod
-    def _calculate_discharge(current_soc: float, config: BESSConfig, price: float) -> tuple:
+    def _build_decisions(
+        hourly_data: List[Dict], 
+        schedule: Dict, 
+        config
+    ) -> List[Dict]:
         """
-        Calculate discharging: how much energy, revenue, and new SoC.
+        Convert optimal schedule into hour-by-hour decisions.
         
-        Key concept - efficiency loss:
-        - Battery stored 100 MWh
-        - But only 87 MWh comes back out (87% efficient)
-        - This is the "round-trip efficiency"
+        This creates the detailed output showing what happens each hour:
+        - What action to take (CHARGE/DISCHARGE/HOLD)
+        - Energy transferred
+        - Cost/revenue
+        - State of charge before/after
         """
-        # Maximum energy we could discharge in 1 hour (accounting for efficiency)
-        max_energy = config.power_mw * config.efficiency
         
-        # But we're limited by how much energy is available above min_soc
-        soc_available = current_soc - config.min_soc  # % points available
-        capacity_available = (soc_available / 100) * config.capacity_mwh  # MWh available
+        # Create sets of hour indices for quick lookup
+        charge_indices = {h['index'] for h in schedule['charge_hours']}
+        discharge_indices = {h['index'] for h in schedule['discharge_hours']}
         
-        # Take the smaller of the two
-        energy_mwh = min(max_energy, capacity_available)
+        # Sort charge/discharge hours chronologically for proper SoC tracking
+        charge_hours_sorted = sorted(schedule['charge_hours'], key=lambda x: x['hour'])
+        discharge_hours_sorted = sorted(schedule['discharge_hours'], key=lambda x: x['hour'])
         
-        # Calculate revenue (negative cost = we earn money)
-        cost = -energy_mwh * price  # Negative because we're earning
+        # Track state of charge through the day
+        current_soc = config.min_soc  # Start at minimum
         
-        # Calculate new SoC (discharge removes energy from battery)
-        # Note: We remove more energy from battery than we sell (due to efficiency)
-        actual_battery_drain = energy_mwh / config.efficiency
-        soc_decrease = (actual_battery_drain / config.capacity_mwh) * 100
-        new_soc = max(current_soc - soc_decrease, config.min_soc)
+        decisions = []
         
-        return energy_mwh, cost, new_soc
-    
-    @staticmethod
-    def _build_reasoning(
-        action: str,
-        price: float,
-        price_spread: float,
-        hour_data: Dict,
-        soc: float,
-        config: BESSConfig
-    ) -> List[str]:
-        reasons = []
-        
-        if price_spread < 15:
-            return [f"⚪ Flat price day (€{price_spread:.0f} spread) - arbitrage not profitable"]
-        
-        if action == 'CHARGE':
-            reasons.append(f"✓ Low price hour (€{price:.2f}/MWh)")
-            if hour_data['vre_pct'] > 60:
-                reasons.append(f"✓ High VRE: {hour_data['vre_pct']:.0f}% renewable")
+        for i, hour in enumerate(hourly_data):
+            price = hour.get('price', 0)
             
-        elif action == 'DISCHARGE':
-            reasons.append(f"✓ High price hour (€{price:.2f}/MWh)")
-            if hour_data['vre_pct'] < 40:
-                reasons.append(f"✓ Peak demand period")
+            if i in charge_indices:
+                # CHARGING
+                energy_mwh = config.power_mw  # Charge at full power for 1 hour
+                cost = energy_mwh * price      # Cost to buy energy
+                soc_increase = (energy_mwh / config.capacity_mwh) * 100
+                new_soc = min(current_soc + soc_increase, config.max_soc)
+                
+                decision = {
+                    'hour': hour.get('hour'),
+                    'action': 'CHARGE',
+                    'price': round(price, 2),
+                    'energy_mwh': round(energy_mwh, 1),
+                    'cost_eur': round(cost, 2),  # Positive = we pay
+                    'soc_before': round(current_soc, 1),
+                    'soc_after': round(new_soc, 1),
+                    'reasoning': [f'✓ Optimal charge hour (€{price:.2f}/MWh)']
+                }
+                current_soc = new_soc
+                
+            elif i in discharge_indices:
+                # DISCHARGING
+                # Energy we can sell = power × efficiency
+                energy_out = config.power_mw * config.efficiency
+                revenue = energy_out * price  # Revenue from selling
+                
+                # Battery drains faster than we sell (efficiency loss)
+                battery_drain = config.power_mw  # Full power draw from battery
+                soc_decrease = (battery_drain / config.capacity_mwh) * 100
+                new_soc = max(current_soc - soc_decrease, config.min_soc)
+                
+                decision = {
+                    'hour': hour.get('hour'),
+                    'action': 'DISCHARGE',
+                    'price': round(price, 2),
+                    'energy_mwh': round(energy_out, 1),  # Energy sold (after efficiency)
+                    'cost_eur': round(-revenue, 2),  # Negative = we earn
+                    'soc_before': round(current_soc, 1),
+                    'soc_after': round(new_soc, 1),
+                    'reasoning': [f'✓ Optimal discharge hour (€{price:.2f}/MWh)']
+                }
+                current_soc = new_soc
+                
+            else:
+                # HOLD
+                decision = {
+                    'hour': hour.get('hour'),
+                    'action': 'HOLD',
+                    'price': round(price, 2) if price else 0,
+                    'energy_mwh': 0,
+                    'cost_eur': 0,
+                    'soc_before': round(current_soc, 1),
+                    'soc_after': round(current_soc, 1),
+                    'reasoning': ['⚪ Not optimal for trading']
+                }
+            
+            decisions.append(decision)
         
-        else:
-            reasons.append(f"⚪ Mid-range price (€{price:.2f}/MWh)")
-        
-        return reasons
+        return decisions
     
     @staticmethod
-    def _calculate_performance(decisions: List[Dict], config: BESSConfig) -> Dict:
+    def _build_hold_decisions(hourly_data: List[Dict], config) -> List[Dict]:
+        """Build all-HOLD decisions when no profitable arbitrage exists."""
+        return [
+            {
+                'hour': hour.get('hour'),
+                'action': 'HOLD',
+                'price': round(hour.get('price', 0), 2) if hour.get('price') else 0,
+                'energy_mwh': 0,
+                'cost_eur': 0,
+                'soc_before': config.min_soc,
+                'soc_after': config.min_soc,
+                'reasoning': ['⚪ No profitable arbitrage opportunity']
+            }
+            for hour in hourly_data
+        ]
+    
+    # =========================================================================
+    # STEP 5: Calculate performance
+    # =========================================================================
+    
+    @staticmethod
+    def _calculate_performance(decisions: List[Dict], config) -> Dict:
         """
         Calculate daily performance metrics.
         
-        Simple sums and averages - completely explainable.
+        Simple arithmetic - no magic:
+        - Sum up all charging costs
+        - Sum up all discharging revenues
+        - Profit = Revenue - Cost
         """
-        # Separate charge and discharge hours
         charges = [d for d in decisions if d['action'] == 'CHARGE']
         discharges = [d for d in decisions if d['action'] == 'DISCHARGE']
         
         # Financial metrics
         total_charge_cost = sum(d['cost_eur'] for d in charges)
-        total_discharge_revenue = sum(-d['cost_eur'] for d in discharges)  # Negative cost = revenue
+        total_discharge_revenue = sum(-d['cost_eur'] for d in discharges)  # cost_eur is negative for discharge
         gross_profit = total_discharge_revenue - total_charge_cost
         
         # Energy metrics
         total_charged = sum(d['energy_mwh'] for d in charges)
         total_discharged = sum(d['energy_mwh'] for d in discharges)
         
-        # Calculate cycles (how many times we "used" the full battery)
-        cycles = total_discharged / config.capacity_mwh if config.capacity_mwh > 0 else 0
+        # Cycles (how many times we used the full usable capacity)
+        usable_capacity = config.capacity_mwh * (config.max_soc - config.min_soc) / 100
+        cycles = total_discharged / usable_capacity if usable_capacity > 0 else 0
         
         # Average prices
         avg_charge_price = total_charge_cost / total_charged if total_charged > 0 else 0
@@ -265,4 +368,21 @@ class BESSDecisionService:
             'charge_hours': len(charges),
             'discharge_hours': len(discharges),
             'utilization_pct': round((total_discharged / config.capacity_mwh) * 100, 1) if config.capacity_mwh > 0 else 0
+        }
+    
+    @staticmethod
+    def _empty_performance() -> Dict:
+        """Return zeroed performance for days with no trading."""
+        return {
+            'gross_profit_eur': 0,
+            'revenue_eur': 0,
+            'cost_eur': 0,
+            'energy_charged_mwh': 0,
+            'energy_discharged_mwh': 0,
+            'avg_charge_price': 0,
+            'avg_discharge_price': 0,
+            'cycles_completed': 0,
+            'charge_hours': 0,
+            'discharge_hours': 0,
+            'utilization_pct': 0
         }

@@ -1,15 +1,23 @@
 <template>
   <div class="h-full w-full p-4 flex flex-col">
     <div class="flex-1 min-h-0">
+      <!-- Loading state -->
+      <div v-if="energyStore.bessLoading" class="h-full flex flex-col items-center justify-center">
+        <div class="animate-spin rounded-full h-8 w-8 border-2 border-cyan-500 border-t-transparent mb-3"></div>
+        <span class="text-custom-text text-sm">Analyzing market data...</span>
+      </div>
+      
+      <!-- Chart when ready -->
       <Chart 
-        v-if="energyStore.bessAnalysis" 
+        v-else-if="energyStore.bessAnalysis" 
         type="bar"
         :data="chartData" 
         :options="chartOptions" 
         class="h-full" 
       />
+      
       <div v-else class="h-full flex items-center justify-center text-custom-text text-sm">
-        Configure battery system and run analysis to see operational decisions
+        Select a date to analyze BESS opportunities
       </div>
     </div>
   </div>
