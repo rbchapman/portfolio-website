@@ -6,14 +6,14 @@
           target="_blank" 
           rel="noopener noreferrer" 
           class="footer-link hover:text-white transition-colors">
-          
+          Github
         </a>
-        <!-- <span class="opacity-50">|</span> -->
+        <span class="opacity-50">|</span>
         <a href="https://www.linkedin.com/in/riley-b-chapman/" 
           target="_blank" 
           rel="noopener noreferrer" 
           class="footer-link hover:text-white transition-colors">
-          
+          LinkedIn
         </a>
       </div>
     <div v-if="siteConfig.isPortfolio">
