@@ -51,18 +51,20 @@
 
   const chartComponent = computed(() => {
     if (!siteConfig.isEnergy) return null
+    if(route.path === '/bess') return BESSChart
     if (route.path === '/vre') return VREEnergyChart
     if (route.path === '/price') return PriceChart
-    if (route.path === '/net-load') return EnergyChart
-    return BESSChart
+    // if (route.path === '/net-load') return EnergyChart
+    return EnergyChart
   })
 
   const panelComponent = computed(() => {
     if (!siteConfig.isEnergy) return null
+    if(route.path === '/bess') return BESSPanel
     if (route.path === '/vre') return VREDashboardPanel  
     if (route.path === '/price') return MarketInsights
-    if (route.path === '/net-load') return DashboardPanel
-    return BESSPanel
+    // if (route.path === '/net-load') return DashboardPanel
+    return DashboardPanel
   })
 
   function updateDisplayPhotos() {
