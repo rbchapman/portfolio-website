@@ -28,8 +28,8 @@
         >
           ←
         </button>
-         <div class="text-xs text-custom-text text-center">
-          Grid data from Rede Elétrica de España via ESIOS API
+        <div class="text-xs text-custom-text text-center">
+          {{ dataSourceText }}
         </div>
         <button 
           @click="nextDay"
@@ -98,6 +98,12 @@
   const energyStore = useEnergyStore()
 
   const localSelectedDate = ref(energyStore.selectedDate)
+
+  const dataSourceText = computed(() => {
+    return energyStore.selectedRegion === 'california' 
+      ? 'CAISO via gridstatus' 
+      : 'Red Eléctrica de España via ESIOS'
+  })
 
   const minDate = '2020-01-01'
   const maxDate = new Date().toISOString().split('T')[0]

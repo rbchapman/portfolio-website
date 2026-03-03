@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import api from '@/utils/axios'
+import { useCurtailmentStore } from './curtailmentStore'
 
 interface HourlyData {
     hour: string
@@ -99,6 +100,7 @@ interface HourlyData {
       chartData: null as ChartData | null,
       loading: false,
       selectedDate: '2024-06-16',
+      selectedRegion: 'california' as 'california' | 'spain',
 
       bessConfig: {
         power_mw: 100,
@@ -140,7 +142,7 @@ interface HourlyData {
       this.loading = true
       
       try {
-        const response = await api.get(`/energy/chart_data/?date=${targetDate}`)
+        const response = await api.get(`/energy/chart_data/?date=${targetDate}&region=${this.selectedRegion}`)
         this.chartData = response.data
         
         // Update selectedDate only after successful fetch
@@ -151,6 +153,19 @@ interface HourlyData {
       } finally {
         this.loading = false
       }      
+    },
+
+    async setRegion(region: 'california' | 'spain'): Promise<void> {
+      this.selectedRegion = region
+      // Refetch data for new region
+      this.chartData = null  // Clear old data
+
+      const curtailmentStore = useCurtailmentStore()
+      curtailmentStore.dailyData = null
+      
+      await this.fetchChartData(this.selectedDate)
+      await curtailmentStore.refreshForRegionChange()
+
     },
 
     // Method to change date (called from components)

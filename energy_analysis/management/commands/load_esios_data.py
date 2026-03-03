@@ -22,7 +22,7 @@ class Command(BaseCommand):
         start_date = datetime.fromisoformat(options['start_date'])
         end_date = datetime.fromisoformat(options['end_date'])
         indicator_id = options['indicator']
-        resolution = options['resolution'] or 'hour'
+        resolution = options['resolution']
         chunk_days = options['chunk_days']
 
         self.stdout.write(f"Loading ESIOS indicator {indicator_id} ({resolution}) from {start_date.date()} to {end_date.date()}")
@@ -120,9 +120,13 @@ class Command(BaseCommand):
             'end': end.isoformat()
         }
 
+        RAW_INDICATORS = [10458, 10459, 10462]
+
         # Price indicator needs geo_ids filter for Spain only
         if indicator_id == 600:
             api_params['geo_ids'] = [3]  # Spain
+        elif indicator_id in RAW_INDICATORS:
+            pass  # No aggregation params needed
         else:
             # Other indicators use geo aggregation
             api_params.update({
@@ -131,7 +135,7 @@ class Command(BaseCommand):
             })
         
         # Add time aggregation when resolution is specified
-        if resolution:
+        if resolution and indicator_id not in RAW_INDICATORS:
             api_params.update({ 
                 'time_trunc': resolution,
                 'time_agg': 'average'

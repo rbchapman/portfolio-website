@@ -17,10 +17,12 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { useUiStore } from '@/stores/uiStore'
+import { useEnergyStore } from '@/stores/energyStore'
 import { siteConfig } from '@/utils/siteConfig'
 import { computed } from 'vue'
 
 const uiStore = useUiStore()
+const energyStore = useEnergyStore()
 
 const props = defineProps({
   boldText: {
@@ -34,11 +36,13 @@ const props = defineProps({
 })
 
 const displayBoldText = computed(() => {
-  return siteConfig.isEnergy ? 'SpanishEnergy' : props.boldText
+  if (!siteConfig.isEnergy) return props.boldText
+  return energyStore.selectedRegion === 'california' ? 'California' : 'Spanish'
 })
 
 const displayItalicText = computed(() => {
-  return siteConfig.isEnergy ? 'Analysis' : props.italicText
+  if (!siteConfig.isEnergy) return props.italicText
+  return 'GridAnalysis'
 })
 
 const router = useRouter()

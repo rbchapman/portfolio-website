@@ -46,10 +46,13 @@ export const actionBarConfigs: ActionBarConfigMap = {
     ]
   },
   energy: {
-    label: '',
+    label: 'Grid Operator:',
     section: {
-      type: 'keyValue',
-      items: {}
+      type: 'regionToggle',
+      regions: [
+        { id: 'california', label: 'CAISO' },
+        { id: 'spain', label: 'REE' }
+      ]
     },
     rightLinks: [
     {
@@ -62,10 +65,15 @@ export const actionBarConfigs: ActionBarConfigMap = {
     //   label: 'NET LOAD',
     //   activeWhen: (route) => route.path === '/net-load'
     // },
+    // {
+    //   to: '/price',
+    //   label: 'PRICE',
+    //   activeWhen: (route) => route.path === '/price'
+    // },
     {
-      to: '/price',
-      label: 'PRICE',
-      activeWhen: (route) => route.path === '/price'
+      to: '/curtailment',
+      label: 'CURTAILMENT',
+      activeWhen: (route) => route.path === '/curtailment'
     },
     {
       to: '/vre',
