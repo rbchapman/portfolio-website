@@ -12,7 +12,6 @@
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
-import { Bar } from 'vue-chartjs'
 import { Chart, BarController, BarElement, LineController, LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js'
 import { useCurtailmentStore } from '@/stores/curtailmentStore'
 import { useEnergyStore } from '@/stores/energyStore'

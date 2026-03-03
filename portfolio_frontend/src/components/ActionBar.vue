@@ -117,7 +117,7 @@
   import { useEnergyStore } from '@/stores/energyStore'
   import { usePhotoStore } from '@/stores/photoStore'
   import { actionBarConfigs } from '@/config/actionBarConfig'
-  import type { LinkSection, ListSection } from '@/types/actionBar'
+  import type { LinkSection, ListSection, RegionToggleSection } from '@/types/actionBar'
   import { siteConfig } from '@/utils/siteConfig'
 
   const route = useRoute()
