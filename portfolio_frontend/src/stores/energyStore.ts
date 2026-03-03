@@ -85,6 +85,7 @@ interface HourlyData {
   }
   interface ChartData {
     date: string
+    region: string
     hourly_data: HourlyData[]
     daily_insights: DailyInsights
     data_quality?: { 
@@ -134,8 +135,10 @@ interface HourlyData {
       // If no date provided, use the currently selected date
       const targetDate = date || this.selectedDate
       
-      // Don't refetch if we already have data for this date
-      if (this.chartData?.date === targetDate && !this.loading) {
+      // Skip if we already have data for this date AND region
+      if (this.chartData?.date === targetDate && 
+          this.chartData?.region === this.selectedRegion && 
+          !this.loading) {
         return
       }
 
@@ -172,7 +175,7 @@ interface HourlyData {
     async setSelectedDate(date: string): Promise<void> {
       // Basic date validation for 2024
       const selectedYear = new Date(date).getFullYear()
-      if (selectedYear !== 2024) {
+      if (selectedYear < 2024 || selectedYear > 2025) {
         console.warn('Only 2024 data is available')
         return
       }
