@@ -24,7 +24,10 @@ class DailyCurtailmentService:
             raise ValueError(f"Invalid date format: {date_str}")
 
         try:
-            summary = DailyCurtailmentSummary.objects.get(date=date_obj)
+            summary = DailyCurtailmentSummary.objects.get(
+                date=date_obj, 
+                data_source__in=['database', 'esios']
+            )
             return summary, False
         except DailyCurtailmentSummary.DoesNotExist:
             summary = cls._create_summary(date_obj)

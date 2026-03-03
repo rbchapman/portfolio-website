@@ -25,9 +25,12 @@ class DailySummaryService:
         except ValueError:
             raise ValueError(f"Invalid date format: {date_str}")
         
-        # Try to get existing summary
+        # Try to get existing summary - filter by Spain sources only
         try:
-            summary = DailyEnergySummary.objects.get(date=date_obj)
+            summary = DailyEnergySummary.objects.get(
+                date=date_obj, 
+                data_source__in=['database', 'esios']
+            )
             return summary, False
         except DailyEnergySummary.DoesNotExist:
             # Create new summary
