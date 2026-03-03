@@ -133,7 +133,36 @@ class RegionService:
     
     @classmethod  
     def _get_california_curtailment(cls, date: str) -> dict:
-        """Use GridStatusService for CAISO curtailment"""
+        """Use GridStatusService for CAISO curtailment, with DB caching"""
+        from ..models import DailyCurtailmentSummary
+        from datetime import datetime
+        
+        date_obj = datetime.fromisoformat(date).date()
+        
+        # Check cache first
+        try:
+            summary = DailyCurtailmentSummary.objects.get(date=date_obj, data_source='caiso')
+            hourly = summary.hourly_data_json['hourly_data']
+            
+            return {
+                'date': date,
+                'hourly_data': hourly,
+                'daily_insights': {
+                    'total_curtailed_mwh': summary.total_curtailed_mwh,
+                    'estimated_revenue_lost_usd': summary.estimated_revenue_lost_eur,  # It's actually USD
+                    'peak_curtailment_mwh': summary.peak_curtailment_mwh,
+                    'peak_curtailment_hour': summary.peak_curtailment_hour.strftime('%H:%M'),
+                    'curtailment_hours': sum(1 for h in hourly if h['curtailed_mwh'] > 0),
+                    'negative_price_hours': sum(1 for h in hourly if h['spot_price'] < 0),
+                    'negative_price_curtailed_mwh': round(sum(h['curtailed_mwh'] for h in hourly if h['spot_price'] < 0), 1),
+                },
+                'curtailment_breakdown': summary.hourly_data_json.get('curtailment_breakdown', {}),
+                'was_cached': True
+            }
+        except DailyCurtailmentSummary.DoesNotExist:
+            pass
+        
+        # Fetch live
         from .gridstatus_service import GridStatusService
         
         svc = GridStatusService('caiso')

@@ -2,7 +2,7 @@
   <div class="h-full w-full p-4 flex flex-col">
     <div class="flex-1 min-h-0">
       <Bar v-if="store.view === 'monthly' && energyStore.selectedRegion === 'spain' && monthlyChartData" :data="monthlyChartData" :options="monthlyOptions" class="h-full" />
-      <Bar v-else-if="store.view === 'daily' && dailyChartData" :data="dailyChartData" :options="dailyOptions" class="h-full" />
+      <ChartJS type="bar" v-else-if="store.view === 'daily' && dailyChartData" :data="dailyChartData" :options="dailyOptions" class="h-full" />
       <div v-else class="h-full flex items-center justify-center">
         <div class="animate-spin rounded-full h-8 w-8 border-2 border-cyan-500 border-t-transparent"></div>
       </div>
@@ -13,6 +13,7 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import { Chart, BarController, BarElement, LineController, LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js'
+import { Bar, Chart as ChartJS } from 'vue-chartjs'
 import { useCurtailmentStore } from '@/stores/curtailmentStore'
 import { useEnergyStore } from '@/stores/energyStore'
 

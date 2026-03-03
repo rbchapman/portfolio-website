@@ -187,7 +187,6 @@ const currency = computed(() => energyStore.selectedRegion === 'california' ? '$
 
 const revenueLost = computed(() => {
   const insights = store.dailyData?.daily_insights
-  console.log('daily_insights:', insights)  
   if (!insights) return 0
   return insights.estimated_revenue_lost_usd ?? insights.estimated_revenue_lost ?? 0
 })
