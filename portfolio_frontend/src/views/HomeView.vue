@@ -33,8 +33,8 @@
   import PhotoGrid from '@/components/PhotoGrid.vue'
   import EnergyChart from '@/components/energy/EnergyChart.vue'
   import VREEnergyChart from '@/components/energy/VREEnergyChart.vue'
-  import PriceChart from '@/components/energy/PriceChart.vue'
-  import MarketInsights from '@/components/energy/MarketInsights.vue'
+  // import PriceChart from '@/components/energy/PriceChart.vue'
+  // import MarketInsights from '@/components/energy/MarketInsights.vue'
   import VREDashboardPanel from '@/components/energy/VREDashboardPanel.vue'
   import DashboardPanel from '@/components/energy/DashboardPanel.vue'
   import { usePhotoStore } from '@/stores/photoStore'
@@ -44,6 +44,8 @@
   import { siteConfig } from '@/utils/siteConfig'
   import BESSChart from '@/components/energy/BESSChart.vue'
   import BESSPanel from '@/components/energy/BESSPanel.vue'
+  import CurtailmentView from '@/components/energy/CurtailmentView.vue'
+  import CurtailmentPanel from '@/components/energy/CurtailmentPanel.vue'
 
   const photoStore = usePhotoStore()
   const uiStore = useUiStore()
@@ -53,7 +55,8 @@
     if (!siteConfig.isEnergy) return null
     if(route.path === '/bess') return BESSChart
     if (route.path === '/vre') return VREEnergyChart
-    if (route.path === '/price') return PriceChart
+    // if (route.path === '/price') return PriceChart
+    if(route.path === '/curtailment') return CurtailmentView
     // if (route.path === '/net-load') return EnergyChart
     return EnergyChart
   })
@@ -62,7 +65,8 @@
     if (!siteConfig.isEnergy) return null
     if(route.path === '/bess') return BESSPanel
     if (route.path === '/vre') return VREDashboardPanel  
-    if (route.path === '/price') return MarketInsights
+    // if (route.path === '/price') return MarketInsights
+    if(route.path === '/curtailment') return CurtailmentPanel
     // if (route.path === '/net-load') return DashboardPanel
     return DashboardPanel
   })

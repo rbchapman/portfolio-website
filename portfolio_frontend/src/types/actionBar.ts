@@ -22,8 +22,16 @@ export type ListSection = {
   items: string[]
 }
 
+export type RegionToggleSection = {
+  type: 'regionToggle'
+  regions: Array<{
+    id: string
+    label: string
+  }>
+}
+
 // Union type for all section formats
-export type ActionBarSection = KeyValueSection | LinkSection | ListSection
+export type ActionBarSection = KeyValueSection | LinkSection | ListSection | RegionToggleSection
 
 // Navigation link configuration
 export interface NavigationLink {

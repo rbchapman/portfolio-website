@@ -37,10 +37,12 @@ class EnergyData(models.Model):
     
 class DailyEnergySummary(models.Model):
     # Core identification
-    date = models.DateField(unique=True, db_index=True)
+    date = models.DateField(db_index=True)
     data_source = models.CharField(max_length=20, choices=[
         ('database', 'Local Database'),
-        ('esios', 'ESIOS API')
+        ('esios', 'ESIOS API'),
+        ('caiso', 'CAISO'),
+        {'spp', 'SPP'}
     ])
     
     # Visibility - Real-time grid awareness
@@ -78,11 +80,78 @@ class DailyEnergySummary(models.Model):
         
         self.save(update_fields=['total_hours'])
     class Meta:
+        unique_together = ['date', 'data_source']
         ordering = ['-date']
         verbose_name = "Daily Energy Summary"
         verbose_name_plural = "Daily Energy Summaries"
 
+class DailyCurtailmentSummary(models.Model):
+    date = models.DateField(db_index=True)
+    data_source = models.CharField(max_length=20, choices=[
+        ('database', 'Local Database'),
+        ('esios', 'ESIOS API'),
+        ('caiso', 'CAISO'),
+        ('spp', 'SPP')
+    ])
 
+    # Daily totals from 721 (MWh)
+    total_curtailed_mwh = models.FloatField()
+    estimated_revenue_lost_eur = models.FloatField()
+
+    # Peak curtailment moment
+    peak_curtailment_mwh = models.FloatField()   # highest single hour (720+721)
+    peak_curtailment_hour = models.TimeField()
+
+    # Constraint type breakdown - monthly only (10458/10459), null until loaded
+    # TODO: future enhancement - forecast vs actual delta using 701/702
+    transmission_curtailment_pct = models.FloatField(null=True, blank=True)   # 10458
+    distribution_curtailment_pct = models.FloatField(null=True, blank=True)   # 10459
+
+    # Raw hourly breakdown for day-view chart
+    # sparse data - hours with no curtailment will have value 0
+    hourly_data_json = models.JSONField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['date', 'data_source']
+        ordering = ['-date']
+        verbose_name = "Daily Curtailment Summary"
+        verbose_name_plural = "Daily Curtailment Summaries"
+
+    def __str__(self):
+        return f"{self.date}: {self.total_curtailed_mwh:.1f} MWh, €{self.estimated_revenue_lost_eur:.0f} lost"
+class MonthlyCurtailmentSummary(models.Model):
+    year = models.IntegerField()
+    month = models.IntegerField()  # 1-12
+
+    # Volume rollup from DailyCurtailmentSummary
+    total_curtailed_mwh = models.FloatField()
+    total_revenue_lost_eur = models.FloatField()
+    avg_daily_curtailed_mwh = models.FloatField()
+    days_with_curtailment = models.IntegerField()
+
+    # Worst day of the month
+    worst_day = models.DateField()
+    worst_day_mwh = models.FloatField()
+
+    # Monthly percentage indicators loaded directly from ESIOS
+    total_curtailment_pct = models.FloatField(null=True, blank=True)        # 10462
+    transmission_curtailment_pct = models.FloatField(null=True, blank=True) # 10458
+    distribution_curtailment_pct = models.FloatField(null=True, blank=True) # 10459
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['year', 'month']
+        ordering = ['year', 'month']
+        verbose_name = "Monthly Curtailment Summary"
+        verbose_name_plural = "Monthly Curtailment Summaries"
+
+    def __str__(self):
+        return f"{self.year}-{self.month:02d}: {self.total_curtailed_mwh:.1f} MWh, €{self.total_revenue_lost_eur:.0f}"
 @dataclass
 class BESSConfig:
     """
