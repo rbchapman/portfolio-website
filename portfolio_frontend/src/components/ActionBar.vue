@@ -94,7 +94,7 @@
       
       <!-- Right: Navigation Links -->
       <div class="flex items-center">
-        <template v-for="link in filteredRightLinks" :key="link.to">
+        <template v-for="link in currentConfig.rightLinks" :key="link.to">
           <router-link
             :to="link.to"
             class="pl-2 text-sm hover:text-white"
@@ -154,22 +154,7 @@
     return null
   })
 
-  const filteredRightLinks = computed(() => {
-    if (!siteConfig.isEnergy) {
-      return currentConfig.value.rightLinks
-    }
-    
-    // Filter out BESS for California
-    return currentConfig.value.rightLinks.filter(link => {
-      if (link.to === '/bess' && energyStore.selectedRegion === 'california') {
-        return false
-      }
-      return true
-    })
-  })
-
   const isToggled = ref(false)
-
 
   const toggleLeftSection = () => {
     isToggled.value = !isToggled.value

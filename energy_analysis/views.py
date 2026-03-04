@@ -76,7 +76,8 @@ class EnergyDataViewSet(viewsets.ReadOnlyModelViewSet):
                     date, power_mw, duration_hours, efficiency)
 
         # 1.  show what the DB really contains
-        summary = DailyEnergySummary.objects.get(date=date)
+        data_source = request.query_params.get('data_source', 'database')
+        summary = DailyEnergySummary.objects.get(date=date, data_source=data_source)
         sample  = summary.hourly_data_json["hourly_data"][0]
         logger.info("DB raw sample (00:00): %s", sample)   # demand, solar, wind, price, ...
 

@@ -1,11 +1,19 @@
 <template>
   <div class="h-full w-full p-4 flex flex-col">
     <div class="flex-1 min-h-0">
+      <!-- California - not available yet -->
+      <div v-if="energyStore.selectedRegion === 'california'" class="h-full w-360 flex flex-col items-center justify-center">
+        <div class="text-center">
+          <div class="text-2xl font-light text-white mb-3">BESS Analysis</div>
+          <div class="text-lg text-white/60 mb-2">Coming soon for CAISO</div>
+          <div class="text-sm text-white/40">Currently available for Spanish market (REE)</div>
+        </div>
+      </div>
       <!-- Loading state -->
-      <div v-if="energyStore.bessLoading" class="h-full flex flex-col items-center justify-center">
+      <!-- <div v-else-if="energyStore.bessLoading" class="h-full flex flex-col items-center justify-center">
         <div class="animate-spin rounded-full h-8 w-8 border-2 border-cyan-500 border-t-transparent mb-3"></div>
         <span class="text-custom-text text-sm">Analyzing market data...</span>
-      </div>
+      </div> -->
       
       <!-- Chart when ready -->
       <Chart 

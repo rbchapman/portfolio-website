@@ -182,6 +182,9 @@ interface HourlyData {
 
       await this.fetchChartData(date)
 
+      const curtailmentStore = useCurtailmentStore()
+      await curtailmentStore.fetchDailyData(date)
+
       if (this.bessAnalysis) {
         await this.fetchBessAnalysis()
       }

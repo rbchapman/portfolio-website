@@ -121,7 +121,7 @@
         <!-- Quick stats -->
         <div class="grid grid-cols-2 gap-3">
           <div class="bg-custom-grey bg-opacity-30 rounded-lg p-4 border border-custom-text border-opacity-20">
-            <div class="text-2xl font-light text-orange-400">{{ fmt(store.dailyData.daily_insights.total_curtailed_mwh, 0) }}</div>
+            <div class="text-2xl font-light text-orange-400">{{ fmtMwh(store.dailyData.daily_insights.total_curtailed_mwh) }}</div>
             <div class="text-xs text-custom-text">MWh Curtailed</div>
           </div>
           <div class="bg-custom-grey bg-opacity-30 rounded-lg p-4 border border-custom-text border-opacity-20">
@@ -136,7 +136,7 @@
           <ul class="space-y-2 text-xs text-custom-text">
             <li class="flex items-start">
               <span class="w-1.5 h-1.5 bg-orange-400 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
-              Peak curtailment: {{ fmt(store.dailyData.daily_insights.peak_curtailment_mwh, 0) }} MWh at {{ store.dailyData.daily_insights.peak_curtailment_hour }}
+              Peak curtailment: {{ fmtMwh(store.dailyData.daily_insights.peak_curtailment_mwh) }} MWh at {{ store.dailyData.daily_insights.peak_curtailment_hour }}
             </li>
             <li class="flex items-start">
               <span class="w-1.5 h-1.5 bg-cyan-400 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
@@ -144,7 +144,7 @@
             </li>
             <li class="flex items-start">
               <span class="w-1.5 h-1.5 bg-red-400 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
-              {{ store.dailyData.daily_insights.negative_price_hours }}h of negative spot prices — {{ fmt(store.dailyData.daily_insights.negative_price_curtailed_mwh, 0) }} MWh curtailed during zero/negative price periods
+              {{ store.dailyData.daily_insights.negative_price_hours }}h of negative spot prices — {{ fmtMwh(store.dailyData.daily_insights.negative_price_curtailed_mwh) }} MWh curtailed during zero/negative price periods
             </li>
           </ul>
         </div>
@@ -175,7 +175,7 @@ import { useEnergyStore } from '@/stores/energyStore'
 
 const store = useCurtailmentStore()
 const energyStore = useEnergyStore()
-const localDate = ref(store.selectedDate)
+const localDate = ref(energyStore.selectedDate)
 
 const dataSourceText = computed(() => {
   return energyStore.selectedRegion === 'california' 
@@ -194,6 +194,13 @@ const revenueLost = computed(() => {
 // Helpers
 const fmt  = (v: number | null | undefined, d: number) => v != null ? v.toFixed(d) : '—'
 const fmtM = (v: number) => (v / 1_000_000).toFixed(1)
+const fmtMwh = (v: number | null | undefined) => {
+  if (v == null) return '—'
+  if (v === 0) return '0'
+  if (v < 1) return v.toFixed(2)      // 0.40
+  if (v < 100) return v.toFixed(1)    // 45.3
+  return v.toFixed(0)                  // 1,234
+}
 
 const growthPct = computed(() => {
   if (!store.annual2024 || !store.annual2025) return '—'
@@ -207,23 +214,23 @@ const latestMonth = computed(() => {
   return [...months].reverse().find(m => m.transmission_curtailment_pct != null) ?? null
 })
 
-const handleDateChange = () => store.setSelectedDate(localDate.value)
+const handleDateChange = () => energyStore.setSelectedDate(localDate.value)
 
 const previousDay = () => {
   const d = new Date(localDate.value)
   d.setDate(d.getDate() - 1)
   localDate.value = d.toISOString().split('T')[0]
-  store.setSelectedDate(localDate.value)
+  energyStore.setSelectedDate(localDate.value)
 }
 
 const nextDay = () => {
   const d = new Date(localDate.value)
   d.setDate(d.getDate() + 1)
   localDate.value = d.toISOString().split('T')[0]
-  store.setSelectedDate(localDate.value)
+  energyStore.setSelectedDate(localDate.value)
 }
 
-watch(() => store.selectedDate, v => { localDate.value = v })
+watch(() => energyStore.selectedDate, v => { localDate.value = v })
 </script>
 
 <style scoped>

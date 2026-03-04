@@ -58,7 +58,6 @@ interface MonthlyData {
 export const useCurtailmentStore = defineStore('curtailment', {
     state: () => ({
         // Daily view
-        selectedDate: '2024-04-15',
         dailyData: null as DailyCurtailmentData | null,
         dailyLoading: false,
 
@@ -71,8 +70,9 @@ export const useCurtailmentStore = defineStore('curtailment', {
     }),
 
     getters: {
-        formattedDate: (state) => {
-            const d = new Date(state.selectedDate)
+        formattedDate: () => {
+            const energyStore = useEnergyStore()
+            const d = new Date(energyStore.selectedDate)
             return d.toLocaleDateString('en-US', {
                 weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
             })
@@ -87,7 +87,7 @@ export const useCurtailmentStore = defineStore('curtailment', {
         async fetchDailyData(date?: string): Promise<void> {
         const energyStore = useEnergyStore()
         const region = energyStore.selectedRegion
-        const targetDate = date || this.selectedDate
+        const targetDate = date || energyStore.selectedDate
         if (this.dailyData?.date === targetDate && !this.dailyLoading) return
 
         this.dailyLoading = true
@@ -96,7 +96,6 @@ export const useCurtailmentStore = defineStore('curtailment', {
                 `/energy/curtailment_data/?date=${targetDate}&region=${region}`
             )
             this.dailyData = response.data
-            this.selectedDate = targetDate
         } catch (e) {
             console.error('Failed to fetch daily curtailment data:', e)
         } finally {
@@ -142,9 +141,9 @@ export const useCurtailmentStore = defineStore('curtailment', {
             
             if (energyStore.selectedRegion === 'california') {
                 this.view = 'daily'
-                await this.fetchDailyData(this.selectedDate)
+                await this.fetchDailyData()
             } else if (this.view === 'daily') {
-                await this.fetchDailyData(this.selectedDate)
+                await this.fetchDailyData()
             } else {
                 await this.fetchMonthlyData()
             }
