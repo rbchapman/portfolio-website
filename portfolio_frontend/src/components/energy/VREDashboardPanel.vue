@@ -52,7 +52,7 @@
         </div>
         <div class="bg-custom-grey bg-opacity-30 rounded-lg p-4 border border-custom-text border-opacity-20">
           <div class="text-2xl font-light text-white">{{ minConventionalNeed }}</div>
-          <div class="text-xs text-custom-text">Minimum Conventional Generation Required</div>
+          <div class="text-xs text-custom-text">Minimum Residual Demand</div>
         </div>
       </div>
 
@@ -62,7 +62,7 @@
         <ul class="space-y-2 text-xs text-custom-text">
           <li class="flex items-start">
             <span class="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
-            Tightest operating hour: {{ tightestHour }} ({{ minConventionalNeed }} conventional capacity needed)
+            Lowest residual demand: {{ tightestHour }} ({{ minConventionalNeed }} remaining after wind and solar)
           </li>
           <li class="flex items-start">
             <span class="w-1.5 h-1.5 bg-yellow-500 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
@@ -77,12 +77,9 @@
 
       <!-- Project Overview -->
       <div class="bg-custom-grey bg-opacity-50 rounded-lg p-6 border border-custom-text border-opacity-20">
-        <h3 class="text-lg font-medium text-white mb-3">Understanding Variable Renewable Energy</h3>
+        <h3 class="text-lg font-medium text-white mb-3">{{ copyStore.get('vre_explainer_title', 'Renewables and System Flexibility') }}</h3>
         <p class="text-custom-text text-sm leading-relaxed">
-            This visualization tracks Spain's wind and solar generation against total electricity demand throughout the day. 
-            When combined VRE output approaches or exceeds demand, conventional generators face operational constraints—they cannot ramp down below technical minimums, creating potential oversupply conditions. 
-            The gap between total demand and VRE output represents the "space" available for nuclear, combined cycle, and other dispatchable generation. 
-            As this gap narrows during high-solar hours, grid operators must carefully balance generation resources or export excess capacity to neighboring markets.
+          {{ copyStore.get('vre_explainer_body', 'This graph compares wind and solar generation with total electricity demand over the course of the day. As renewable output rises, the amount of demand left for other resources falls, and changes in wind and solar can cause that residual demand to move quickly. Storage and controllable demand can help by increasing electricity use during periods of abundant renewable generation and reducing or shifting consumption when renewable output falls. The timing and size of these changes help show when additional flexibility could make variable generation easier to integrate.') }}
         </p>
       </div>
     </div>
@@ -92,8 +89,10 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useEnergyStore } from '@/stores/energyStore'
+import { useSiteCopyStore } from '@/stores/siteCopyStore'
 
 const energyStore = useEnergyStore()
+const copyStore = useSiteCopyStore()
 
 // Local reactive date for the input
 const localSelectedDate = ref(energyStore.selectedDate)

@@ -78,7 +78,7 @@
 
         <!-- Transmission vs distribution -->
         <div v-if="latestMonth" class="bg-custom-grey bg-opacity-30 rounded-lg p-4 border border-custom-text border-opacity-20">
-          <h4 class="text-sm font-medium text-white mb-2">Constraint Type Breakdown</h4>
+          <h4 class="text-sm font-medium text-white mb-2">{{ copyStore.get('curtailment_breakdown_title', 'Constraint Type Breakdown') }}</h4>
           <ul class="space-y-2 text-xs text-custom-text">
             <li class="flex justify-between">
               <span class="flex items-center gap-2">
@@ -95,23 +95,17 @@
               <span class="text-white">{{ fmt(latestMonth.distribution_curtailment_pct, 3) }}%</span>
             </li>
           </ul>
-          <p class="text-xs text-custom-text mt-3 opacity-70">Monthly avg · transmission constraints dominate by ~10x</p>
+          <p class="text-xs text-custom-text mt-3 opacity-70">{{ copyStore.get('curtailment_breakdown_note', 'Monthly avg · transmission constraints dominate by ~10x') }}</p>
         </div>
 
         <!-- Explainer -->
         <div class="bg-custom-grey bg-opacity-50 rounded-lg p-6 border border-custom-text border-opacity-20">
-          <h3 class="text-lg font-medium text-white mb-3">Grid Congestion & Curtailment</h3>
+          <h3 class="text-lg font-medium text-white mb-3">{{ copyStore.get('curtailment_annual_title', 'Renewable Curtailment and System Flexibility') }}</h3>
           <p class="text-custom-text text-sm leading-relaxed mb-3">
-            Curtailment occurs when renewable energy is generated but cannot be delivered to consumers.
-            In Spain, transmission congestion—physical bottlenecks in the high-voltage grid—accounts for
-            the overwhelming majority of constraint events, forcing grid operators to instruct generators to reduce output
-            even when demand exists on the other side of the bottleneck.
+            {{ copyStore.get('curtailment_annual_body_problem', 'Curtailment occurs when available renewable generation cannot be fully used, either because grid constraints limit where the power can be delivered or because supply exceeds what the system can absorb at that time. In Spain, congestion on the high-voltage network is a major source of curtailment, while periods of very low or negative prices can also reflect excess renewable supply. Both show a mismatch between renewable output and the system’s ability to move or use that energy when it is available.') }}
           </p>
           <p class="text-custom-text text-sm leading-relaxed">
-            Dynamic Line Rating (DLR) technology addresses this directly by calculating the real-time thermal
-            capacity of transmission lines, which on cool or windy days can safely carry 20–30% more power
-            than static ratings allow. Recovering this latent capacity reduces curtailment without building
-            new infrastructure.
+            {{ copyStore.get('curtailment_annual_body_solution', 'Storage and flexible demand can help reduce this mismatch by shifting electricity use toward hours with abundant renewable generation. Batteries, EV charging, thermal loads, and other controllable resources can absorb surplus energy and reduce demand during tighter periods. Used alongside transmission upgrades and other grid investments, these resources can help the power system make better use of the renewable generation already available.') }}
           </p>
         </div>
       </template>
@@ -126,13 +120,13 @@
           </div>
           <div class="bg-custom-grey bg-opacity-30 rounded-lg p-4 border border-custom-text border-opacity-20">
             <div class="text-2xl font-light text-white">{{ currency }}{{ fmt(revenueLost, 0) }}</div>
-            <div class="text-xs text-custom-text">Revenue Lost</div>
+            <div class="text-xs text-custom-text">Lost Spot Value</div>
           </div>
         </div>
 
         <!-- Daily insights -->
         <div class="bg-custom-grey bg-opacity-30 rounded-lg p-4 border border-custom-text border-opacity-20">
-          <h4 class="text-sm font-medium text-white mb-2">Day Summary</h4>
+          <h4 class="text-sm font-medium text-white mb-2">{{ copyStore.get('curtailment_daily_summary_title', 'Day Summary') }}</h4>
           <ul class="space-y-2 text-xs text-custom-text">
             <li class="flex items-start">
               <span class="w-1.5 h-1.5 bg-orange-400 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
@@ -151,16 +145,16 @@
 
         <!-- Explainer -->
         <div class="bg-custom-grey bg-opacity-50 rounded-lg p-6 border border-custom-text border-opacity-20">
-          <h3 class="text-lg font-medium text-white mb-3">Why This Matters</h3>
+          <h3 class="text-lg font-medium text-white mb-3">{{ copyStore.get('curtailment_daily_title', 'What the Hourly Pattern Shows') }}</h3>
           <p class="text-custom-text text-sm leading-relaxed mb-3">
-            Every bar is clean energy that was generated but couldn't reach consumers, typically due to 
-            transmission bottlenecks, not lack of demand. The price overlay reveals the economic impact: 
-            curtailment during high prices is direct revenue loss, while negative prices indicate oversupply.
+            {{ copyStore.get('curtailment_daily_body_problem', 'This view pairs hourly curtailment with wholesale prices to show when renewable generation is going unused and under what market conditions. Curtailment during low or negative-price hours often coincides with surplus generation, while curtailment at higher prices can indicate local constraints that prevent available power from reaching demand.') }}
           </p>
           <p class="text-custom-text text-sm leading-relaxed">
-            Dynamic Line Rating (DLR) addresses this by unlocking 10-30% more capacity on existing 
-            transmission lines—no new infrastructure required.
+            {{ copyStore.get('curtailment_daily_body_solution', 'For storage and controllable demand, these hours can point to useful windows for shifting energy consumption. Flexible resources can increase load or charge during periods of surplus generation, then reduce consumption or discharge during tighter and more expensive hours. This can improve renewable utilization while also supporting grid balancing.') }}
           </p>
+          <div class="mt-4 pt-4 border-t border-custom-text border-opacity-30 text-xs text-custom-text italic">
+            {{ copyStore.get('curtailment_methodology_note', 'Methodology: Curtailment volumes are paired with hourly spot prices. Lost spot value is calculated only for curtailed energy during positive-price hours, using curtailed MWh × hourly price. It is an illustrative market-value estimate and does not account for contracts, settlements, congestion pricing differences, or other compensation.') }}
+          </div>
         </div>
       </template>
 
@@ -172,9 +166,11 @@
 import { ref, computed, watch } from 'vue'
 import { useCurtailmentStore } from '@/stores/curtailmentStore'
 import { useEnergyStore } from '@/stores/energyStore'
+import { useSiteCopyStore } from '@/stores/siteCopyStore'
 
 const store = useCurtailmentStore()
 const energyStore = useEnergyStore()
+const copyStore = useSiteCopyStore()
 const localDate = ref(energyStore.selectedDate)
 
 const dataSourceText = computed(() => {

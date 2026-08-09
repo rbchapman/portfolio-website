@@ -1,6 +1,41 @@
 from django.db import models
 from dataclasses import dataclass
 from typing import Literal
+
+
+class SiteCopy(models.Model):
+    """Editable site copy managed through Django admin."""
+
+    key = models.CharField(
+        max_length=120,
+        unique=True,
+        db_index=True,
+        help_text="Stable frontend key, e.g. hero_title or bess_explainer_text.",
+    )
+    value = models.TextField()
+    page = models.CharField(
+        max_length=80,
+        blank=True,
+        db_index=True,
+        help_text="Optional page grouping for easier filtering in admin.",
+    )
+    section = models.CharField(
+        max_length=80,
+        blank=True,
+        db_index=True,
+        help_text="Optional section grouping for easier filtering in admin.",
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['page', 'section', 'key']
+        verbose_name = "Site Copy"
+        verbose_name_plural = "Site Copy"
+
+    def __str__(self):
+        return self.key
+
+
 class EnergyIndicator(models.Model):
     """indicator metadata"""
     indicator_id = models.IntegerField(unique=True, primary_key=True)

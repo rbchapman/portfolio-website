@@ -77,13 +77,9 @@
 
       <!-- Project Overview -->
       <div class="bg-custom-grey bg-opacity-50 rounded-lg p-6 border border-custom-text border-opacity-20">
-        <h3 class="text-lg font-medium text-white mb-3">Understanding Daily Price Dynamics</h3>
+        <h3 class="text-lg font-medium text-white mb-3">{{ copyStore.get('market_price_explainer_title', 'Price Signals and System Flexibility') }}</h3>
         <p class="text-custom-text text-sm leading-relaxed">
-          This view summarizes how Spain’s wholesale market prices fluctuate over the day. 
-          High volatility reflects grid stress and balancing challenges, while price troughs indicate hours of renewable oversupply. 
-          When prices are low or negative, storage assets and interconnections capture surplus renewable energy, later discharging during high-price peaks. 
-          The price–VRE correlation helps gauge how strongly renewables are driving market conditions — 
-          a key insight for evaluating the value of flexibility resources such as BESS and demand response.
+          {{ copyStore.get('market_price_explainer_body', 'Wholesale prices provide a useful signal of changing conditions on the grid. Low or negative prices often occur when renewable generation is abundant relative to demand, while higher prices tend to appear as supply becomes tighter. The spread between these periods creates opportunities for resources that can shift electricity use across time. Batteries, EV charging, flexible industrial loads, and demand response can increase consumption during low-price hours and reduce or shift it when prices rise. Comparing prices with renewable output helps show when additional flexibility could improve the use of available clean energy and reduce pressure during tighter periods.') }}
         </p>
       </div>
     </div>
@@ -93,8 +89,10 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useEnergyStore } from '@/stores/energyStore'
+import { useSiteCopyStore } from '@/stores/siteCopyStore'
 
 const energyStore = useEnergyStore()
+const copyStore = useSiteCopyStore()
 const localSelectedDate = ref(energyStore.selectedDate)
 const minDate = '2020-01-01'
 const maxDate = new Date().toISOString().split('T')[0]

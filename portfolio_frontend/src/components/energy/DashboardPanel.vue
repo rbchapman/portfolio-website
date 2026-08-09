@@ -57,34 +57,32 @@
 
       <!-- Flexibility Requirements -->
       <div v-if="energyStore.chartData?.hourly_data" class="bg-custom-grey bg-opacity-30 rounded-lg p-4 border border-custom-text border-opacity-20">
-        <h4 class="text-sm font-medium text-white mb-2">Operational Flexibility Challenge</h4>
+        <h4 class="text-sm font-medium text-white mb-2">{{ copyStore.get('net_load_challenge_title', 'Daily Flexibility Signals') }}</h4>
         <ul class="space-y-2 text-xs text-custom-text">
           <li class="flex items-start">
             <span class="w-1.5 h-1.5 bg-amber-500 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
-            Duck curve depth: Net load dropped to {{ minNetLoad }} at {{ minNetLoadHour }} - a {{ duckCurveDepth }} reduction from morning baseline
+            Net-load trough: Net load fell to {{ minNetLoad }} at {{ minNetLoadHour }}, {{ duckCurveDepth }} below the morning baseline
           </li>
           <li class="flex items-start">
             <span class="w-1.5 h-1.5 bg-sky-500 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
-            Evening ramp: Conventional generation ramped {{ eveningRamp }} in {{ rampDuration }} as solar dropped and demand peaked
+            Evening net-load change: {{ eveningRamp }} over {{ rampDuration }}
           </li>
           <li class="flex items-start">
             <span class="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
-            Baseload constraint: {{ tightHours }} potential oversupply risk
+            Low net-load hours: {{ tightHours }} below the daily 20th-percentile threshold
           </li>
         </ul>
       </div>
 
       <!-- What Net Load Shows -->
       <div class="bg-custom-grey bg-opacity-50 rounded-lg p-6 border border-custom-text border-opacity-20">
-        <h3 class="text-lg font-medium text-white mb-3">Understanding Net Load</h3>
+        <h3 class="text-lg font-medium text-white mb-3">{{ copyStore.get('net_load_explainer_title', 'Why Net Load Matters') }}</h3>
         <p class="text-custom-text text-sm leading-relaxed mb-3">
-          Net load (also called residual load) represents the demand that must be met by dispatchable generation after variable renewables contribute. 
+          {{ copyStore.get('net_load_explainer_definition', 'Net load, also called residual load, is the electricity demand remaining after wind and solar generation are subtracted from total demand. It shows how much demand must be balanced by other resources at each hour.') }}
           It's calculated as: <span class="text-white font-mono">Net Load = Total Demand - Wind - Solar</span>
         </p>
         <p class="text-custom-text text-sm leading-relaxed">
-          This metric reveals the operational flexibility challenge: when net load is negative, the grid has oversupply and must curtail generation. 
-          When net load ramps steeply, conventional plants must respond quickly. 
-          Low net load values indicate tight operating margins where forecast accuracy becomes critical.
+          {{ copyStore.get('net_load_explainer_flexibility', 'As wind and solar output changes, net load can move significantly over the course of a day. When net load falls very low, batteries and controllable demand can shift consumption into hours with abundant renewable generation. When net load rises quickly, storage, demand response, and other flexible resources can reduce demand or supply energy during the ramp. Looking at both the troughs and the ramps helps identify when additional flexibility could be most useful.') }}
         </p>
       </div>
     </div>
@@ -94,8 +92,10 @@
 <script setup lang="ts">
   import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
   import { useEnergyStore } from '@/stores/energyStore'
+  import { useSiteCopyStore } from '@/stores/siteCopyStore'
 
   const energyStore = useEnergyStore()
+  const copyStore = useSiteCopyStore()
 
   const localSelectedDate = ref(energyStore.selectedDate)
 
