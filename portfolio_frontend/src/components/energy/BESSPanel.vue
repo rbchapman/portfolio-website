@@ -121,9 +121,9 @@
            </ul>
          </div>
      
-         <!-- Market Eligibility -->
+         <!-- Market Opportunities -->
          <div class="bg-custom-grey bg-opacity-30 rounded-lg p-4 border border-custom-text border-opacity-20 mb-4">
-           <h4 class="text-sm font-medium text-white mb-2">Market Eligibility</h4>
+           <h4 class="text-sm font-medium text-white mb-2">Market Opportunities</h4>
            <ul class="space-y-2 text-xs text-custom-text">
              <li class="flex items-start">
                <span class="w-1.5 h-1.5 bg-green-400 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
@@ -140,15 +140,15 @@
            </ul>
          </div>
      
-         <!-- Daily Performance (only show after analysis) -->
+         <!-- Illustrative Daily Arbitrage (only show after analysis) -->
          <div v-if="energyStore.bessAnalysis" class="bg-custom-grey bg-opacity-50 rounded-lg p-6 border border-custom-text border-opacity-20">
-           <h3 class="text-lg font-medium text-white mb-3">Daily Performance</h3>
+           <h3 class="text-lg font-medium text-white mb-3">Illustrative Daily Arbitrage</h3>
            
            <!-- Main metrics -->
            <div class="grid grid-cols-2 gap-4 mb-4">
              <div class="bg-custom-grey bg-opacity-30 rounded-lg p-3 border border-custom-text border-opacity-20">
                <div class="text-xl font-light text-green-400">€{{ energyStore.bessAnalysis.daily_performance.gross_profit_eur.toLocaleString() }}</div>
-               <div class="text-xs text-custom-text">Gross Profit</div>
+               <div class="text-xs text-custom-text">Arbitrage Margin</div>
              </div>
              <div class="bg-custom-grey bg-opacity-30 rounded-lg p-3 border border-custom-text border-opacity-20">
                <div class="text-xl font-light text-white">{{ energyStore.bessAnalysis.daily_performance.cycles_completed.toFixed(2) }}</div>
@@ -179,8 +179,7 @@
            <!-- Disclaimer -->
            <div class="mt-4 pt-4 border-t border-custom-text border-opacity-20">
              <p class="text-xs text-custom-text italic">
-                ⚠️ Illustrative values only. Excludes: Degradation, O&M, transaction fees, imbalance charges, 
-                and primary revenue streams (FCR, aFRR). Real BESS economics require revenue stacking.
+                ⚠️ {{ copyStore.get('bess_disclaimer', 'Illustrative backtest using perfect knowledge of the day’s hourly prices. The modeled arbitrage margin includes round-trip efficiency but excludes degradation, O&M, transaction fees, imbalance costs, taxes, market participation constraints, and ancillary-service revenues. Results should not be interpreted as a forecast of realized BESS returns.') }}
               </p>
            </div>
          </div>
@@ -191,8 +190,10 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
 import { useEnergyStore } from '@/stores/energyStore'
+import { useSiteCopyStore } from '@/stores/siteCopyStore'
 
 const energyStore = useEnergyStore()
+const copyStore = useSiteCopyStore()
 
 // Date picker state
 const localSelectedDate = ref(energyStore.selectedDate)

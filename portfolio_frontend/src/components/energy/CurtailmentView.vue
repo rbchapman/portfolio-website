@@ -28,7 +28,7 @@ onMounted(async () => {
 
 // --- Monthly chart ---
 const monthlyChartData = computed(() => {
-  if (!store.monthlyData) return null
+  if (!store.monthlyData || !Array.isArray(store.monthlyData.monthly_data) || store.monthlyData.monthly_data.length === 0) return null
   const m2024 = store.monthlyData.monthly_data.filter(m => m.year === 2024)
   const m2025 = store.monthlyData.monthly_data.filter(m => m.year === 2025)
   const labels = m2024.map(m => new Date(m.year, m.month - 1).toLocaleString('en', { month: 'short' }))
@@ -93,7 +93,7 @@ const currency = computed(() => energyStore.selectedRegion === 'california' ? '$
 
 // --- Daily chart ---
 const dailyChartData = computed(() => {
-  if (!store.dailyData) return null
+  if (!store.dailyData || !Array.isArray(store.dailyData.hourly_data) || store.dailyData.hourly_data.length === 0) return null
   const currentCurrency = currency.value
   const hourly = store.dailyData.hourly_data
 
